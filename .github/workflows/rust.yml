@@ -2,9 +2,17 @@ name: Rust
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [
+      "master",
+      "develop",
+      "feature/*"
+    ]
   pull_request:
-    branches: [ "master" ]
+    branches: [
+      "master",
+      "develop",
+      "feature/*"
+    ]
 
 env:
   CARGO_TERM_COLOR: always
@@ -15,10 +23,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Dependencies
-      run: sudo apt-get install protobuf-compiler
-    - name: Build
-      run: cargo build --verbose
-    - name: Run tests
-      run: cargo test --verbose
+      - uses: actions/checkout@v4
+
+      # Step to cache Cargo dependencies
+      - name: Cache Cargo dependencies
+        uses: actions/cache@v2
+        with:
+          path: ~/.cargo                  # Path to cache
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}  # Cache key based on OS and Cargo.lock content
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
+      # Step to install protobuf compiler
+      - name: Install protobuf compiler
+        run: sudo apt-get install protobuf-compiler
+
+      # Build step
+      - name: Build
+        run: cargo build --verbose
+
+      # Test step
+      - name: Run tests
+        run: cargo test --verbose
