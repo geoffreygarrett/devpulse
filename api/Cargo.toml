@@ -6,7 +6,7 @@ build = "build.rs"
 description = """
 DevPulse API is a comprehensive tool designed to analyze developer performance and repository contributions. It provides endpoints to assess code churn, identify top contributors, and evaluate individual developer metrics across various repositories. The API supports multiple protocols including HTTP, gRPC, and WebSocket, ensuring flexibility and scalability for diverse integration needs. DevPulse aims to offer actionable insights into codebase health and developer efficiency, facilitating better project management and development practices.
 """
-homepage = "https://devpulse.example.com"
+homepage = "https://devpulse.shuttleapp.rs"
 repository = "https://github.com/geoffreygrrett/devpulse"
 
 [dependencies]
