@@ -29,7 +29,9 @@ jobs:
       - name: Cache Cargo dependencies
         uses: actions/cache@v4
         with:
-          path: ~/.cargo                  # Path to cache
+          path: |
+            ~/.cargo 
+            ~/.rustup
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}  # Cache key based on OS and Cargo.lock content
           restore-keys: |
             ${{ runner.os }}-cargo-
