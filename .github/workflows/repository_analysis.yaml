@@ -30,15 +30,9 @@ jobs:
 
       # Step 4: Determine start and end commits
       - name: Determine start and end commits
-        id: determine-commits
         run: |
-          START_COMMIT=$(git rev-parse HEAD~1)
-          END_COMMIT=$(git rev-parse HEAD)
-          echo "START_COMMIT=${START_COMMIT}" >> $GITHUB_ENV
-          echo "END_COMMIT=${END_COMMIT}" >> $GITHUB_ENV
-        env:
-          # Ensure the GITHUB_ENV variable is available for setting environment variables
-          GITHUB_ENV: ${{ github.env_path }}
+          echo "START_COMMIT=$(git rev-parse HEAD~1)" >> $GITHUB_ENV
+          echo "END_COMMIT=$(git rev-parse HEAD)" >> $GITHUB_ENV
 
       # Step 5: Perform repository analysis by calling the API
       - name: Perform repository analysis
