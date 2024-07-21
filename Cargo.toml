@@ -1,7 +1,10 @@
 [workspace]
 members = [
     "core",
-    "backend"
+    "api",
+    "clients"
 ]
+
+exclude = ["gen"]
 
 resolver = "2"
