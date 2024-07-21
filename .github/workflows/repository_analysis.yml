@@ -2,8 +2,9 @@ name: Repository Analysis
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
 
 jobs:
   repository-analysis:
