@@ -21,13 +21,13 @@ jobs:
     steps:
       # Step 1: Checkout the repository
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
         with:
           fetch-depth: 2  # Fetch the last 2 commits to identify start and end commits
 
       # Step 2: Set up Python environment
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
 
@@ -75,7 +75,7 @@ jobs:
       # Step 6: Comment on the pull request with the result
       - name: Comment PR
         if: github.event_name == 'pull_request'
-        uses: thollander/actions-comment-pull-request@v1
+        uses: thollander/actions-comment-pull-request@v2
         with:
           message: |
             ### Repository Analysis Result
