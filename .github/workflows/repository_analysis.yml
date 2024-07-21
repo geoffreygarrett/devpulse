@@ -55,13 +55,23 @@ jobs:
           }
 
           response = requests.post(url, headers=headers, data=json.dumps(data))
+          result = response.json()
 
           if response.status_code == 200:
-              print("Success: ", response.json())
-          elif response.status_code == 400:
-              print("Bad request: ", response.json())
-          elif response.status_code == 401:
-              print("Unauthorized: ", response.json())
+              print("Success: ", result)
           else:
-              print("Unexpected response: ", response.status_code, response.text)
+              print("Error: ", response.status_code, result.get('message', 'No message available'))
+          
           EOF
+
+      # Step 6: Comment on the pull request with the result
+      - name: Comment PR
+        if: github.event_name == 'pull_request'
+        uses: thollander/actions-comment-pull-request@v1
+        with:
+          message: |
+            ### Repository Analysis Result
+            ```
+            ${{ steps.repository-analysis.outputs.result }}
+            ```
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
