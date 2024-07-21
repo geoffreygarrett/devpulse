@@ -46,7 +46,7 @@ jobs:
           import requests
           import json
 
-          url = "https://devpulse.shuttleapp.rs/repositories/commit-range"
+          url = "https://devpulse.shuttleapp.rs/repository/commit-range"
           headers = {"Content-Type": "application/json"}
           data = {
               "repository_url": "${{ env.REPOSITORY_URL }}",
