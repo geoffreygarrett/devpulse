@@ -19,11 +19,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 1: Checkout the repository
+      # Step 1: Checkout the repository with full commit history
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # Fetch the last 2 commits to identify start and end commits
+          fetch-depth: 0  # Fetch all history for all branches and tags to ensure accessibility of all commits
 
       # Step 2: Set up Python environment
       - name: Set up Python
@@ -37,11 +37,16 @@ jobs:
           python -m pip install --upgrade pip
           pip install requests
 
-      # Step 4: Determine start and end commits
+      # Step 4: Determine start and end commits more robustly
       - name: Determine start and end commits
         run: |
-          echo "START_COMMIT=$(git rev-parse HEAD~1)" >> $GITHUB_ENV
-          echo "END_COMMIT=$(git rev-parse HEAD)" >> $GITHUB_ENV
+          if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+            echo "START_COMMIT=${{ github.event.pull_request.base.sha }}" >> $GITHUB_ENV
+            echo "END_COMMIT=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
+          else
+            echo "START_COMMIT=$(git rev-parse HEAD~1)" >> $GITHUB_ENV
+            echo "END_COMMIT=$(git rev-parse HEAD)" >> $GITHUB_ENV
+          fi
 
       # Step 5: Perform repository analysis by calling the API
       - name: Perform repository analysis
