@@ -27,7 +27,7 @@ jobs:
 
       # Step to cache Cargo dependencies
       - name: Cache Cargo dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ~/.cargo                  # Path to cache
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}  # Cache key based on OS and Cargo.lock content
