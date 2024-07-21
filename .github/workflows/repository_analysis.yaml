@@ -1,0 +1,72 @@
+name: Repository Analysis
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  repository-analysis:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 2  # Fetch the last 2 commits to identify start and end commits
+
+      # Step 2: Set up Python environment
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.x'
+
+      # Step 3: Install required Python dependencies
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install requests
+
+      # Step 4: Determine start and end commits
+      - name: Determine start and end commits
+        id: determine-commits
+        run: |
+          START_COMMIT=$(git rev-parse HEAD~1)
+          END_COMMIT=$(git rev-parse HEAD)
+          echo "START_COMMIT=${START_COMMIT}" >> $GITHUB_ENV
+          echo "END_COMMIT=${END_COMMIT}" >> $GITHUB_ENV
+        env:
+          # Ensure the GITHUB_ENV variable is available for setting environment variables
+          GITHUB_ENV: ${{ github.env_path }}
+
+      # Step 5: Perform repository analysis by calling the API
+      - name: Perform repository analysis
+        env:
+          REPOSITORY_URL: "https://github.com/${{ github.repository }}"
+          START_COMMIT: ${{ env.START_COMMIT }}
+          END_COMMIT: ${{ env.END_COMMIT }}
+        run: |
+          python - <<EOF
+          import requests
+          import json
+
+          url = "http://localhost:3000/repositories/commit-range"
+          headers = {"Content-Type": "application/json"}
+          data = {
+              "repository_url": "${{ env.REPOSITORY_URL }}",
+              "start_commit": "${{ env.START_COMMIT }}",
+              "end_commit": "${{ env.END_COMMIT }}"
+          }
+
+          response = requests.post(url, headers=headers, data=json.dumps(data))
+
+          if response.status_code == 200:
+              print("Success: ", response.json())
+          elif response.status_code == 400:
+              print("Bad request: ", response.json())
+          elif response.status_code == 401:
+              print("Unauthorized: ", response.json())
+          else:
+              print("Unexpected response: ", response.status_code, response.text)
+          EOF
