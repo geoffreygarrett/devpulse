@@ -30,7 +30,9 @@ jobs:
           output-dir: ${{ matrix.client.type }}-client
           command-args: ${{ matrix.client.extra_args }}
 
-      - name: Do anything with the generated code
-        run: |
-          # Add any additional steps to process the generated code here
-          echo "Generated ${matrix.client.type} client code is in ${matrix.client.type}-client directory."
+      - name: Upload generated code
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.client.type }}-client
+          path: ${{ matrix.client.type }}-client
+
