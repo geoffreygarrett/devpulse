@@ -1,5 +1,6 @@
 // core/src/models/conversions.rs
-use crate::models::{CommitRangeDetails, CommitRangeResponse, Contributor};
+use super::*;
+use models::{CommitRangeDetails, CommitRangeResponse, Contributor};
 use devpulse_core::models::CommitRangeAnalysis;
 
 impl From<CommitRangeAnalysis> for CommitRangeResponse {

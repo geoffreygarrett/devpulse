@@ -2,39 +2,40 @@ use utoipa::{OpenApi, ToSchema};
 use utoipa::openapi;
 use utoipa::openapi::{OpenApiBuilder};
 
+
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const DESCRIPTION: &str = env!("CARGO_PKG_DESCRIPTION");
 const HOMEPAGE: &str = env!("CARGO_PKG_HOMEPAGE");
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
-const PRODUCTION_SERVER: &str = "https://devpulse.shuttleapp.rs";
+const PRODUCTION_SERVER: &str = "https://devpulse.shuttleapp.rs/v1";
 const PRODUCTION_SERVER_DESCRIPTION: &str = "Production server";
-const LOCAL_SERVER: &str = "http://localhost:8000";
+const LOCAL_SERVER: &str = "http://localhost:8000/v1";
 const LOCAL_SERVER_DESCRIPTION: &str = "Local development server";
 
 
 #[derive(OpenApi, ToSchema)]
 #[openapi(
     paths(
-        crate::http::controllers::repository::create_commit_range_analysis,
-        crate::http::controllers::developer::get_developer_performance,
-        crate::http::controllers::docs::get_openapi_json,
-        crate::http::controllers::docs::get_openapi_yaml
+        super::controllers::repository::create_commit_range_analysis,
+        super::controllers::developer::get_developer_performance,
+        super::controllers::docs::get_openapi_json,
+        super::controllers::docs::get_openapi_yaml
     ),
     components(
         responses(
-            crate::models::TooManyRequests
+            super::models::TooManyRequests
         ),
         schemas(
-            crate::models::TooManyRequests,
-            crate::models::CommitRangeRequest,
-            crate::models::CommitRangeResponse,
-            crate::models::CommitRangeDetails,
-            crate::models::ResponseDetail,
-            crate::models::ResponseFormat,
-            crate::models::RepositoryContribution,
-            crate::models::DeveloperPerformance,
-            crate::models::Contributor,
-            crate::errors::DevPulseError
+            super::models::TooManyRequests,
+            super::models::CommitRangeRequest,
+            super::models::CommitRangeResponse,
+            super::models::CommitRangeDetails,
+            super::models::ResponseDetail,
+            super::models::ResponseFormat,
+            super::models::RepositoryContribution,
+            super::models::DeveloperPerformance,
+            super::models::Contributor,
+            super::errors::DevPulseError
         )
     )
 )]

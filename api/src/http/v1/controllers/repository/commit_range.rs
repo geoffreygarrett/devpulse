@@ -7,9 +7,10 @@ use axum_xml_up::Xml;
 use axum_yaml::Yaml;
 use serde::Deserialize;
 use utoipa::{IntoParams, ToSchema};
-use crate::errors::DevPulseError;
 use devpulse_core::services::analyze_commit_range_service;
-use crate::models::{ResponseFormat, ResponseDetail, CommitRangeRequest, TooManyRequests};
+use super::super::super::*;
+use errors::DevPulseError;
+use models::{ResponseFormat, ResponseDetail, CommitRangeRequest, TooManyRequests};
 
 #[derive(Debug, Deserialize, IntoParams, ToSchema)]
 #[into_params(style = Form, parameter_in = Query)]
@@ -55,7 +56,7 @@ impl Default for ResponseFormatQuery {
 ///   ```
 #[utoipa::path(
     post,
-    path = crate::http::COMMIT_RANGE_PATH,
+    path = constants::COMMIT_RANGE_PATH,
     operation_id = "create_commit_range_analysis",
     params(
     ResponseFormatQuery,
@@ -73,7 +74,7 @@ impl Default for ResponseFormatQuery {
     (status = 429, response = TooManyRequests),
     ),
     request_body(content = CommitRangeRequest, description = "The repository URL and commit range to analyze", content_type = "application/json"),
-    tag = crate::http::TAG_REPOSITORY_ANALYSIS,
+    tag = constants::TAG_REPOSITORY_ANALYSIS,
 )]
 pub async fn create_commit_range_analysis(
     params: Option<Query<ResponseFormatQuery>>,

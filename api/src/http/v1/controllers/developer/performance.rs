@@ -1,7 +1,8 @@
 use axum::{Json, extract::Path, response::IntoResponse};
 use axum::http::StatusCode;
-use crate::errors::DevPulseError;
-use crate::models::{DeveloperPerformance, RepositoryContribution, TooManyRequests};
+use super::super::super::*;
+use errors::DevPulseError;
+use models::{DeveloperPerformance, RepositoryContribution, TooManyRequests};
 
 
 /// Retrieves performance metrics for a specified developer.
@@ -40,7 +41,7 @@ use crate::models::{DeveloperPerformance, RepositoryContribution, TooManyRequest
     params(
     ("username" = String, Path, description = "Username of the developer to retrieve performance for")
     ),
-    tag = crate::http::TAG_DEVELOPER_ANALYSIS,
+    tag = TAG_DEVELOPER_ANALYSIS,
 )]
 pub async fn get_developer_performance(Path(username): Path<String>) -> impl IntoResponse {
     // Mock-up example of a performance object.

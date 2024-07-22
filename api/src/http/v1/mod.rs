@@ -1,4 +1,13 @@
-use crate::http::*;
+pub(crate) mod constants;
+pub(crate) mod controllers;
+pub(crate) mod middleware;
+pub(crate) mod openapi;
+pub(crate) mod conversion;
+pub(crate) mod models;
+pub(crate) mod errors;
+
+use self::constants::*;
+
 use tower_http::trace::TraceLayer;
 
 use axum::{
@@ -10,9 +19,11 @@ use utoipa_rapidoc::RapiDoc;
 use utoipa_swagger_ui::SwaggerUi;
 use utoipa_redoc::{Redoc, Servable};
 use utoipa_scalar::{Scalar, Servable as ScalarServable};
-use crate::http::api_doc::API_DOC;
+use self::openapi::API_DOC;
+pub(crate) use self::openapi::ApiDoc;
 
-pub(crate) fn create_router() -> Router {
+
+pub(crate) fn router() -> Router {
     let doc = API_DOC.clone();
     Router::new()
         .layer(
@@ -29,7 +40,7 @@ pub(crate) fn create_router() -> Router {
         .merge(Redoc::with_url("/redoc", doc.clone()))
         .merge(Scalar::with_url("/scalar", doc.clone()))
         .route(ROOT_PATH, get(|| async { Redirect::permanent(SWAGGER_UI_PATH) }))
-        .route(COMMIT_RANGE_PATH, post(controllers::repository::create_commit_range_analysis))
-        .route(DEVELOPER_PERFORMANCE_PATH, get(controllers::developer::get_developer_performance))
+        .route(COMMIT_RANGE_PATH, post(self::controllers::repository::create_commit_range_analysis))
+        .route(DEVELOPER_PERFORMANCE_PATH, get(self::controllers::developer::get_developer_performance))
         .fallback(controllers::not_found::handler_404)
 }

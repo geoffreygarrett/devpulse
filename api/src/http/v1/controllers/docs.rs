@@ -2,7 +2,7 @@ use axum::{response::IntoResponse};
 use axum::http::StatusCode;
 use axum::response::Response;
 use utoipa::{OpenApi};
-use crate::http::api_doc::API_DOC;
+use super::super::*;
 
 /// Provides the OpenAPI documentation for the API in YAML format.
 ///
@@ -11,14 +11,14 @@ use crate::http::api_doc::API_DOC;
 /// * `500 Internal Server Error` - Occurs if there is an issue generating the documentation.
 #[utoipa::path(
     get,
-    path = crate::http::openapi_yaml_path(),
+    path = openapi_yaml_path(),
     responses(
     (status = 200, description = "Returns the OpenAPI YAML documentation",
     content(
     ("application/yaml" = String),
     ))
     ),
-    tag = crate::http::TAG_API_DOCS
+    tag = TAG_API_DOCS
 )]
 pub async fn get_openapi_yaml() -> impl IntoResponse {
     let doc = API_DOC.clone();
@@ -37,7 +37,7 @@ pub async fn get_openapi_yaml() -> impl IntoResponse {
 #[allow(unused)]
 #[utoipa::path(
     get,
-    path = crate::http::openapi_json_path(),
+    path = openapi_json_path(),
     responses(
     (status = 200, description = "Returns the OpenAPI JSON documentation",
     content(
@@ -46,7 +46,7 @@ pub async fn get_openapi_yaml() -> impl IntoResponse {
     ),
     (status = 500, description = "Internal server error", body = DevPulseError),
     ),
-    tag = crate::http::TAG_API_DOCS
+    tag = TAG_API_DOCS
 )]
 pub async fn get_openapi_json() -> impl IntoResponse {
     let doc = API_DOC.clone();
