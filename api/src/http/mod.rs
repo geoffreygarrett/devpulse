@@ -1,6 +1,8 @@
 pub(crate) mod controllers;
 pub(crate) mod middleware;
 pub(crate) mod routes;
+pub(crate) mod api_doc;
+
 pub(crate) use routes::*;
 
 pub const TAG_API_DOCS: &str = "API Documentation";
@@ -16,6 +18,7 @@ pub const ROOT_PATH: &str = "/";
 pub const COMMIT_RANGE_PATH: &str = "/repository/commit-range";
 pub const DEVELOPER_PERFORMANCE_PATH: &str = "/developers/{username}/performance";
 
+
 // Use functions to concatenate the strings at runtime
 pub fn openapi_json_path() -> String {
     format!("{}{}", BASE_API_DOCS_PATH, OPENAPI_JSON)
@@ -24,3 +27,4 @@ pub fn openapi_json_path() -> String {
 pub fn openapi_yaml_path() -> String {
     format!("{}{}", BASE_API_DOCS_PATH, OPENAPI_YAML)
 }
+

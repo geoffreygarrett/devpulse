@@ -215,6 +215,38 @@ dependencies = [
 ]
 
 [[package]]
+name = "axum-xml-up"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6ae5a750e19a9bbb2e1c9a9ad280c0ba79d9b8b4efd0e578062b4116a4181e28"
+dependencies = [
+ "axum-core 0.4.3",
+ "bytes",
+ "http 1.1.0",
+ "http-body 1.0.1",
+ "mime",
+ "quick-xml",
+ "serde",
+ "thiserror",
+]
+
+[[package]]
+name = "axum-yaml"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c0fc2edb81a9c8b2d3bb53e996ef3055f670406dd78bf296d292d3e22d11177e"
+dependencies = [
+ "async-trait",
+ "axum-core 0.4.3",
+ "bytes",
+ "http 1.1.0",
+ "mime",
+ "serde",
+ "serde_path_to_error",
+ "serde_yaml",
+]
+
+[[package]]
 name = "backtrace"
 version = "0.3.73"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -431,12 +463,17 @@ name = "devpulse"
 version = "0.1.0"
 dependencies = [
  "axum 0.7.5",
+ "axum-xml-up",
+ "axum-yaml",
  "base64 0.22.1",
  "devpulse_core",
  "futures-util",
  "headers",
+ "lazy_static",
+ "once_cell",
  "prost 0.13.1",
  "serde",
+ "serde-xml-rs",
  "serde_json",
  "serde_yaml",
  "shuttle-axum",
@@ -453,13 +490,6 @@ dependencies = [
  "utoipa-redoc",
  "utoipa-scalar",
  "utoipa-swagger-ui",
-]
-
-[[package]]
-name = "devpulse_clients"
-version = "0.1.0"
-dependencies = [
- "devpulse",
 ]
 
 [[package]]
@@ -1541,6 +1571,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "quick-xml"
+version = "0.31.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1004a344b30a54e2ee58d66a71b32d2db2feb0a31f9a2d302bf0536f15de2a33"
+dependencies = [
+ "memchr",
+ "serde",
+]
+
+[[package]]
 name = "quinn"
 version = "0.11.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1880,6 +1920,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "bc76f558e0cbb2a839d37354c575f1dc3fdc6546b5be373ba43d95f231bf7c12"
 dependencies = [
  "serde_derive",
+]
+
+[[package]]
+name = "serde-xml-rs"
+version = "0.6.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fb3aa78ecda1ebc9ec9847d5d3aba7d618823446a049ba2491940506da6e2782"
+dependencies = [
+ "log",
+ "serde",
+ "thiserror",
+ "xml-rs",
 ]
 
 [[package]]
@@ -3083,6 +3135,12 @@ dependencies = [
  "cfg-if",
  "windows-sys 0.48.0",
 ]
+
+[[package]]
+name = "xml-rs"
+version = "0.8.20"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "791978798f0597cfc70478424c2b4fdc2b7a8024aaff78497ef00f24ef674193"
 
 [[package]]
 name = "zeroize"

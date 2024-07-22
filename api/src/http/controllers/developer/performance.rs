@@ -1,7 +1,7 @@
 use axum::{Json, extract::Path, response::IntoResponse};
 use axum::http::StatusCode;
 use crate::errors::DevPulseError;
-use crate::models::{DeveloperPerformance, RepositoryContribution};
+use crate::models::{DeveloperPerformance, RepositoryContribution, TooManyRequests};
 
 /// Retrieves performance metrics for a specified developer.
 ///
@@ -33,6 +33,7 @@ use crate::models::{DeveloperPerformance, RepositoryContribution};
     (status = 200, description = "Successful retrieval of developer performance", body = DeveloperPerformance),
     (status = 404, description = "Developer not found", body = DevPulseError),
     (status = 401, description = "Unauthorized access", body = DevPulseError),
+    (status = 429, response = TooManyRequests),
     ),
     params(
     ("username" = String, Path, description = "Username of the developer to retrieve performance for")

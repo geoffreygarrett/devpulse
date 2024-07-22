@@ -1,8 +1,8 @@
 use axum::{response::IntoResponse};
 use axum::http::StatusCode;
 use axum::response::Response;
-use crate::http::ApiDoc;
-use utoipa::{OpenApi, openapi};
+use utoipa::{OpenApi};
+use crate::http::api_doc::API_DOC;
 
 /// Provides the OpenAPI documentation for the API in YAML format.
 ///
@@ -13,12 +13,15 @@ use utoipa::{OpenApi, openapi};
     get,
     path = crate::http::openapi_yaml_path(),
     responses(
-    (status = 200, description = "Returns the OpenAPI YAML documentation", body = String)
+    (status = 200, description = "Returns the OpenAPI YAML documentation",
+    content(
+    ("application/yaml" = String),
+    ))
     ),
     tag = crate::http::TAG_API_DOCS
 )]
 pub async fn get_openapi_yaml() -> impl IntoResponse {
-    let doc = ApiDoc::openapi();
+    let doc = API_DOC.clone();
     Response::builder()
         .status(StatusCode::OK)
         .header("Content-Type", "application/yaml")
@@ -36,12 +39,17 @@ pub async fn get_openapi_yaml() -> impl IntoResponse {
     get,
     path = crate::http::openapi_json_path(),
     responses(
-    (status = 200, description = "Returns the OpenAPI JSON documentation", body = String),
+    (status = 200, description = "Returns the OpenAPI JSON documentation",
+    content(
+    ("application/json" = String),
+    )
+    ),
     (status = 500, description = "Internal server error", body = DevPulseError),
     ),
     tag = crate::http::TAG_API_DOCS
 )]
-pub async fn get_openapi_json(doc: openapi::OpenApi) -> impl IntoResponse {
+pub async fn get_openapi_json() -> impl IntoResponse {
+    let doc = API_DOC.clone();
     Response::builder()
         .status(StatusCode::OK)
         .header("Content-Type", "application/json")

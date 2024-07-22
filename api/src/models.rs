@@ -1,5 +1,5 @@
 use serde::{Serialize, Deserialize};
-use utoipa::{ToSchema};
+use utoipa::{IntoParams, ToResponse, ToSchema};
 
 /// DTO representing a request to analyze a range of commits within a repository.
 ///
@@ -30,7 +30,9 @@ pub struct CommitRangeRequest {
 /// - `commit_range`: The details of the analyzed commit range.
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct CommitRangeResponse {
+    // #[schema(example = "https://github.com/bazelbuild/rules_rust")]
     pub repository: String,
+    // #[schema(example)]
     pub commit_range: CommitRangeDetails,
 }
 
@@ -48,11 +50,17 @@ pub struct CommitRangeResponse {
 /// - `top_contributors`: A list of the top contributors in the commit range.
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct CommitRangeDetails {
+    // #[schema(example = "6c2bd67")]
     pub start_commit: String,
+    // #[schema(example = "6b10ce3")]
     pub end_commit: String,
+    // #[schema(example = "34")]
     pub total_commits: i32,
+    // #[schema(example = "1200")]
     pub total_additions: i32,
+    // #[schema(example = "450")]
     pub total_deletions: i32,
+    // #[schema(example)]
     pub top_contributors: Vec<Contributor>,
 }
 
@@ -66,7 +74,9 @@ pub struct CommitRangeDetails {
 /// - `commits`: The number of commits made by the contributor in the commit range.
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct Contributor {
+    #[schema(example = "john_doe")]
     pub username: String,
+    #[schema(example = "15")]
     pub commits: i32,
 }
 
@@ -83,10 +93,15 @@ pub struct Contributor {
 /// - `repositories`: A list of repositories the developer has contributed to.
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct DeveloperPerformance {
+    // #[schema(example = "john_doe")]
     pub username: String,
+    // #[schema(example = "150")]
     pub total_commits: i32,
+    // #[schema(example = "20")]
     pub total_prs: i32,
+    // #[schema(example = "24 hours")]
     pub average_time_to_merge: String,
+    // #[schema(example)]
     pub repositories: Vec<RepositoryContribution>,
 }
 
@@ -100,6 +115,73 @@ pub struct DeveloperPerformance {
 /// - `commits`: The number of commits made by the developer in the repository.
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct RepositoryContribution {
+    #[schema(example = "https://github.com/bazelbuild/rules_rust")]
     pub url: String,
+    #[schema(example = "30")]
     pub commits: i32,
+}
+
+fn examples() -> CommitRangeResponse {
+    CommitRangeResponse {
+        repository: "https://github.com/bazelbuild/rules_rust".to_string(),
+        commit_range: CommitRangeDetails {
+            start_commit: "6c2bd67".to_string(),
+            end_commit: "6b10ce3".to_string(),
+            total_commits: 34,
+            total_additions: 1200,
+            total_deletions: 450,
+            top_contributors: vec![
+                Contributor {
+                    username: "john_doe".to_string(),
+                    commits: 15,
+                },
+                Contributor {
+                    username: "jane_smith".to_string(),
+                    commits: 10,
+                },
+            ],
+        },
+    }
+}
+
+
+#[derive(Debug, Deserialize, ToSchema)]
+pub(crate) enum ResponseDetail {
+    #[serde(rename = "simple")]
+    Simple,
+    #[serde(rename = "detailed")]
+    Detailed,
+}
+
+#[derive(Debug, Deserialize, ToSchema)]
+pub(crate) enum ResponseFormat {
+    #[serde(rename = "json")]
+    Json,
+    #[serde(rename = "xml")]
+    Xml,
+    #[serde(rename = "yaml", alias = "yml")]
+    Yaml,
+}
+
+
+/// Too Many Requests response to indicate rate limiting.
+#[derive(ToResponse, ToSchema)]
+#[response(
+    description = "Too many requests.",
+    content_type = "application/json"
+)]
+pub struct TooManyRequests {
+    #[schema(example = "You have made too many requests. Please try again later.")]
+    message: String,
+    #[schema(example = "60")]
+    retry_after: Option<i32>, // Seconds to wait before retry
+}
+
+impl TooManyRequests {
+    pub fn new(retry_after_seconds: Option<i32>) -> Self {
+        TooManyRequests {
+            message: "You have made too many requests. Please try again later.".to_string(),
+            retry_after: retry_after_seconds,
+        }
+    }
 }
