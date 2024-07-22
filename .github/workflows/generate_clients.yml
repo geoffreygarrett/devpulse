@@ -14,6 +14,8 @@ jobs:
           - { type: 'python', extra_args: '--additional-properties=packageName=devpulse_client' }
           - { type: 'python-flask', extra_args: '' }
           - { type: 'rust', extra_args: '' }
+          - { type: 'rust-server', extra_args: '' }
+          - { type: 'rust-axum', extra_args: '' }
           - { type: 'csharp', extra_args: '' }
           - { type: 'csharp-functions', extra_args: '' }
           - { type: 'go', extra_args: '' }
