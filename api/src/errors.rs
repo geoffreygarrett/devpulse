@@ -1,9 +1,9 @@
 use axum::{
-    response::{IntoResponse, Response},
     http::StatusCode,
+    response::{IntoResponse, Response},
     Json,
 };
-use serde::{Serialize};
+use serde::Serialize;
 use serde_json::json;
 use thiserror::Error;
 use utoipa::ToSchema;
@@ -46,10 +46,17 @@ pub enum DevPulseError {
 impl IntoResponse for DevPulseError {
     fn into_response(self) -> Response {
         let status = match &self {
-            DevPulseError::MissingCredentials | DevPulseError::WrongCredentials => StatusCode::UNAUTHORIZED,
-            DevPulseError::TokenCreation | DevPulseError::InternalServerError(_) => StatusCode::INTERNAL_SERVER_ERROR,
-            DevPulseError::RepositoryNotFound | DevPulseError::DeveloperNotFound => StatusCode::NOT_FOUND,
-            DevPulseError::RepositoryProcessingError(_) | DevPulseError::DeveloperPerformanceError => StatusCode::BAD_REQUEST,
+            DevPulseError::MissingCredentials | DevPulseError::WrongCredentials => {
+                StatusCode::UNAUTHORIZED
+            }
+            DevPulseError::TokenCreation | DevPulseError::InternalServerError(_) => {
+                StatusCode::INTERNAL_SERVER_ERROR
+            }
+            DevPulseError::RepositoryNotFound | DevPulseError::DeveloperNotFound => {
+                StatusCode::NOT_FOUND
+            }
+            DevPulseError::RepositoryProcessingError(_)
+            | DevPulseError::DeveloperPerformanceError => StatusCode::BAD_REQUEST,
         };
 
         let error_message = self.to_string();

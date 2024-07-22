@@ -1,14 +1,11 @@
-use axum::{response::IntoResponse};
 use axum::http::StatusCode;
+use axum::response::IntoResponse;
 use axum::response::Response;
-use utoipa::{OpenApi};
+use utoipa::OpenApi;
+
 use crate::http::api_doc::API_DOC;
 
-/// Provides the OpenAPI documentation for the API in YAML format.
-///
-/// # Responses
-/// * `200 OK` - Returns the OpenAPI YAML documentation.
-/// * `500 Internal Server Error` - Occurs if there is an issue generating the documentation.
+/// YAML
 #[utoipa::path(
     get,
     path = crate::http::openapi_yaml_path(),
@@ -29,11 +26,7 @@ pub async fn get_openapi_yaml() -> impl IntoResponse {
         .unwrap()
 }
 
-/// Provides the OpenAPI documentation for the API in JSON format.
-///
-/// # Responses
-/// * `200 OK` - Returns the OpenAPI JSON documentation.
-/// * `500 Internal Server Error` - Occurs if there is an issue generating the documentation.
+/// JSON
 #[allow(unused)]
 #[utoipa::path(
     get,

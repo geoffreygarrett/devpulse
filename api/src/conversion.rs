@@ -1,10 +1,9 @@
 // core/src/models/conversions.rs
-use crate::models::{CommitRangeDetails, CommitRangeResponse, Contributor};
-use devpulse_core::models::CommitRangeAnalysis;
+use crate::models::{CommitRangeAnalysis, CommitRangeDetails, Contributor};
 
-impl From<CommitRangeAnalysis> for CommitRangeResponse {
-    fn from(analysis: CommitRangeAnalysis) -> Self {
-        CommitRangeResponse {
+impl From<devpulse_core::models::CommitRangeAnalysis> for CommitRangeAnalysis {
+    fn from(analysis: devpulse_core::models::CommitRangeAnalysis) -> Self {
+        CommitRangeAnalysis {
             repository: analysis.repository,
             commit_range: CommitRangeDetails {
                 start_commit: analysis.commit_range.start_commit,
@@ -12,7 +11,12 @@ impl From<CommitRangeAnalysis> for CommitRangeResponse {
                 total_commits: analysis.commit_range.total_commits,
                 total_additions: analysis.commit_range.total_additions,
                 total_deletions: analysis.commit_range.total_deletions,
-                top_contributors: analysis.commit_range.top_contributors.into_iter().map(Contributor::from).collect(),
+                top_contributors: analysis
+                    .commit_range
+                    .top_contributors
+                    .into_iter()
+                    .map(Contributor::from)
+                    .collect(),
             },
         }
     }

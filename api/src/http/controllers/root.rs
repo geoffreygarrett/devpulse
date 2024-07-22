@@ -13,7 +13,6 @@ use axum::response::IntoResponse;
 #[utoipa::path(
     get,
     path = "/",
-
     responses(
         (status = 200, description = "Successful response with greeting message", body = String)
     ),

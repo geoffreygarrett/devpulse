@@ -1,3 +1,3 @@
-mod performance;
-
 pub use performance::*;
+
+mod performance;

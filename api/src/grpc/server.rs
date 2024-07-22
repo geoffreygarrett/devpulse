@@ -1,8 +1,13 @@
 // src/grpc/server.rs
 
 use tonic::{transport::Server, Request, Response, Status};
-use crate::grpc::server::proto::{CommitRangeRequest, CommitRangeResponse, DeveloperPerformance, DeveloperPerformanceRequest};
-use crate::grpc::server::proto::dev_pulse_service_server::{DevPulseService, DevPulseServiceServer};
+
+use crate::grpc::server::proto::dev_pulse_service_server::{
+    DevPulseService, DevPulseServiceServer,
+};
+use crate::grpc::server::proto::{
+    CommitRangeRequest, CommitRangeResponse, DeveloperPerformance, DeveloperPerformanceRequest,
+};
 
 pub mod proto {
     tonic::include_proto!("devpulse");
@@ -13,7 +18,9 @@ pub struct DevPulseServiceImpl;
 
 #[tonic::async_trait]
 impl DevPulseService for DevPulseServiceImpl {
-    async fn analyze_commit_range(&self, request: Request<CommitRangeRequest>) -> Result<Response<CommitRangeResponse>, Status> {
+    async fn analyze_commit_range(
+        &self, request: Request<CommitRangeRequest>,
+    ) -> Result<Response<CommitRangeResponse>, Status> {
         // Implement your business logic here.
         // For now, returning an empty response.
         let response = CommitRangeResponse {
@@ -23,7 +30,9 @@ impl DevPulseService for DevPulseServiceImpl {
         Ok(Response::new(response))
     }
 
-    async fn get_developer_performance(&self, request: Request<DeveloperPerformanceRequest>) -> Result<Response<DeveloperPerformance>, Status> {
+    async fn get_developer_performance(
+        &self, request: Request<DeveloperPerformanceRequest>,
+    ) -> Result<Response<DeveloperPerformance>, Status> {
         // Implement your business logic here.
         // For now, returning an empty response.
         let response = DeveloperPerformance {
