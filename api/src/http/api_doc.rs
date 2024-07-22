@@ -9,7 +9,7 @@ const HOMEPAGE: &str = env!("CARGO_PKG_HOMEPAGE");
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 const PRODUCTION_SERVER: &str = "https://devpulse.shuttleapp.rs";
 const PRODUCTION_SERVER_DESCRIPTION: &str = "Production server";
-const LOCAL_SERVER: &str = "http://localhost:8000";
+const LOCAL_SERVER: &str = "http://127.0.0.1:8081";
 const LOCAL_SERVER_DESCRIPTION: &str = "Local development server";
 
 #[derive(OpenApi, ToSchema)]

@@ -1,6 +1,5 @@
 use axum::response::IntoResponse;
 use utoipa::OpenApi;
-use utoipa::ToResponse;
 
 use crate::models::NotImplemented;
 

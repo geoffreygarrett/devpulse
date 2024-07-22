@@ -1,10 +1,20 @@
+use std::sync::Arc;
+use std::time::Duration;
+
 use axum::{
     Router,
     routing::{get, post},
 };
+use axum::body::Body;
+use axum::error_handling::HandleErrorLayer;
+use axum::http::{Request, StatusCode};
 use axum::response::Redirect;
-use tower::ServiceBuilder;
+// use crate::http::middleware::RateLimitLayer;
+use tower::{limit::RateLimitLayer, ServiceBuilder, buffer::BufferLayer, BoxError};
+use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer};
+use tower_governor::key_extractor::{PeerIpKeyExtractor, SmartIpKeyExtractor};
 use tower_http::trace::TraceLayer;
+// use tower::ServiceBuilder;
 use utoipa_rapidoc::RapiDoc;
 use utoipa_redoc::{Redoc, Servable};
 use utoipa_scalar::{Scalar, Servable as ScalarServable};
@@ -14,18 +24,38 @@ use crate::http::*;
 use crate::http::api_doc::API_DOC;
 
 pub(crate) fn create_router() -> Router {
+    // Configure tracing if desired
+    // construct a subscriber that prints formatted traces to stdout
+    // let subscriber = tracing_subscriber::FmtSubscriber::new();
+    // use that subscriber to process traces emitted after this point
+    // tracing::subscriber::set_global_default(subscriber).unwrap();
+
+    // Allow bursts with up to five requests per IP address
+    // and replenishes one element every two seconds
+    // We Box it because Axum 0.6 requires all Layers to be Clone
+    // and thus we need a static reference to it
+    let governor_conf = Arc::new(
+        GovernorConfigBuilder::default()
+            .per_second(2)
+            .burst_size(5)
+            .use_headers()
+            .key_extractor(SmartIpKeyExtractor)
+            .finish()
+            .unwrap(),
+    );
+
+    let governor_limiter = governor_conf.limiter().clone();
+    let interval = Duration::from_secs(60);
+    // a separate background task to clean up
+    std::thread::spawn(move || loop {
+        std::thread::sleep(interval);
+        tracing::info!("rate limiting storage size: {}", governor_limiter.len());
+        governor_limiter.retain_recent();
+    });
+
     let doc = API_DOC.clone();
-    Router::new()
-        .layer(
-            ServiceBuilder::new()
-                .layer(TraceLayer::new_for_http())
-                .layer(middleware::AuthLayer::new(
-                    "admin".to_string(),
-                    "password".to_string(),
-                    "token".to_string(),
-                ))
-                .into_inner(),
-        )
+    // https://docs.shuttle.rs/templates/tutorials/custom-service#getting-started
+    let router = Router::new()
         .nest(
             BASE_API_DOCS_PATH,
             Router::new().route(OPENAPI_YAML, get(controllers::openapi::get_openapi_yaml)),
@@ -40,5 +70,25 @@ pub(crate) fn create_router() -> Router {
             DEVELOPER_PERFORMANCE_PATH,
             get(controllers::developer::get_developer_performance),
         )
-        .fallback(controllers::not_found::handler_404)
+        .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()))
+        .layer(
+            ServiceBuilder::new()
+                .layer(HandleErrorLayer::new(|err: BoxError| async move {
+                    (
+                        StatusCode::INTERNAL_SERVER_ERROR,
+                        format!("Unhandled error: {}", err),
+                    )
+                }))
+                .layer(BufferLayer::new(1024))
+                .layer(RateLimitLayer::new(5, Duration::from_secs(1))),
+        )
+        .fallback(controllers::not_found::handler_404);
+
+    if (std::env::var("SHUTTLE").is_ok()) {
+        router.layer(GovernorLayer {
+            config: governor_conf,
+        })
+    } else {
+        router
+    }
 }

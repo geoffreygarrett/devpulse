@@ -1,5 +1,4 @@
 use axum::{extract::Path, response::IntoResponse};
-use utoipa::ToResponse;
 
 use crate::models::NotImplemented;
 
