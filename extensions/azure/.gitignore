@@ -1,0 +1,9 @@
+# Ignore the node_modules directory
+node_modules/
+
+# Ignore the .vsix files
+*.vsix
+
+# Ignore the package-lock.json files
+package-lock.json
+.DS_Store/
