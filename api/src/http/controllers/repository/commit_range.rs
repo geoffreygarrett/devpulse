@@ -27,7 +27,7 @@ impl Default for ResponseFormatQuery {
     }
 }
 
-/// Analyzes a specified range of commits within a repository.
+/// Repository Commit Range Analysis
 ///
 /// # Request Body
 /// * `CommitRangeRequest` - Contains the repository URL and the specific start and end commits to analyze.

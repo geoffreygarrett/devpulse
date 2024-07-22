@@ -4,7 +4,7 @@ use crate::errors::DevPulseError;
 use crate::models::{DeveloperPerformance, RepositoryContribution, TooManyRequests};
 
 
-/// Retrieves performance metrics for a specified developer.
+/// Developer Performance Metrics
 ///
 /// This endpoint returns a set of performance metrics for the developer identified by `username`.
 /// The performance metrics include total commits, total pull requests, average time to merge PRs,
