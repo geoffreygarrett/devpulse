@@ -1,0 +1,24 @@
+{
+  "name": "azure-devpulse-extension",
+  "version": "1.0.0",
+  "description": "Azure DevOps extension for analyzing repository contributions using the DevPulse API.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "dependencies": {
+    "@types/node": "^14.14.31"
+  },
+  "keywords": [
+    "azure",
+    "devops",
+    "devpulse",
+    "repository",
+    "analysis",
+    "contributions"
+  ],
+  "author": "Your Name <your.email@example.com>",
+  "license": "ISC",
+  "icon": "images/icon.png"
+}

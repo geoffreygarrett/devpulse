@@ -1,0 +1,36 @@
+{
+  "manifestVersion": 1,
+  "id": "devpulse-repository-analysis",
+  "name": "DevPulse Repository Analysis",
+  "version": "0.1.0",
+  "publisher": "GeoffreyGarrett",
+  "targets": [
+    {
+      "id": "Microsoft.VisualStudio.Services"
+    }
+  ],
+  "description": "This extension provides detailed repository analysis directly within Azure DevOps.",
+  "categories": [
+    "Azure Repos"
+  ],
+  "icons": {
+    "default": "images/icon.png"
+  },
+  "contributions": [
+    {
+      "id": "repository-analysis",
+      "description": "Perform analysis of repository changes.",
+      "type": "ms.vss-web.azure-devops-service-hook-consumer",
+      "targets": [
+        "ms.vss-servicehooks.consumer"
+      ],
+      "properties": {
+        "name": "Repository Analysis",
+        "url": "https://devpulse.shuttleapp.rs/repository/commit-range"
+      }
+    }
+  ],
+  "scopes": [
+    "vso.code"
+  ]
+}
