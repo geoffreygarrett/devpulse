@@ -12,8 +12,16 @@ jobs:
       matrix:
         client:
           - { type: 'python', extra_args: '--additional-properties=packageName=devpulse_client' }
+          - { type: 'python-flask', extra_args: '' }
           - { type: 'rust', extra_args: '' }
           - { type: 'csharp', extra_args: '' }
+          - { type: 'csharp-functions', extra_args: '' }
+          - { type: 'go', extra_args: '' }
+          - { type: 'typescript-fetch', extra_args: '' }
+          - { type: 'typescript-node', extra_args: '' }
+          - { type: 'java', extra_args: '' }
+          - { type: 'dart', extra_args: '' }
+          - { type: 'bash', extra_args: '' }
       fail-fast: false
 
     steps:
