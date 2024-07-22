@@ -1,0 +1,36 @@
+name: Generate Clients 🛠️
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  generate_code:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        client:
+          - { type: 'python', extra_args: '--additional-properties=packageName=devpulse_client' }
+          - { type: 'rust', extra_args: '' }
+          - { type: 'csharp', extra_args: '' }
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Generate code
+        uses: hatamiarash7/openapi-generator@v0.2.0
+        with:
+          generator: ${{ matrix.client.type }}
+          #openapi-file: ${{ secrets.OPENAPI_SPEC_PATH }}
+          openapi-url: https://devpulse.shuttleapp.rs/api-docs/openapi.json
+          #          openapi-url: https://devpulse.shuttleapp.rs/api/v1/openapi.json <-- soon
+          output-dir: ${{ matrix.client.type }}-client
+          command-args: ${{ matrix.client.extra_args }}
+
+      - name: Do anything with the generated code
+        run: |
+          # Add any additional steps to process the generated code here
+          echo "Generated ${matrix.client.type} client code is in ${matrix.client.type}-client directory."
