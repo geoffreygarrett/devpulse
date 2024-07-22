@@ -59,7 +59,7 @@ jobs:
           import requests
           import json
 
-          url = "https://devpulse.shuttleapp.rs/repository/commit-range?format=yaml"
+          url = "https://devpulse.shuttleapp.rs/repository/commit-range"
           headers = {"Content-Type": "application/json"}
           data = {
               "repository_url": "${{ env.REPOSITORY_URL }}",
@@ -67,7 +67,7 @@ jobs:
               "end_commit": "${{ env.END_COMMIT }}"
           }
 
-          response = requests.post(url, headers=headers, data=json.dumps(data))
+          response = requests.post(url, headers=headers, data=json.dumps(data, indent=2))
           result = response.json()
 
           if response.status_code == 200:
