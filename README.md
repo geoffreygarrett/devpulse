@@ -1,3 +1,5 @@
+![🚧 Under construction 👷‍♂️](https://i.imgur.com/LEP2R3N.png)
+
 # DevPulse
 
 The DevPulse project is a comprehensive suite designed to analyze developer performance and repository contributions. It
@@ -6,6 +8,15 @@ developer metrics across various repositories. The API supports multiple protoco
 ensuring flexibility and scalability for diverse integration needs. DevPulse aims to offer actionable insights into
 codebase health and developer efficiency, facilitating better project management and development practices. The project
 may also be extended to include a CLI for enhanced accessibility and utility.
+
+## 📋 TODO List
+
+- [x] ✅ Setup CI for API release
+- [ ] 🔄 Add versioning to the `http` API routes
+- [ ] ⚙️ Develop `integrations/azure` for Azure DevOps
+- [ ] 🐙 Develop `integrations/github` for GitHub Actions
+- [ ] 💻 Develop `integrations/vscode` for Visual Studio Code
+- [ ] 🚀 Setup CI client release using `openapi-generator` for `http` API
 
 ## Prerequisites
 

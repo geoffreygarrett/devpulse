@@ -1,0 +1,24 @@
+FROM rust:latest
+
+# Install required dependencies
+RUN apt-get update && apt-get install -y libssl-dev pkg-config
+
+# Create a new empty shell project
+RUN USER=root cargo new --bin action
+WORKDIR /action
+
+# Copy the Cargo.toml and Cargo.lock files
+COPY Cargo.toml Cargo.lock ./
+
+# Build the dependencies
+RUN cargo build --release
+RUN rm src/*.rs
+
+# Now copy the source code
+COPY src ./src
+
+# Build the source code
+RUN cargo build --release
+
+# Set the entrypoint to the compiled binary
+ENTRYPOINT ["/action/target/release/action"]

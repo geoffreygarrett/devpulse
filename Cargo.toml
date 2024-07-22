@@ -1,7 +1,8 @@
 [workspace]
 members = [
     "core",
-    "api"
+    "api",
+    "integrations/github"
 ]
 
 resolver = "2"
