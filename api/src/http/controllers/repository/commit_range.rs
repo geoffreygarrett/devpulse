@@ -11,12 +11,11 @@ use crate::errors::DevPulseError;
 use devpulse_core::services::analyze_commit_range_service;
 use crate::models::{ResponseFormat, ResponseDetail, CommitRangeRequest, TooManyRequests};
 
-
 #[derive(Debug, Deserialize, IntoParams, ToSchema)]
 #[into_params(style = Form, parameter_in = Query)]
 pub struct ResponseFormatQuery {
-    format: Option<ResponseFormat>,  // Response formats: json, xml, yaml
-    detail: Option<ResponseDetail>,  // Response details: simple, detailed
+    format: Option<ResponseFormat>,  // Optional. The response format: json, xml, yaml. Default is json.
+    detail: Option<ResponseDetail>,  // Optional. The level of detail: simple, detailed. Default is simple.
 }
 
 impl Default for ResponseFormatQuery {
@@ -41,6 +40,7 @@ impl Default for ResponseFormatQuery {
 /// * `200 OK` - Returns the results of the commit range analysis in the specified format.
 /// * `400 Bad Request` - Occurs if the request parameters are invalid.
 /// * `401 Unauthorized` - Occurs if the API access is unauthorized.
+/// * `429 Too Many Requests` - Occurs if the rate limit is exceeded.
 ///
 /// # Examples
 /// * Successful request in XML format:

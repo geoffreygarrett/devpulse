@@ -3,6 +3,7 @@ use axum::http::StatusCode;
 use crate::errors::DevPulseError;
 use crate::models::{DeveloperPerformance, RepositoryContribution, TooManyRequests};
 
+
 /// Retrieves performance metrics for a specified developer.
 ///
 /// This endpoint returns a set of performance metrics for the developer identified by `username`.
@@ -16,15 +17,16 @@ use crate::models::{DeveloperPerformance, RepositoryContribution, TooManyRequest
 /// * `200 OK` - Returns the detailed performance metrics of the specified developer.
 /// * `404 Not Found` - Indicates that the developer with the specified username does not exist.
 /// * `401 Unauthorized` - Indicates that the request lacks valid authentication credentials for the requested resource.
+/// * `429 Too Many Requests` - Occurs if the rate limit is exceeded.
 ///
 /// # Examples
 /// * Successful request:
 ///   ```bash
-///   curl -X GET "http://localhost:3000/developers/johndoe/performance" -H "Authorization: Bearer {token}"
+///   curl -X GET "http://localhost:3000/developers/{username}/performance" -H "Authorization: Bearer {token}"
 ///   ```
 /// * Unauthorized request:
 ///   ```bash
-///   curl -X GET "http://localhost:3000/developers/johndoe/performance"
+///   curl -X GET "http://localhost:3000/developers/{username}/performance"
 ///   ```
 #[utoipa::path(
     get,
