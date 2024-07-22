@@ -10,6 +10,17 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+
+      - name: Cache Cargo dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo 
+            ~/.rustup
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}-${{ env.CACHE_NUMBER }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
+
       - uses: shuttle-hq/deploy-action@main
         with:
           deploy-key: ${{ secrets.SHUTTLE_API_KEY }}
