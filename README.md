@@ -1,33 +1,81 @@
+# DevPulse
 
-# Rabbit
-
-A simple Rust project demonstrating basic functionalities.
+The DevPulse project is a comprehensive suite designed to analyze developer performance and repository contributions. It
+includes an API that provides endpoints to assess code churn, identify top contributors, and evaluate individual
+developer metrics across various repositories. The API supports multiple protocols including HTTP, gRPC, and WebSocket,
+ensuring flexibility and scalability for diverse integration needs. DevPulse aims to offer actionable insights into
+codebase health and developer efficiency, facilitating better project management and development practices. The project
+may also be extended to include a CLI for enhanced accessibility and utility.
 
 ## Prerequisites
 
-- **Rust**: Install Rust and Cargo from the [official Rust website](https://www.rust-lang.org/tools/install).
+- Rust and Cargo: Install from the [official Rust website](https://www.rust-lang.org/tools/install).
+- Cargo Shuttle: Install using `cargo install cargo-shuttle`.
 
 ## Setup
 
 Clone the repository and navigate into the project directory:
 
 ```bash
-git clone https://github.com/geoffreygarrett/rabbit.git
-cd rabbit
+git clone https://github.com/geoffreygarrett/devpulse.git
+cd devpulse
 ```
 
-## Build and Run
+## Running the API Server
 
-Compile and run the project using Cargo:
+To start the API server locally, use the following Cargo Shuttle command:
+
+### Bash
 
 ```bash
-cargo run --release
-# Number of commits from old (469fddb7d66f06981596c051cf7cca2681e55f55) to new (60719404b37c8cfb747e9d4cd7ef6f865b148acf): 3
-# Commit | Additions | Deletions
-# Commit: 60719404b37c8cfb747e9d4cd7ef6f865b148acf | Additions: 9 | Deletions: 28
-# Commit: dfb56cf65375285917509b8a7dd70d7156a186e6 | Additions: 6 | Deletions: 24
-# Commit: 7fdf431dd29a54d2842f27f40911fd041b89bc2a | Additions: 17 | Deletions: 6
-# Repository status at "/Users/geoffreygarrett/RustroverProjects/rabbit/.cache/github_com_tudat-team_tudatpy/.git/"
+cargo shuttle run
 ```
 
-This command compiles the project with optimizations and runs the executable.
+### PowerShell
+
+```powershell
+cargo shuttle run
+```
+
+This will compile the project and start the server, making the API available locally for integration and testing.
+
+## Testing the API
+
+To test the API, you can send a request to analyze a range of commits in a repository using `curl`. Here’s how you can
+do it:
+
+### Bash
+
+```bash
+curl --request POST \
+  --url http://127.0.0.1:8000/repository/commit-range?format=yaml \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "end_commit": "6b10ce3",
+    "repository_url": "https://github.com/bazelbuild/rules_rust",
+    "start_commit": "6c2bd67"
+}'
+```
+
+### PowerShell
+
+```powershell
+curl --request POST `
+  --url http://127.0.0.1:8000/repository/commit-range?format=yaml `
+  --header 'Content-Type: application/json' `
+  --data '{
+    "end_commit": "6b10ce3",
+    "repository_url": "https://github.com/bazelbuild/rules_rust",
+    "start_commit": "6c2bd67"
+}'
+```
+
+## Documentation
+
+For more detailed documentation, including all available endpoints and their parameters, please refer to
+the [official DevPulse documentation](https://devpulse.shuttleapp.rs).
+
+## Support
+
+For support, issues, or contributions, please visit
+the [project repository](https://github.com/geoffreygarrett/devpulse).
