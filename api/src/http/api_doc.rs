@@ -47,6 +47,7 @@ const LOCAL_SERVER_DESCRIPTION: &str = "Local development server";
             crate::models::InternalServerError,
             crate::models::NotImplemented,
         ),
+        // headers(),
         schemas(
             crate::models::CommitRangeRequest,
             crate::models::CommitRangeAnalysis,

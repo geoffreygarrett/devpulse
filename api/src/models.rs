@@ -123,12 +123,31 @@ pub(crate) enum ResponseFormat {
     Xml,
     Yaml,
 }
+// headers:
+// X-RateLimit-Limit:
+// schema:
+// type: integer
+// description: The number of allowed requests in the current period
+// X-RateLimit-Remaining:
+// schema:
+// type: integer
+// description: The number of remaining requests in the current period
+// X-RateLimit-Reset:
+// schema:
+// type: integer
+// description: The number of seconds left in the current period
 
 /// Represents a rate limit error response with retry information.
 #[derive(ToResponse, ToSchema)]
 #[response(
     description = "Too Many Requests",
-    content_type = APPLICATION_VND_DEVPULSE_V1_JSON
+    content_type = APPLICATION_VND_DEVPULSE_V1_JSON,
+    headers(
+        // https://github.com/OAI/OpenAPI-Specification/issues/1586
+        ("X-RateLimit-Limit", description = "The number of allowed requests in the current period"),
+        ("X-RateLimit-Remaining", description = "The number of remaining requests in the current period"),
+        ("X-RateLimit-Reset", description = "The number of seconds left in the current period")
+    )
 )]
 pub struct TooManyRequests {
     pub message: String,
@@ -168,6 +187,7 @@ pub struct Unauthorized {
 
 impl Unauthorized {
     pub fn new(message: &str) -> Self {
+        #[allow(unused)]
         Unauthorized {
             message: message.to_string(),
         }
@@ -191,6 +211,7 @@ pub struct InternalServerError {
 }
 
 impl InternalServerError {
+    #[allow(unused)]
     pub fn new(message: &str) -> Self {
         InternalServerError {
             message: message.to_string(),
