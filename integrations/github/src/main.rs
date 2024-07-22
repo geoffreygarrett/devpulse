@@ -10,6 +10,9 @@
 //     }
 // }
 //
+fn main() {
+    println!("Hello, world!");
+}
 // async fn run() -> Result<(), Box<dyn std::error::Error>> {
 //     let token = core::get_input("repo-token", Some(true))?;
 //     let octocrab = Octocrab::builder().personal_token(token).build()?;
