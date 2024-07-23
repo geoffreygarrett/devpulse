@@ -13,7 +13,6 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
-
       - name: Cache Cargo dependencies
         uses: actions/cache@v4
         with:
@@ -27,6 +26,22 @@ jobs:
       - uses: shuttle-hq/deploy-action@main
         with:
           deploy-key: ${{ secrets.SHUTTLE_API_KEY }}
+
+  download_spec:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download OpenAPI spec
+        run: |
+          curl -o openapi.json https://devpulse.shuttleapp.rs/api-docs/openapi.json
+
+      - name: Upload OpenAPI spec
+        uses: actions/upload-artifact@v4
+        with:
+          name: openapi-spec
+          path: openapi.json
 
   generate_code:
     runs-on: ubuntu-latest
@@ -52,13 +67,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Download OpenAPI spec artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: openapi-spec
+          path: ./openapi
+
       - name: Generate code
         uses: hatamiarash7/openapi-generator@v0.3.0
         with:
           generator: ${{ matrix.client.type }}
-          #openapi-file: ${{ secrets.OPENAPI_SPEC_PATH }}
-          openapi-url: https://devpulse.shuttleapp.rs/api-docs/openapi.json
-          #          openapi-url: https://devpulse.shuttleapp.rs/api/v1/openapi.json <-- soon
+          openapi-file: ./openapi/openapi.json
           output-dir: ${{ matrix.client.type }}-client
           command-args: ${{ matrix.client.extra_args }}
 
@@ -67,4 +86,3 @@ jobs:
         with:
           name: ${{ matrix.client.type }}-client
           path: ${{ matrix.client.type }}-client
-
