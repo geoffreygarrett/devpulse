@@ -81,6 +81,7 @@ impl RepositoryManager {
     /// # Errors
     ///
     /// Returns an error if the fetch operation fails.
+    #[allow(unused)]
     pub async fn fetch_updates(&self) -> Result<(), Error> {
         let local_path = Path::new(&self.local_path);
         if local_path.exists() {
