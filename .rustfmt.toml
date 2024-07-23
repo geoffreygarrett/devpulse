@@ -1,5 +1,3 @@
-# rustfmt.toml
-
 # Code Formatting Style
 use_small_heuristics = "Default"
 max_width = 100                   # Maximum line width for better readability
@@ -9,17 +7,12 @@ newline_style = "unix"            # Unix-style newlines, lowercased to fit conve
 
 # Import Ordering
 reorder_imports = true            # Reorder imports automatically
-reorder_imports_in_group = true   # Reorder imports inside groups
-imports_granularity = "Module"    # Group imports by module
-group_imports = "StdExternalCrate" # Group standard library and external crate imports
 
 # Control Structures
 brace_style = "SameLineWhere"     # Braces start on the same line for control structures
-control_brace_style = "AlwaysNextLine" # Always put braces on the next line for control structures
 
 # Function Arguments and Calls
-fn_args_layout = "Compressed"     # Use compressed layout for function arguments
-fn_args_density = "Tall"          # Prefer taller formatting for function arguments if they don't fit on one line
+fn_params_layout = "Compressed"   # Use compressed layout for function arguments
 fn_call_width = 80                # Width threshold for collapsing function call args
 
 # Field and Try Shorthand
@@ -28,30 +21,16 @@ use_try_shorthand = true          # Use shorthand for try operator
 
 # Item & Module Formatting
 item_brace_style = "PreferSameLine" # Prefer braces on the same line for structs, enums, etc.
-mod_item_spacing = "Compressed"   # Reduce spacing between items in modules
-trailing_comma = "Always"         # Add a trailing comma to multi-line call sites
 
 # Whitespace Control
 space_before_colon = false        # Do not put space before colons
 space_after_colon = true          # Put space after colons
 spaces_around_ranges = false      # No spaces around range operators
-spaces_within_parens_and_brackets = false # Avoid spaces within parentheses and brackets
-indent_style = "Block"            # Use block indent style
 
 # Comment Handling
-wrap_comments = true              # Wrap comments at max_width
-normalize_comments = true         # Normalize comments to ensure a uniform style
-comment_width = 100               # Maximum width for comments
+wrap_comments = false             # Disabled as it requires nightly
+comment_width = 80                # Adjusted to a standard width
 
 # Error Handling
-error_on_line_overflow = true     # Error if a line exceeds max_width
-error_on_unformatted = true       # Error if rustfmt skips formatting any part of the code
-
-# Unstable Features (requires nightly)
-unstable_features = true          # Enable unstable features
-version = "Two"                   # Use version Two of unstable features
-format_code_in_doc_comments = true # Format code inside doc comments
-format_macro_bodies = true        # Format bodies of macros
-format_macro_matchers = true      # Format macro matchers
-format_strings = true             # Format string literals
-normalize_doc_attributes = true   # Normalize doc attributes
+error_on_line_overflow = false    # Disabled as it requires nightly
+error_on_unformatted = false      # Disabled as it requires nightly
