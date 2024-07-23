@@ -1,6 +1,11 @@
+use std::sync::Arc;
+use std::time::SystemTime;
+
 use axum::http::StatusCode;
+use axum::Json;
 use axum::response::{IntoResponse, Response};
 use serde::{Deserialize, Serialize};
+use tokio::sync::RwLock;
 use utoipa::{ToResponse, ToSchema};
 
 const APPLICATION_VND_DEVPULSE_V1_JSON: &str = "application/vnd.devpulse.v1+json";
@@ -284,3 +289,48 @@ impl NotImplemented {
 }
 
 impl_into_response!(NotImplemented);
+
+#[derive(Clone)]
+pub struct ServerState {
+    start_time: Arc<RwLock<SystemTime>>,
+}
+
+impl ServerState {
+    pub fn new(start_time: Arc<RwLock<SystemTime>>) -> Self {
+        ServerState { start_time }
+    }
+
+    pub async fn get_uptime_as_secs(&self) -> u64 {
+        self.start_time
+            .read()
+            .await
+            .elapsed()
+            .unwrap_or_default()
+            .as_secs()
+    }
+}
+
+#[derive(Serialize, ToSchema, ToResponse)]
+#[response(
+    description = "Successful health check",
+    content_type = "application/vnd.devpulse.v1+json"
+)]
+pub struct HealthCheckResponse {
+    status: String,
+    uptime: u64,
+}
+
+impl HealthCheckResponse {
+    pub fn new(status: &str, uptime: u64) -> Self {
+        HealthCheckResponse {
+            status: status.to_string(),
+            uptime,
+        }
+    }
+}
+
+impl IntoResponse for HealthCheckResponse {
+    fn into_response(self) -> Response {
+        (StatusCode::OK, Json(self)).into_response()
+    }
+}

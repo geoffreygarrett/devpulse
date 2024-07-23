@@ -15,7 +15,7 @@ use crate::http::api_doc::API_DOC;
     ("application/yaml" = String),
     ))
     ),
-    tag = crate::http::TAG_API_DOCS
+    tag = "General"
 )]
 pub async fn get_openapi_yaml() -> impl IntoResponse {
     let doc = API_DOC.clone();
@@ -39,7 +39,7 @@ pub async fn get_openapi_yaml() -> impl IntoResponse {
     ),
     (status = 500, description = "Internal server error", body = DevPulseError),
     ),
-    tag = crate::http::TAG_API_DOCS
+    tag = "General"
 )]
 pub async fn get_openapi_json() -> impl IntoResponse {
     let doc = API_DOC.clone();

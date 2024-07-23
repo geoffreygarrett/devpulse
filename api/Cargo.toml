@@ -24,7 +24,7 @@ thiserror = "1.0.63"
 base64 = "0.22.1"
 futures-util = "0.3.30"
 tower = "0.4.13"
-tower-http = { version = "0.5.2", features = ["trace"] }
+tower-http = { version = "0.5.2", features = ["trace", "add-extension"] }
 serde_yaml = "0.9.34" # provides YAML serialization and deserialization
 serde-xml-rs = "0.6.0"  # provides XML serialization and deserialization
 axum-xml-up = "0.2.0"

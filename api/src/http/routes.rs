@@ -14,9 +14,10 @@ use tower::{BoxError, buffer::BufferLayer, limit::RateLimitLayer, ServiceBuilder
 use tower_governor::{governor::GovernorConfigBuilder, GovernorError, GovernorLayer};
 use tower_governor::key_extractor::{PeerIpKeyExtractor, SmartIpKeyExtractor};
 use tower_http::trace::TraceLayer;
+use utoipa::Path;
 // use tower::ServiceBuilder;
 use utoipa_rapidoc::RapiDoc;
-use utoipa_redoc::{Redoc, Servable};
+use utoipa_redoc::{Redoc, Servable as RedocServable};
 use utoipa_scalar::{Scalar, Servable as ScalarServable};
 use utoipa_swagger_ui::SwaggerUi;
 
@@ -24,6 +25,12 @@ use crate::http::*;
 use crate::http::api_doc::API_DOC;
 use crate::models::TooManyRequests;
 
+#[macro_export]
+macro_rules! path {
+    ($controller:ident) => {
+        concat!("__", stringify!($controller), "::path()")
+    };
+}
 pub(crate) fn create_router() -> Router {
     // Configure tracing if desired
     // construct a subscriber that prints formatted traces to stdout
@@ -65,17 +72,23 @@ pub(crate) fn create_router() -> Router {
 
     let doc = API_DOC.clone();
     let base_router = Router::new()
-        .nest(
-            BASE_API_DOCS_PATH,
-            Router::new().route(OPENAPI_YAML, get(controllers::openapi::get_openapi_yaml)),
-        )
-        .route(ROOT_PATH, get(|| async { Redirect::permanent(SWAGGER_UI_PATH) }))
-        .route("/pull-request", post(controllers::pull_request::create_pull_request_analysis))
+        .route("/", get(|| async { Redirect::permanent("/scalar") }))
         .route(
-            DEVELOPER_PERFORMANCE_PATH,
+            controllers::openapi::__path_get_openapi_yaml::path().as_str(),
+            get(controllers::openapi::get_openapi_yaml),
+        )
+        .route(
+            controllers::pull_request::__path_create_pull_request_analysis::path().as_str(),
+            post(controllers::pull_request::create_pull_request_analysis),
+        )
+        .route(
+            controllers::developer::__path_get_developer_performance::path().as_str(),
             get(controllers::developer::get_developer_performance),
         )
-        .route(COMMIT_RANGE_PATH, post(controllers::repository::create_commit_range_analysis));
+        .route(
+            controllers::repository::__path_create_commit_range_analysis::path().as_str(),
+            post(controllers::repository::create_commit_range_analysis),
+        );
 
     let router = if std::env::var("SHUTTLE").is_ok() {
         base_router.layer(GovernorLayer {
@@ -90,6 +103,10 @@ pub(crate) fn create_router() -> Router {
         .merge(RapiDoc::new(openapi_json_path()).path(RAPIDOC_PATH))
         .merge(Redoc::with_url("/redoc", doc.clone()))
         .merge(Scalar::with_url("/scalar", doc.clone()))
+        .route(
+            controllers::health::__path_health_check::path().as_str(),
+            get(controllers::health::health_check),
+        )
         .fallback(controllers::not_found::handler_404)
         .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()))
 }

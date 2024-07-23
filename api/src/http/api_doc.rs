@@ -36,8 +36,8 @@ impl Modify for SecurityAddon {
     // modifiers(&SecurityAddon),
     tags(
         (
-            name = "Documentation",
-            description = "Endpoints for accessing API documentation in JSON and YAML formats."
+            name = "General",
+            description = "Endpoints for general information, health checks, and API documentation."
         ),
         (
             name = "Repository",
@@ -57,7 +57,8 @@ impl Modify for SecurityAddon {
         crate::http::controllers::developer::get_developer_performance,
         crate::http::controllers::pull_request::create_pull_request_analysis,
         crate::http::controllers::openapi::get_openapi_json,
-        crate::http::controllers::openapi::get_openapi_yaml
+        crate::http::controllers::openapi::get_openapi_yaml,
+        crate::http::controllers::health::health_check,
     ),
     components(
         responses(
@@ -66,6 +67,7 @@ impl Modify for SecurityAddon {
             crate::models::Unauthorized,
             crate::models::InternalServerError,
             crate::models::NotImplemented,
+            crate::models::HealthCheckResponse,
         ),
         // headers(),
         schemas(
@@ -75,6 +77,7 @@ impl Modify for SecurityAddon {
             crate::models::ResponseDetail,
             crate::models::ResponseFormat,
             crate::models::RepositoryContribution,
+            crate::models::HealthCheckResponse,
             crate::models::DeveloperPerformanceAnalysis,
             crate::models::Contributor,
             crate::errors::DevPulseError
