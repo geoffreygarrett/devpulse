@@ -32,10 +32,11 @@ pub async fn analyze_commit_range_service(
     let code_churn_results = code_churn_analyzer
         .analyze(&local_path, &start_commit, &end_commit)
         .await?;
-    let top_contributors_results = top_contributors_analyzer
+    let mut top_contributors_results = top_contributors_analyzer
         .analyze(&local_path, &start_commit, &end_commit)
-        .await?
-        .sort_by(|a, b| b.commits.cmp(&a.commits));
+        .await?;
+
+    top_contributors_results.sort_by(|a, b| b.commits.cmp(&a.commits));
 
     // Combine the results from different analyzers
     Ok(CommitRangeAnalysis {

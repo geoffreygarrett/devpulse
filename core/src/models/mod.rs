@@ -1,4 +1,5 @@
 use serde::{Deserialize, Serialize};
+
 mod base;
 mod github;
 
@@ -66,7 +67,7 @@ pub struct CommitRangeDetails {
 }
 
 /// Represents a contributor with a username and the number of commits.
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Contributor {
     pub username: String,
     pub commits: i32,
