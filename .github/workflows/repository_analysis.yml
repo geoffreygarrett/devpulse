@@ -62,7 +62,11 @@ jobs:
           url = "https://devpulse.shuttleapp.rs/repository/commit-range"
           headers = {"Content-Type": "application/json"}
           data = {
-              "repository_url": "${{ env.REPOSITORY_URL }}",
+              "repository": {
+                 "type": "github",
+                 "owner": "${{ github.repository_owner }}",
+                 "name": "${{ github.repository_name }}"
+              },
               "start_commit": "${{ env.START_COMMIT }}",
               "end_commit": "${{ env.END_COMMIT }}"
           }
