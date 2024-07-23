@@ -30,6 +30,7 @@ jobs:
           deploy-key: ${{ secrets.SHUTTLE_API_KEY }}
 
   download_spec:
+    needs: deploy
     runs-on: ubuntu-latest
     steps:
       # 4. Download the OpenAPI specification
