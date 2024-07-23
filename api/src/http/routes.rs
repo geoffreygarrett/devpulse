@@ -64,30 +64,32 @@ pub(crate) fn create_router() -> Router {
     });
 
     let doc = API_DOC.clone();
-    let router = Router::new()
+    let base_router = Router::new()
         .nest(
             BASE_API_DOCS_PATH,
             Router::new().route(OPENAPI_YAML, get(controllers::openapi::get_openapi_yaml)),
         )
-        .merge(SwaggerUi::new(SWAGGER_UI_PATH).url(openapi_json_path(), doc.clone()))
-        .merge(RapiDoc::new(openapi_json_path()).path(RAPIDOC_PATH))
-        .merge(Redoc::with_url("/redoc", doc.clone()))
-        .merge(Scalar::with_url("/scalar", doc.clone()))
         .route(ROOT_PATH, get(|| async { Redirect::permanent(SWAGGER_UI_PATH) }))
         .route("/pull-request", post(controllers::pull_request::create_pull_request_analysis))
         .route(
             DEVELOPER_PERFORMANCE_PATH,
             get(controllers::developer::get_developer_performance),
         )
-        .route(COMMIT_RANGE_PATH, post(controllers::repository::create_commit_range_analysis))
-        .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()))
-        .fallback(controllers::not_found::handler_404);
+        .route(COMMIT_RANGE_PATH, post(controllers::repository::create_commit_range_analysis));
 
-    if (std::env::var("SHUTTLE").is_ok()) {
-        router.layer(GovernorLayer {
+    let router = if std::env::var("SHUTTLE").is_ok() {
+        base_router.layer(GovernorLayer {
             config: governor_conf,
         })
     } else {
-        router
-    }
+        base_router
+    };
+
+    router
+        .merge(SwaggerUi::new(SWAGGER_UI_PATH).url(openapi_json_path(), doc.clone()))
+        .merge(RapiDoc::new(openapi_json_path()).path(RAPIDOC_PATH))
+        .merge(Redoc::with_url("/redoc", doc.clone()))
+        .merge(Scalar::with_url("/scalar", doc.clone()))
+        .fallback(controllers::not_found::handler_404)
+        .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()))
 }
