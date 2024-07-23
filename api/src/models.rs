@@ -37,9 +37,9 @@ pub struct CommitRangeAnalysis {
         "total_additions": 1163,
         "total_deletions": 59,
         "top_contributors": [
-            {"username": "Marcel Hlopko", "commits": 18},
+            {"username": "Daniel Wagner-Hall", "commits": 1144},
             {"username": "Milan Vukov", "commits": 60},
-            {"username": "Daniel Wagner-Hall", "commits": 1144}
+            {"username": "Marcel Hlopko", "commits": 18}
         ]
     }))]
     pub commit_range: CommitRangeDetails,
@@ -68,9 +68,9 @@ pub struct CommitRangeDetails {
     #[schema(example = "59")]
     pub total_deletions: i32,
     #[schema(example = json!([
-        {"username": "Marcel Hlopko", "commits": 18},
+        {"username": "Daniel Wagner-Hall", "commits": 1144},
         {"username": "Milan Vukov", "commits": 60},
-        {"username": "Daniel Wagner-Hall", "commits": 1144}
+        {"username": "Marcel Hlopko", "commits": 18}
     ]))]
     pub top_contributors: Vec<Contributor>,
 }
