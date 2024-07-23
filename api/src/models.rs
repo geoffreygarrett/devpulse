@@ -5,6 +5,7 @@ use axum::http::StatusCode;
 use axum::Json;
 use axum::response::{IntoResponse, Response};
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use tokio::sync::RwLock;
 use utoipa::{ToResponse, ToSchema};
 
@@ -27,7 +28,20 @@ pub struct CommitRangeRequest {
 /// Represents the response containing the results from analyzing a commit range.
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct CommitRangeAnalysis {
+    #[schema(example = "https://github.com/bazelbuild/rules_rust")]
     pub repository: String,
+    #[schema(example = json!({
+        "start_commit": "6c2bd67",
+        "end_commit": "6b10ce3",
+        "total_commits": 6,
+        "total_additions": 1163,
+        "total_deletions": 59,
+        "top_contributors": [
+            {"username": "Marcel Hlopko", "commits": 18},
+            {"username": "Milan Vukov", "commits": 60},
+            {"username": "Daniel Wagner-Hall", "commits": 1144}
+        ]
+    }))]
     pub commit_range: CommitRangeDetails,
 }
 
@@ -40,30 +54,24 @@ impl CommitRangeAnalysis {
     }
 }
 
-// #[derive(utoipa::ToResponse)]
-// enum Person {
-//     #[response(examples(
-//         ("Person1" = (value = json!({"name": "name1"}))),
-//         ("Person2" = (value = json!({"name": "name2"})))
-//     ))]
-//     Admin(#[content("application/vnd-custom-v1+json")] Admin),
-//
-//     #[response(example = json!({"name": "name3", "id": 1}))]
-//     Admin2(
-//         #[content("application/vnd-custom-v2+json")]
-//         #[to_schema]
-//         Admin2,
-//     ),
-// }
-
 /// Details the results of a commit range analysis, including commits, additions, deletions, and contributors.
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct CommitRangeDetails {
+    #[schema(example = "6c2bd67")]
     pub start_commit: String,
+    #[schema(example = "6b10ce3")]
     pub end_commit: String,
+    #[schema(example = "6")]
     pub total_commits: i32,
+    #[schema(example = "1163")]
     pub total_additions: i32,
+    #[schema(example = "59")]
     pub total_deletions: i32,
+    #[schema(example = json!([
+        {"username": "Marcel Hlopko", "commits": 18},
+        {"username": "Milan Vukov", "commits": 60},
+        {"username": "Daniel Wagner-Hall", "commits": 1144}
+    ]))]
     pub top_contributors: Vec<Contributor>,
 }
 
