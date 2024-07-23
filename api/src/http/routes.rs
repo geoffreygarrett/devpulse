@@ -8,10 +8,10 @@ use axum::{
 use axum::body::Body;
 use axum::error_handling::HandleErrorLayer;
 use axum::http::{Request, StatusCode};
-use axum::response::Redirect;
+use axum::response::{IntoResponse, Redirect};
 // use crate::http::middleware::RateLimitLayer;
-use tower::{limit::RateLimitLayer, ServiceBuilder, buffer::BufferLayer, BoxError};
-use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer};
+use tower::{BoxError, buffer::BufferLayer, limit::RateLimitLayer, ServiceBuilder};
+use tower_governor::{governor::GovernorConfigBuilder, GovernorError, GovernorLayer};
 use tower_governor::key_extractor::{PeerIpKeyExtractor, SmartIpKeyExtractor};
 use tower_http::trace::TraceLayer;
 // use tower::ServiceBuilder;
@@ -22,6 +22,7 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use crate::http::*;
 use crate::http::api_doc::API_DOC;
+use crate::models::TooManyRequests;
 
 pub(crate) fn create_router() -> Router {
     // Configure tracing if desired
@@ -36,10 +37,19 @@ pub(crate) fn create_router() -> Router {
     // and thus we need a static reference to it
     let governor_conf = Arc::new(
         GovernorConfigBuilder::default()
-            .per_second(2)
+            .per_second(1)
             .burst_size(5)
             .use_headers()
             .key_extractor(SmartIpKeyExtractor)
+            .error_handler(|error| {
+                tracing::error!("Rate limiting error: {}", error);
+                match error {
+                    GovernorError::TooManyRequests { wait_time, .. } => {
+                        TooManyRequests::new(Some(wait_time as i32)).into_response()
+                    }
+                    _ => TooManyRequests::new(None).into_response(),
+                }
+            })
             .finish()
             .unwrap(),
     );
@@ -54,7 +64,6 @@ pub(crate) fn create_router() -> Router {
     });
 
     let doc = API_DOC.clone();
-    // https://docs.shuttle.rs/templates/tutorials/custom-service#getting-started
     let router = Router::new()
         .nest(
             BASE_API_DOCS_PATH,
@@ -70,18 +79,8 @@ pub(crate) fn create_router() -> Router {
             DEVELOPER_PERFORMANCE_PATH,
             get(controllers::developer::get_developer_performance),
         )
+        .route(COMMIT_RANGE_PATH, post(controllers::repository::create_commit_range_analysis))
         .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()))
-        .layer(
-            ServiceBuilder::new()
-                .layer(HandleErrorLayer::new(|err: BoxError| async move {
-                    (
-                        StatusCode::INTERNAL_SERVER_ERROR,
-                        format!("Unhandled error: {}", err),
-                    )
-                }))
-                .layer(BufferLayer::new(1024))
-                .layer(RateLimitLayer::new(5, Duration::from_secs(1))),
-        )
         .fallback(controllers::not_found::handler_404);
 
     if (std::env::var("SHUTTLE").is_ok()) {

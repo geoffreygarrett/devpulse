@@ -1,7 +1,8 @@
 use lazy_static::lazy_static;
-use utoipa::{OpenApi, ToSchema};
+use utoipa::{Modify, OpenApi, ToSchema};
 use utoipa::openapi;
 use utoipa::openapi::OpenApiBuilder;
+use utoipa::openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme};
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const DESCRIPTION: &str = env!("CARGO_PKG_DESCRIPTION");
@@ -12,8 +13,27 @@ const PRODUCTION_SERVER_DESCRIPTION: &str = "Production server";
 const LOCAL_SERVER: &str = "http://127.0.0.1:8081";
 const LOCAL_SERVER_DESCRIPTION: &str = "Local development server";
 
+struct SecurityAddon;
+
+impl Modify for SecurityAddon {
+    fn modify(&self, openapi: &mut utoipa::openapi::OpenApi) {
+        if let Some(components) = openapi.components.as_mut() {
+            components.add_security_scheme(
+                "bearer_auth",
+                SecurityScheme::Http(
+                    HttpBuilder::new()
+                        .scheme(HttpAuthScheme::Bearer)
+                        .bearer_format("JWT")
+                        .build(),
+                ), // Using Bearer authentication
+            );
+        }
+    }
+}
+
 #[derive(OpenApi, ToSchema)]
 #[openapi(
+    // modifiers(&SecurityAddon),
     tags(
         (
             name = "Documentation",

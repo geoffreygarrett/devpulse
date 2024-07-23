@@ -10,7 +10,7 @@ use crate::models::NotImplemented;
     post,
     path = "/pull-request",
     responses(
-        (status = 500, response = NotImplemented),
+        (status = 501, response = NotImplemented),
     ),
     tag = "Pull Request"
 )]

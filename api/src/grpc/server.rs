@@ -15,6 +15,8 @@ pub mod proto {
 
 #[derive(Default)]
 pub struct DevPulseServiceImpl;
+// https://docs.shuttle.rs/templates/tutorials/custom-service#getting-started
+// https://docs.shuttle.rs/templates/tutorials/custom-service#getting-started
 
 #[tonic::async_trait]
 impl DevPulseService for DevPulseServiceImpl {

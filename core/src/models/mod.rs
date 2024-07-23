@@ -1,4 +1,6 @@
 use serde::{Deserialize, Serialize};
+mod base;
+mod github;
 
 /// Represents the code churn (additions and deletions) for a specific commit.
 #[derive(Debug, Serialize, Deserialize)]
@@ -64,7 +66,7 @@ pub struct CommitRangeDetails {
 }
 
 /// Represents a contributor with a username and the number of commits.
-#[derive(Serialize, Deserialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct Contributor {
     pub username: String,
     pub commits: i32,

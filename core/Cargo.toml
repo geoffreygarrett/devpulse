@@ -2,6 +2,7 @@
 name = "devpulse_core"
 version = "0.1.0"
 edition = "2021"
+#build = "build.rs"
 
 [dependencies]
 git2 = "0.19.0"
@@ -10,3 +11,15 @@ serde_json = { version = "1.0.120", features = ["preserve_order"] }
 serde = { version = "1.0.204", features = ["derive"] }
 async-trait = "0.1.81"
 tokio = { version = "1.38.1", features = ["full"] }
+chrono = "0.4.38"
+
+[build-dependencies]
+openapiv3 = "2.0.0"
+serde_json = "1.0"
+syn = "1.0"
+prettyplease = "0.1.25"
+progenitor = { git = "https://github.com/geoffreygarrett/progenitor", branch = "feat/multi-response" }
+serde_yaml = "0.9.34+deprecated"
+reqwest = { version = "0.11", features = ["json", "stream", "blocking"] }
+tokio = { version = "1", features = ["full"] }
+utoipa = { version = "4", features = ["axum_extras", "yaml", "openapi_extensions"] }

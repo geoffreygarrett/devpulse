@@ -1,7 +1,8 @@
+use std::error::Error;
+
 use crate::analyzers::{Analyzer, CodeChurnAnalyzer, TopContributorsAnalyzer};
 use crate::models::{CommitRangeAnalysis, CommitRangeDetails, Contributor};
 use crate::utils::RepositoryManager;
-use std::error::Error;
 
 /// Analyzes a specified range of commits within a repository using various analyzers.
 ///
@@ -18,7 +19,9 @@ use std::error::Error;
 /// # Errors
 ///
 /// Returns an error if there is an issue with repository access, cloning, or analysis.
-pub async fn analyze_commit_range_service(repository_url: &str, start_commit: &str, end_commit: &str) -> Result<CommitRangeAnalysis, Box<dyn Error>> {
+pub async fn analyze_commit_range_service(
+    repository_url: &str, start_commit: &str, end_commit: &str,
+) -> Result<CommitRangeAnalysis, Box<dyn Error>> {
     let repo_manager = RepositoryManager::new(&repository_url)?;
     let repo = repo_manager.open_or_clone().await?;
     let local_path = repo_manager.get_local_path();
@@ -26,8 +29,12 @@ pub async fn analyze_commit_range_service(repository_url: &str, start_commit: &s
     let code_churn_analyzer = CodeChurnAnalyzer;
     let top_contributors_analyzer = TopContributorsAnalyzer;
 
-    let code_churn_results = code_churn_analyzer.analyze(&local_path, &start_commit, &end_commit).await?;
-    let top_contributors_results = top_contributors_analyzer.analyze(&local_path, &start_commit, &end_commit).await?;
+    let code_churn_results = code_churn_analyzer
+        .analyze(&local_path, &start_commit, &end_commit)
+        .await?;
+    let top_contributors_results = top_contributors_analyzer
+        .analyze(&local_path, &start_commit, &end_commit)
+        .await?;
 
     // Combine the results from different analyzers
     Ok(CommitRangeAnalysis {
@@ -36,12 +43,21 @@ pub async fn analyze_commit_range_service(repository_url: &str, start_commit: &s
             start_commit: start_commit.to_string(),
             end_commit: end_commit.to_string(),
             total_commits: code_churn_results.len() as i32,
-            total_additions: code_churn_results.iter().map(|c| c.additions() as i32).sum(),
-            total_deletions: code_churn_results.iter().map(|c| c.deletions() as i32).sum(),
-            top_contributors: top_contributors_results.iter().map(|c| Contributor {
-                username: c.username.clone(),
-                commits: c.commits as i32,
-            }).collect(),
+            total_additions: code_churn_results
+                .iter()
+                .map(|c| c.additions() as i32)
+                .sum(),
+            total_deletions: code_churn_results
+                .iter()
+                .map(|c| c.deletions() as i32)
+                .sum(),
+            top_contributors: top_contributors_results
+                .iter()
+                .map(|c| Contributor {
+                    username: c.username.clone(),
+                    commits: c.commits as i32,
+                })
+                .collect(),
         },
     })
 }

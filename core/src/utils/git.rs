@@ -1,6 +1,7 @@
-use git2::{Error, Repository};
 use std::path::Path;
 use std::process::Command;
+
+use git2::{Error, Repository};
 use url::Url;
 
 /// Manages cloning or opening a Git repository.

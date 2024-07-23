@@ -1,3 +1,3 @@
-mod git;
-
 pub use git::*;
+
+mod git;

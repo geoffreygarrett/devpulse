@@ -17,7 +17,7 @@ use crate::models::NotImplemented;
         // (status = 404, description = "Developer not found", body = DevPulseError),
         // (status = 401, response = Unauthorized),
         // (status = 429, response = TooManyRequests),
-        (status = 500, response = NotImplemented)
+        (status = 501, response = NotImplemented)
     ),
     params(
     ("username" = String, Path, description = "Username of the developer to retrieve performance for")

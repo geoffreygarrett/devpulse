@@ -137,8 +137,24 @@ pub(crate) enum ResponseFormat {
 // type: integer
 // description: The number of seconds left in the current period
 
+macro_rules! impl_into_response {
+    ($type:ty) => {
+        impl IntoResponse for $type {
+            fn into_response(self) -> Response {
+                let json = serde_json::to_string(&self).unwrap();
+                (*Self::CODE, json).into_response()
+                // Response::builder()
+                //     .status(*Self::CODE)
+                //     .header("content-type", APPLICATION_VND_DEVPULSE_V1_JSON)
+                //     .body(serde_json::to_string(&self).unwrap())
+                //     .unwrap()
+            }
+        }
+    };
+}
+
 /// Represents a rate limit error response with retry information.
-#[derive(ToResponse, ToSchema)]
+#[derive(ToResponse, ToSchema, Serialize)]
 #[response(
     description = "Too Many Requests",
     content_type = APPLICATION_VND_DEVPULSE_V1_JSON,
@@ -155,6 +171,7 @@ pub struct TooManyRequests {
 }
 
 impl TooManyRequests {
+    const CODE: &'static StatusCode = &StatusCode::TOO_MANY_REQUESTS;
     pub fn new(retry_after_seconds: Option<i32>) -> Self {
         TooManyRequests {
             message: "You have made too many requests. Please try again later.".to_string(),
@@ -163,20 +180,49 @@ impl TooManyRequests {
     }
 }
 
+// impl_into_response!(TooManyRequests);
+impl IntoResponse for TooManyRequests {
+    fn into_response(self) -> Response {
+        let json = serde_json::to_string(&self).unwrap();
+        Response::builder()
+            .status(*Self::CODE)
+            .header("content-type", APPLICATION_VND_DEVPULSE_V1_JSON)
+            .header("X-RateLimit-Limit", "100")
+            .header("X-RateLimit-Remaining", "0")
+            .body::<axum::body::Body>(axum::body::Body::from(json))
+            .unwrap()
+    }
+}
+
+// impl IntoResponse for TooManyRequests {
+//     fn into_response(self) -> Response {
+//         let mut response = (StatusCode::TOO_MANY_REQUESTS, Json(&self)).into_response();
+//         if let Some(retry_after) = self.retry_after {
+//             response
+//                 .headers_mut()
+//                 .insert("X-RateLimit-Reset", format!("{}", retry_after).parse().unwrap());
+//         }
+//         response
+//     }
+// }
+
 /// Bad request error response.
-#[derive(ToResponse, ToSchema)]
+#[derive(ToResponse, ToSchema, Serialize)]
 #[response(description = "Bad Request", content_type = APPLICATION_VND_DEVPULSE_V1_JSON)]
 pub struct BadRequest {
     pub message: String,
 }
 
 impl BadRequest {
+    const CODE: &'static StatusCode = &StatusCode::BAD_REQUEST;
     pub fn new(message: &str) -> Self {
         BadRequest {
             message: message.to_string(),
         }
     }
 }
+
+impl_into_response!(BadRequest);
 
 /// Unauthorized error response.
 #[derive(ToResponse, ToSchema, Serialize)]
@@ -186,6 +232,7 @@ pub struct Unauthorized {
 }
 
 impl Unauthorized {
+    const CODE: &'static StatusCode = &StatusCode::UNAUTHORIZED;
     pub fn new(message: &str) -> Self {
         #[allow(unused)]
         Unauthorized {
@@ -194,12 +241,7 @@ impl Unauthorized {
     }
 }
 
-impl IntoResponse for Unauthorized {
-    fn into_response(self) -> Response {
-        let body = serde_json::to_string(&self).unwrap();
-        (StatusCode::UNAUTHORIZED, body).into_response()
-    }
-}
+impl_into_response!(Unauthorized);
 
 #[derive(ToResponse, ToSchema, Serialize)]
 #[response(
@@ -211,6 +253,7 @@ pub struct InternalServerError {
 }
 
 impl InternalServerError {
+    const CODE: &'static StatusCode = &StatusCode::INTERNAL_SERVER_ERROR;
     #[allow(unused)]
     pub fn new(message: &str) -> Self {
         InternalServerError {
@@ -219,12 +262,7 @@ impl InternalServerError {
     }
 }
 
-impl IntoResponse for InternalServerError {
-    fn into_response(self) -> Response {
-        let body = serde_json::to_string(&self).unwrap();
-        (StatusCode::INTERNAL_SERVER_ERROR, body).into_response()
-    }
-}
+impl_into_response!(InternalServerError);
 
 #[derive(ToResponse, ToSchema, Serialize)]
 #[response(
@@ -237,6 +275,7 @@ pub struct NotImplemented {
 }
 
 impl NotImplemented {
+    const CODE: &'static StatusCode = &StatusCode::NOT_IMPLEMENTED;
     pub fn new(message: &str) -> Self {
         NotImplemented {
             message: message.to_string(),
@@ -244,9 +283,4 @@ impl NotImplemented {
     }
 }
 
-impl IntoResponse for NotImplemented {
-    fn into_response(self) -> Response {
-        let body = serde_json::to_string(&self).unwrap();
-        (StatusCode::NOT_IMPLEMENTED, body).into_response()
-    }
-}
+impl_into_response!(NotImplemented);
