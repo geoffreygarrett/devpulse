@@ -17,6 +17,7 @@ pub struct AuthLayer {
 }
 
 impl AuthLayer {
+    #[allow(unused)]
     pub fn new(username: String, password: String, bearer_token: String) -> Self {
         Self {
             username,

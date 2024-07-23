@@ -69,11 +69,13 @@ impl Modify for SecurityAddon {
             crate::models::InternalServerError,
             crate::models::SourceVersionResponse,
             crate::models::NotImplemented,
+            crate::models::CommitRangeAnalysisResponse,
             crate::models::HealthCheckResponse,
         ),
         // headers(),
         schemas(
             crate::models::Repository,
+            crate::models::HealthCheck,
             crate::models::CommitRangeRequest,
             crate::models::CommitRangeAnalysis,
             crate::models::CommitRangeDetails,

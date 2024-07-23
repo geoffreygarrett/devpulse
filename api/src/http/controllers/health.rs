@@ -1,7 +1,9 @@
 use axum::{Extension, response::IntoResponse};
+use axum::http::HeaderMap;
 use utoipa::ToResponse;
 
-use crate::models::{HealthCheckResponse, ServerState};
+use crate::accept::serialize_response;
+use crate::models::{HealthCheck, HealthCheckResponse, ServerState};
 
 /// Health Check
 ///
@@ -17,7 +19,9 @@ use crate::models::{HealthCheckResponse, ServerState};
     ),
     tag = "General"
 )]
-pub async fn health_check(Extension(state): Extension<ServerState>) -> impl IntoResponse {
+pub async fn health_check(
+    headers: HeaderMap, Extension(state): Extension<ServerState>,
+) -> impl IntoResponse {
     let uptime = state.get_uptime_as_secs().await;
-    HealthCheckResponse::new("ok", uptime).into_response()
+    serialize_response(&HealthCheck::new("ok", uptime), &headers)
 }

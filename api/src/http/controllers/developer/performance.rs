@@ -24,6 +24,6 @@ use crate::models::NotImplemented;
     ),
     tag = crate::http::TAG_DEVELOPER_ANALYSIS,
 )]
-pub async fn get_developer_performance(Path(username): Path<String>) -> impl IntoResponse {
+pub async fn get_developer_performance(Path(_username): Path<String>) -> impl IntoResponse {
     NotImplemented::new("The developer performance analysis endpoint is not implemented yet")
 }

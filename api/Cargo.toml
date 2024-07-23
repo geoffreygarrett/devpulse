@@ -26,7 +26,6 @@ futures-util = "0.3.30"
 tower = "0.4.13"
 tower-http = { version = "0.5.2", features = ["trace", "add-extension"] }
 serde_yaml = "0.9.34" # provides YAML serialization and deserialization
-serde-xml-rs = "0.6.0"  # provides XML serialization and deserialization
 axum-xml-up = "0.2.0"
 axum-yaml = "0.4.0"
 utoipa-swagger-ui = { version = "7.1.0", features = ["axum"] }
@@ -44,6 +43,13 @@ tower_governor = { version = "0.4.2" }
 tracing-subscriber = "0.3.18"
 tracing = "0.1.40"
 #axum_valid = "0.19.0"
+axum-core = "0.4.3"
+bytes = "1.6.1"
+mime = "0.3.17"
+serde-xml-rs = "0.6.0"
+quick-xml = { version = "0.36.0", features = ["serialize"] }
+toml = "0.8.15"
+snafu = "0.8.4"
 
 [build-dependencies]
 tonic-build = "0.12.1"

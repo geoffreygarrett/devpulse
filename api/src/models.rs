@@ -8,11 +8,12 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use tokio::sync::RwLock;
 use utoipa::{ToResponse, ToSchema};
+use crate::create_response_enum;
 
 const APPLICATION_VND_DEVPULSE_V1_JSON: &str = "application/vnd.devpulse.v1+json";
-const APPLICATION_VND_DEVPULSE_V1_YAML: &str = "application/vnd.devpulse.v1+yaml";
-const APPLICATION_VND_DEVPULSE_V1_TOML: &str = "application/vnd.devpulse.v1+toml";
-const APPLICATION_VND_DEVPULSE_V1_XML: &str = "application/vnd.devpulse.v1+xml";
+// const APPLICATION_VND_DEVPULSE_V1_YAML: &str = "application/vnd.devpulse.v1+yaml";
+// const APPLICATION_VND_DEVPULSE_V1_TOML: &str = "application/vnd.devpulse.v1+toml";
+// const APPLICATION_VND_DEVPULSE_V1_XML: &str = "application/vnd.devpulse.v1+xml";
 
 /// Represents a request to analyze a specific commit range in a repository.
 #[derive(Serialize, Deserialize, ToSchema)]
@@ -52,6 +53,8 @@ pub struct CommitRangeAnalysis {
     }))]
     pub commit_range: CommitRangeDetails,
 }
+
+create_response_enum!(CommitRangeAnalysisResponse, "Commit Range Analysis", CommitRangeAnalysis);
 
 impl CommitRangeAnalysis {
     pub fn new(repository: &Repository, commit_range: CommitRangeDetails) -> Self {
@@ -101,6 +104,7 @@ pub struct DeveloperPerformanceAnalysis {
 }
 
 impl DeveloperPerformanceAnalysis {
+    #[allow(unused)]
     pub fn new(
         username: &str, total_commits: i32, total_prs: i32, average_time_to_merge: &str,
         repositories: Vec<RepositoryContribution>,
@@ -116,6 +120,7 @@ impl DeveloperPerformanceAnalysis {
 }
 
 #[derive(ToResponse)]
+#[allow(unused)]
 pub(crate) enum DeveloperPerformanceAnalysisResponse {
     Json(#[content("application/vnd.devpulse.v1+json")] DeveloperPerformanceAnalysis),
     Yaml(#[content("application/vnd.devpulse.v1+yaml")] DeveloperPerformanceAnalysis),
@@ -236,6 +241,7 @@ pub struct BadRequest {
 
 impl BadRequest {
     const CODE: &'static StatusCode = &StatusCode::BAD_REQUEST;
+    #[allow(unused)]
     pub fn new(message: &str) -> Self {
         BadRequest {
             message: message.to_string(),
@@ -254,6 +260,7 @@ pub struct Unauthorized {
 
 impl Unauthorized {
     const CODE: &'static StatusCode = &StatusCode::UNAUTHORIZED;
+    #[allow(unused)]
     pub fn new(message: &str) -> Self {
         #[allow(unused)]
         Unauthorized {
@@ -326,34 +333,37 @@ impl ServerState {
     }
 }
 
-#[derive(Serialize, ToSchema, ToResponse)]
-#[response(
-    description = "Successful health check",
-    content_type = "application/vnd.devpulse.v1+json",
-    example = json!({
-        "status": "ok",
-        "uptime": 123456
-    })
-)]
-pub struct HealthCheckResponse {
+#[derive(Serialize, ToSchema, Deserialize)]
+pub struct HealthCheck {
     status: String,
     uptime: u64,
 }
 
-impl HealthCheckResponse {
+impl HealthCheck {
     pub fn new(status: &str, uptime: u64) -> Self {
-        HealthCheckResponse {
+        HealthCheck {
             status: status.to_string(),
             uptime,
         }
     }
 }
 
-impl IntoResponse for HealthCheckResponse {
-    fn into_response(self) -> Response {
-        (StatusCode::OK, Json(self)).into_response()
-    }
-}
+create_response_enum!(HealthCheckResponse, "Health Check", HealthCheck);
+
+// impl HealthCheckResponse {
+//     pub fn new(status: &str, uptime: u64) -> Self {
+//         HealthCheckResponse {
+//             status: status.to_string(),
+//             uptime,
+//         }
+//     }
+// }
+//
+// impl IntoResponse for HealthCheckResponse {
+//     fn into_response(self) -> Response {
+//         (StatusCode::OK, Json(self)).into_response()
+//     }
+// }
 
 #[derive(Serialize, ToSchema, ToResponse)]
 #[response(
