@@ -36,7 +36,6 @@ pub async fn analyze_commit_range_service(
         .analyze(&local_path, &start_commit, &end_commit)
         .await?;
 
-    // Combine the results from different analyzers
     Ok(CommitRangeAnalysis {
         repository: repository_url.to_string(),
         commit_range: CommitRangeDetails {
@@ -51,13 +50,17 @@ pub async fn analyze_commit_range_service(
                 .iter()
                 .map(|c| c.deletions() as i32)
                 .sum(),
-            top_contributors: top_contributors_results
-                .iter()
-                .map(|c| Contributor {
-                    username: c.username.clone(),
-                    commits: c.commits as i32,
-                })
-                .collect(),
+            top_contributors: {
+                let mut sorted_contributors = top_contributors_results.clone();
+                sorted_contributors.sort_by(|a, b| b.commits.cmp(&a.commits));
+                sorted_contributors
+                    .iter()
+                    .map(|c| Contributor {
+                        username: c.username.clone(),
+                        commits: c.commits as i32,
+                    })
+                    .collect()
+            },
         },
     })
 }

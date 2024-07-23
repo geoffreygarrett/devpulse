@@ -66,7 +66,7 @@ pub struct CommitRangeDetails {
 }
 
 /// Represents a contributor with a username and the number of commits.
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Contributor {
     pub username: String,
     pub commits: i32,
