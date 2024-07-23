@@ -44,6 +44,7 @@ jobs:
           path: openapi.json
 
   generate_code:
+    needs: download_spec
     runs-on: ubuntu-latest
     strategy:
       matrix:
