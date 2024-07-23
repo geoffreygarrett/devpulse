@@ -10,7 +10,7 @@ const HOMEPAGE: &str = env!("CARGO_PKG_HOMEPAGE");
 const REPOSITORY: &str = env!("CARGO_PKG_REPOSITORY");
 const PRODUCTION_SERVER: &str = "https://devpulse.shuttleapp.rs";
 const PRODUCTION_SERVER_DESCRIPTION: &str = "Production server";
-const LOCAL_SERVER: &str = "http://127.0.0.1:8081";
+const LOCAL_SERVER: &str = "http://127.0.0.1:8000";
 const LOCAL_SERVER_DESCRIPTION: &str = "Local development server";
 
 struct SecurityAddon;
@@ -57,6 +57,7 @@ impl Modify for SecurityAddon {
         crate::http::controllers::developer::get_developer_performance,
         crate::http::controllers::pull_request::create_pull_request_analysis,
         crate::http::controllers::openapi::get_openapi_json,
+        crate::http::controllers::version::version,
         crate::http::controllers::openapi::get_openapi_yaml,
         crate::http::controllers::health::health_check,
     ),
@@ -66,11 +67,13 @@ impl Modify for SecurityAddon {
             crate::models::BadRequest,
             crate::models::Unauthorized,
             crate::models::InternalServerError,
+            crate::models::SourceVersionResponse,
             crate::models::NotImplemented,
             crate::models::HealthCheckResponse,
         ),
         // headers(),
         schemas(
+            crate::models::Repository,
             crate::models::CommitRangeRequest,
             crate::models::CommitRangeAnalysis,
             crate::models::CommitRangeDetails,

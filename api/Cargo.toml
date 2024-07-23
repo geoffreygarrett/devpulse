@@ -11,8 +11,8 @@ repository = "https://github.com/geoffreygrrett/devpulse"
 
 [dependencies]
 axum = { version = "0.7.4", features = ["macros"] }
-shuttle-axum = "0.46.0"
-shuttle-runtime = "0.46.0"
+shuttle-axum = "0.47.0"
+shuttle-runtime = "0.47.0"
 tokio = "1.28.2"
 devpulse_core = { path = "../core" }
 url = "2.5.2"
@@ -47,3 +47,4 @@ tracing = "0.1.40"
 
 [build-dependencies]
 tonic-build = "0.12.1"
+

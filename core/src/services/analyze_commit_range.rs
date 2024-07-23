@@ -1,7 +1,7 @@
 use std::error::Error;
 
 use crate::analyzers::{Analyzer, CodeChurnAnalyzer, TopContributorsAnalyzer};
-use crate::models::{CommitRangeAnalysis, CommitRangeDetails, Contributor};
+use crate::models::{CommitRangeAnalysis, CommitRangeDetails, Contributor, Protocol, Repository};
 use crate::utils::RepositoryManager;
 
 /// Analyzes a specified range of commits within a repository using various analyzers.
@@ -20,9 +20,9 @@ use crate::utils::RepositoryManager;
 ///
 /// Returns an error if there is an issue with repository access, cloning, or analysis.
 pub async fn analyze_commit_range_service(
-    repository_url: &str, start_commit: &str, end_commit: &str,
+    repository: &Repository, start_commit: &str, end_commit: &str,
 ) -> Result<CommitRangeAnalysis, Box<dyn Error>> {
-    let repo_manager = RepositoryManager::new(&repository_url)?;
+    let repo_manager = RepositoryManager::new(&repository.url(Protocol::Http).unwrap())?;
     let repo = repo_manager.open_or_clone().await?;
     let local_path = repo_manager.get_local_path();
 
@@ -40,7 +40,7 @@ pub async fn analyze_commit_range_service(
 
     // Combine the results from different analyzers
     Ok(CommitRangeAnalysis {
-        repository: repository_url.to_string(),
+        repository: repository.clone(),
         commit_range: CommitRangeDetails {
             start_commit: start_commit.to_string(),
             end_commit: end_commit.to_string(),

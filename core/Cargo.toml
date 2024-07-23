@@ -12,6 +12,7 @@ serde = { version = "1.0.204", features = ["derive"] }
 async-trait = "0.1.81"
 tokio = { version = "1.38.1", features = ["full"] }
 chrono = "0.4.38"
+thiserror = "1.0.63"
 
 [build-dependencies]
 openapiv3 = "2.0.0"

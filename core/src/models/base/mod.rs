@@ -9,3 +9,6 @@
 // pub use review::Review;
 // pub use comment::Comment;
 // pub use contributor::Contributor;
+
+pub mod repository;
+

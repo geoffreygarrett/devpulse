@@ -9,6 +9,7 @@ use axum::body::Body;
 use axum::error_handling::HandleErrorLayer;
 use axum::http::{Request, StatusCode};
 use axum::response::{IntoResponse, Redirect};
+use axum::routing::put;
 // use crate::http::middleware::RateLimitLayer;
 use tower::{BoxError, buffer::BufferLayer, limit::RateLimitLayer, ServiceBuilder};
 use tower_governor::{governor::GovernorConfigBuilder, GovernorError, GovernorLayer};
@@ -83,7 +84,7 @@ pub(crate) fn create_router() -> Router {
             &*crate::utils::convert_openapi_to_axum_path(
                 controllers::pull_request::__path_create_pull_request_analysis::path().as_str(),
             ),
-            post(controllers::pull_request::create_pull_request_analysis),
+            put(controllers::pull_request::create_pull_request_analysis),
         )
         .route(
             &*crate::utils::convert_openapi_to_axum_path(
@@ -95,7 +96,7 @@ pub(crate) fn create_router() -> Router {
             &*crate::utils::convert_openapi_to_axum_path(
                 controllers::repository::__path_create_commit_range_analysis::path().as_str(),
             ),
-            post(controllers::repository::create_commit_range_analysis),
+            put(controllers::repository::create_commit_range_analysis),
         );
 
     let router = if std::env::var("SHUTTLE").is_ok() {
@@ -116,6 +117,12 @@ pub(crate) fn create_router() -> Router {
                 controllers::health::__path_health_check::path().as_str(),
             ),
             get(controllers::health::health_check),
+        )
+        .route(
+            &*crate::utils::convert_openapi_to_axum_path(
+                controllers::version::__path_version::path().as_str(),
+            ),
+            get(controllers::version::version),
         )
         .fallback(controllers::not_found::handler_404)
         .layer(ServiceBuilder::new().layer(TraceLayer::new_for_http()))

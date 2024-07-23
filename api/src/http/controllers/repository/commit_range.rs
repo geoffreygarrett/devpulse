@@ -29,8 +29,11 @@ impl Default for ResponseFormatQuery {
 }
 
 /// Commit Range
+///
+/// Create a new analysis for a repository in the commit range, if the analysis exists,
+/// it will be returned.
 #[utoipa::path(
-    post,
+    put,
     path = crate::http::COMMIT_RANGE_PATH,
     operation_id = "create_commit_range_analysis",
     params(
@@ -61,7 +64,7 @@ pub async fn create_commit_range_analysis(
 ) -> impl IntoResponse {
     let params = params.unwrap_or_default();
     match analyze_commit_range_service(
-        &payload.repository_url,
+        &payload.repository.into(),
         &payload.start_commit,
         &payload.end_commit,
     )

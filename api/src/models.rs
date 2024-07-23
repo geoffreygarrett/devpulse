@@ -17,8 +17,12 @@ const APPLICATION_VND_DEVPULSE_V1_XML: &str = "application/vnd.devpulse.v1+xml";
 /// Represents a request to analyze a specific commit range in a repository.
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct CommitRangeRequest {
-    #[schema(example = "https://github.com/bazelbuild/rules_rust")]
-    pub repository_url: String,
+    #[schema(example = json!({
+        "type": "github",
+        "owner": "bazelbuild",
+        "name": "rules_rust"
+    }))]
+    pub repository: Repository,
     #[schema(example = "6c2bd67")]
     pub start_commit: String,
     #[schema(example = "6b10ce3")]
@@ -28,8 +32,12 @@ pub struct CommitRangeRequest {
 /// Represents the response containing the results from analyzing a commit range.
 #[derive(Serialize, Deserialize, ToSchema)]
 pub struct CommitRangeAnalysis {
-    #[schema(example = "https://github.com/bazelbuild/rules_rust")]
-    pub repository: String,
+    #[schema(example = json!({
+        "type": "github",
+        "owner": "bazelbuild",
+        "name": "rules_rust"
+    }))]
+    pub repository: Repository,
     #[schema(example = json!({
         "start_commit": "6c2bd67",
         "end_commit": "6b10ce3",
@@ -46,9 +54,9 @@ pub struct CommitRangeAnalysis {
 }
 
 impl CommitRangeAnalysis {
-    pub fn new(repository: &str, commit_range: CommitRangeDetails) -> Self {
+    pub fn new(repository: &Repository, commit_range: CommitRangeDetails) -> Self {
         CommitRangeAnalysis {
-            repository: repository.to_string(),
+            repository: repository.clone(),
             commit_range,
         }
     }
@@ -172,10 +180,10 @@ macro_rules! impl_into_response {
     description = "Too Many Requests",
     content_type = APPLICATION_VND_DEVPULSE_V1_JSON,
     headers(
-        // https://github.com/OAI/OpenAPI-Specification/issues/1586
-        ("X-RateLimit-Limit", description = "The number of allowed requests in the current period"),
-        ("X-RateLimit-Remaining", description = "The number of remaining requests in the current period"),
-        ("X-RateLimit-Reset", description = "The number of seconds left in the current period")
+    // https://github.com/OAI/OpenAPI-Specification/issues/1586
+    ("X-RateLimit-Limit", description = "The number of allowed requests in the current period"),
+    ("X-RateLimit-Remaining", description = "The number of remaining requests in the current period"),
+    ("X-RateLimit-Reset", description = "The number of seconds left in the current period")
     )
 )]
 pub struct TooManyRequests {
@@ -321,7 +329,11 @@ impl ServerState {
 #[derive(Serialize, ToSchema, ToResponse)]
 #[response(
     description = "Successful health check",
-    content_type = "application/vnd.devpulse.v1+json"
+    content_type = "application/vnd.devpulse.v1+json",
+    example = json!({
+        "status": "ok",
+        "uptime": 123456
+    })
 )]
 pub struct HealthCheckResponse {
     status: String,
@@ -341,4 +353,89 @@ impl IntoResponse for HealthCheckResponse {
     fn into_response(self) -> Response {
         (StatusCode::OK, Json(self)).into_response()
     }
+}
+
+#[derive(Serialize, ToSchema, ToResponse)]
+#[response(
+    description = "Source Version",
+    content_type = "application/vnd.devpulse.v1+json",
+    example = json!({
+        "version": "0.1.0"
+    })
+)]
+pub(crate) struct SourceVersionResponse {
+    version: String,
+}
+
+impl SourceVersionResponse {
+    pub fn new(version: &str) -> Self {
+        SourceVersionResponse {
+            version: version.to_string(),
+        }
+    }
+}
+
+impl IntoResponse for SourceVersionResponse {
+    fn into_response(self) -> Response {
+        (StatusCode::OK, Json(self)).into_response()
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+#[serde(tag = "type")]
+pub enum Repository {
+    #[serde(rename = "github")]
+    #[schema(
+        title = "GitHubRepository",
+        example = json!({
+            "type": "github",
+            "owner": "bazelbuild",
+            "name": "rules_rust"
+        })
+    )]
+    GitHub { owner: String, name: String },
+    #[serde(rename = "gitlab")]
+    #[schema(
+        title = "GitLabRepository",
+        example = json!({
+            "type": "gitlab",
+            "owner": "gitlab-org",
+            "name": "gitlab"
+        })
+    )]
+    GitLab { owner: String, name: String },
+    #[serde(rename = "bitbucket")]
+    #[schema(
+        title = "BitbucketRepository",
+        example = json!({
+            "type": "bitbucket",
+            "owner": "atlassian",
+            "name": "pyramid"
+        })
+    )]
+    Bitbucket { owner: String, name: String },
+    #[serde(rename = "azure_repos")]
+    #[schema(
+        title = "AzureRepositories",
+        example = json!({
+            "type": "azure_repos",
+            "organization": "Microsoft",
+            "project": "vscode",
+            "repository": "vscode"
+        })
+    )]
+    AzureRepos {
+        organization: String,
+        project: String,
+        repository: String,
+    },
+    #[serde(rename = "custom")]
+    #[schema(
+        title = "CustomRepository",
+        example = json!({
+            "type": "custom",
+            "url": "https://custom.repo/url"
+        })
+    )]
+    Custom { url: String },
 }

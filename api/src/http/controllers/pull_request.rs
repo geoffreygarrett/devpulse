@@ -5,10 +5,13 @@ use crate::models::NotImplemented;
 
 /// Create Analysis
 ///
+/// Create a new analysis for a pull request, if the analysis exists, it will be returned.
+///
 /// TODO: Implement this endpoint
 #[utoipa::path(
-    post,
+    put,
     path = "/pull-request",
+    operation_id = "create_pull_request_analysis",
     responses(
         (status = 501, response = NotImplemented),
     ),
