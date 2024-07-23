@@ -13,6 +13,7 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
+      # 1. Cache Cargo dependencies to speed up the build process
       - name: Cache Cargo dependencies
         uses: actions/cache@v4
         with:
@@ -23,6 +24,7 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
 
+      # 2. Deploy using Shuttle
       - uses: shuttle-hq/deploy-action@main
         with:
           deploy-key: ${{ secrets.SHUTTLE_API_KEY }}
@@ -30,13 +32,12 @@ jobs:
   download_spec:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
+      # 4. Download the OpenAPI specification
       - name: Download OpenAPI spec
         run: |
           curl -o openapi.json https://devpulse.shuttleapp.rs/api-docs/openapi.json
 
+      # 5. Upload the OpenAPI specification as an artifact
       - name: Upload OpenAPI spec
         uses: actions/upload-artifact@v4
         with:
@@ -44,7 +45,7 @@ jobs:
           path: openapi.json
 
   generate_code:
-    needs: download_spec
+    needs: download_spec  # Ensure the download_spec job completes first
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -65,15 +66,18 @@ jobs:
       fail-fast: false
 
     steps:
+      # 6. Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 7. Download the OpenAPI specification artifact
       - name: Download OpenAPI spec artifact
         uses: actions/download-artifact@v4
         with:
           name: openapi-spec
           path: ./openapi
 
+      # 8. Generate client code from the OpenAPI specification
       - name: Generate code
         uses: hatamiarash7/openapi-generator@v0.3.0
         with:
@@ -82,6 +86,7 @@ jobs:
           output-dir: ${{ matrix.client.type }}-client
           command-args: ${{ matrix.client.extra_args }}
 
+      # 9. Upload the generated client code as an artifact
       - name: Upload generated code
         uses: actions/upload-artifact@v4
         with:
