@@ -27,3 +27,44 @@ jobs:
       - uses: shuttle-hq/deploy-action@main
         with:
           deploy-key: ${{ secrets.SHUTTLE_API_KEY }}
+
+  generate_code:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        client:
+          - { type: 'python', extra_args: '--additional-properties=packageName=devpulse_client' }
+          - { type: 'python-flask', extra_args: '' }
+          - { type: 'rust', extra_args: '' }
+          - { type: 'rust-server', extra_args: '' }
+          - { type: 'rust-axum', extra_args: '' }
+          - { type: 'csharp', extra_args: '' }
+          - { type: 'csharp-functions', extra_args: '' }
+          - { type: 'go', extra_args: '' }
+          - { type: 'typescript-fetch', extra_args: '' }
+          - { type: 'typescript-node', extra_args: '' }
+          - { type: 'java', extra_args: '' }
+          - { type: 'dart', extra_args: '' }
+          - { type: 'bash', extra_args: '' }
+      fail-fast: false
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Generate code
+        uses: hatamiarash7/openapi-generator@v0.3.0
+        with:
+          generator: ${{ matrix.client.type }}
+          #openapi-file: ${{ secrets.OPENAPI_SPEC_PATH }}
+          openapi-url: https://devpulse.shuttleapp.rs/api-docs/openapi.json
+          #          openapi-url: https://devpulse.shuttleapp.rs/api/v1/openapi.json <-- soon
+          output-dir: ${{ matrix.client.type }}-client
+          command-args: ${{ matrix.client.extra_args }}
+
+      - name: Upload generated code
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.client.type }}-client
+          path: ${{ matrix.client.type }}-client
+
