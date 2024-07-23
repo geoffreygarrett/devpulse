@@ -59,7 +59,6 @@ pub async fn analyze_commit_range_service(
                     username: c.username.clone(),
                     commits: c.commits as i32,
                 })
-                .sort_by(|a, b| b.commits.cmp(&a.commits))
                 .collect(),
         },
     })

@@ -74,19 +74,27 @@ pub(crate) fn create_router() -> Router {
     let base_router = Router::new()
         .route("/", get(|| async { Redirect::permanent("/scalar") }))
         .route(
-            controllers::openapi::__path_get_openapi_yaml::path().as_str(),
+            &*crate::utils::convert_openapi_to_axum_path(
+                controllers::openapi::__path_get_openapi_yaml::path().as_str(),
+            ),
             get(controllers::openapi::get_openapi_yaml),
         )
         .route(
-            controllers::pull_request::__path_create_pull_request_analysis::path().as_str(),
+            &*crate::utils::convert_openapi_to_axum_path(
+                controllers::pull_request::__path_create_pull_request_analysis::path().as_str(),
+            ),
             post(controllers::pull_request::create_pull_request_analysis),
         )
         .route(
-            controllers::developer::__path_get_developer_performance::path().as_str(),
+            &*crate::utils::convert_openapi_to_axum_path(
+                controllers::developer::__path_get_developer_performance::path().as_str(),
+            ),
             get(controllers::developer::get_developer_performance),
         )
         .route(
-            controllers::repository::__path_create_commit_range_analysis::path().as_str(),
+            &*crate::utils::convert_openapi_to_axum_path(
+                controllers::repository::__path_create_commit_range_analysis::path().as_str(),
+            ),
             post(controllers::repository::create_commit_range_analysis),
         );
 
@@ -104,7 +112,9 @@ pub(crate) fn create_router() -> Router {
         .merge(Redoc::with_url("/redoc", doc.clone()))
         .merge(Scalar::with_url("/scalar", doc.clone()))
         .route(
-            controllers::health::__path_health_check::path().as_str(),
+            &*crate::utils::convert_openapi_to_axum_path(
+                controllers::health::__path_health_check::path().as_str(),
+            ),
             get(controllers::health::health_check),
         )
         .fallback(controllers::not_found::handler_404)

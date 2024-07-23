@@ -14,6 +14,7 @@ mod errors;
 mod grpc;
 mod http;
 mod models;
+mod utils;
 
 #[shuttle_runtime::main]
 async fn main() -> shuttle_axum::ShuttleAxum {
