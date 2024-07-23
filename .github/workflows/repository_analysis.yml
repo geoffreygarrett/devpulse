@@ -30,6 +30,8 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - run: rustup component add clippy
+
       - name: Annotate commit with clippy warnings
         uses: actions-rs/clippy-check@v1
         with:
