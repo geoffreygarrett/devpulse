@@ -13,6 +13,7 @@ const PRODUCTION_SERVER_DESCRIPTION: &str = "Production server";
 const LOCAL_SERVER: &str = "http://127.0.0.1:8000";
 const LOCAL_SERVER_DESCRIPTION: &str = "Local development server";
 
+#[allow(dead_code)]
 struct SecurityAddon;
 
 impl Modify for SecurityAddon {

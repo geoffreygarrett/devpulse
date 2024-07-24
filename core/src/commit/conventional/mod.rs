@@ -59,7 +59,7 @@ impl CommitType {
 /// Represents a conventional commit, adhering to the Conventional Commits 1.0.0-beta.2 specification.
 /// This structure encapsulates all possible elements of a conventional commit message.
 #[derive(Debug, serde::Serialize)]
-struct Commit {
+pub struct Commit {
     /// The type of commit, indicating the nature of the changes.
     commit_type: CommitType,
     /// Optional scope providing additional context on the area of the codebase affected.
@@ -100,6 +100,7 @@ impl Commit {
 
 /// Represents emoji symbols associated with different types of conventional commits.
 #[derive(Debug, Clone, Copy)]
+#[allow(dead_code)]
 enum Emoji {
     Feat,
     Fix,

@@ -9,6 +9,7 @@ use thiserror::Error;
 use utoipa::ToSchema;
 
 #[derive(Error, Debug, Serialize, ToSchema)]
+#[allow(dead_code)]
 pub enum DevPulseError {
     #[error("Missing credentials")]
     #[schema(example = "Missing username or password")]

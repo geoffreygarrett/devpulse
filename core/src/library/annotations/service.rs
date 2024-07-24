@@ -66,8 +66,7 @@ impl AnnotationService {
     }
 
     pub fn new_with_platform(platform: Platform) -> Result<Self> {
-        let annotator: Box<dyn Annotator> =
-            Self::create_annotator(platform);
+        let annotator: Box<dyn Annotator> = Self::create_annotator(platform);
 
         Ok(Self { annotator })
     }
@@ -103,8 +102,10 @@ mod tests {
     use super::*;
 
     // Ensure env variables are set only once for all tests
+    #[allow(dead_code)]
     static INIT: Once = Once::new();
 
+    #[allow(dead_code)]
     fn setup() {
         INIT.call_once(|| {
             env::set_var("CI_PLATFORM", "github");
@@ -194,7 +195,7 @@ mod tests {
     }
 
     fn dummy_annotation(annotation_type: AnnotationLevel) -> Annotation {
-        Annotation::builder()
+        let annotation = Annotation::builder()
             .file("dummy.rs".to_string())
             .line(1)
             .end_line(1)
@@ -203,7 +204,8 @@ mod tests {
             .message("This is a dummy annotation".to_string())
             .level(annotation_type)
             .build()
-            .unwrap()
+            .unwrap();
+        println!("{:?}", annotation);
+        annotation
     }
-
 }

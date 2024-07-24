@@ -101,6 +101,7 @@ mod error {
 
     #[derive(Debug, Snafu)]
     #[snafu(visibility(pub(crate)))]
+    #[allow(dead_code)]
     pub enum ContentTypeError {
         #[snafu(display("Missing Content-Type: {content_type}"))]
         MissingContentType { content_type: String },

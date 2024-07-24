@@ -20,6 +20,7 @@ pub struct ResponseDetailQuery {
     detail: Option<ResponseDetail>, // Optional. The level of detail: simple, detailed. Default is simple.
 }
 
+#[allow(dead_code)]
 impl Default for ResponseDetailQuery {
     fn default() -> Self {
         Self {

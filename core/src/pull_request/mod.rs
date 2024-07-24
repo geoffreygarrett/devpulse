@@ -1,5 +1,4 @@
 pub use error::*;
-pub use models::*;
 
 use crate::annotations::prelude::*;
 
@@ -8,12 +7,14 @@ pub(crate) mod models;
 pub(crate) mod service;
 
 /// Trait for services that process pull requests and generate summaries.
+#[allow(dead_code)]
 pub trait PullRequestSummaryService {
     /// Processes a pull request by its ID and collects summaries from its segments.
     fn generate_summary(&self, pr_id: u64) -> Result<String, PullRequestError>;
 }
 
 /// Trait for services that process pull requests and generate detailed code annotations.
+#[allow(dead_code)]
 pub trait PullRequestAnnotationService {
     /// Processes a pull request by its ID and generates annotations for code ranges.
     fn generate_annotations(&self, pr_id: u64) -> Result<Vec<Annotation>, PullRequestError>;
@@ -21,6 +22,7 @@ pub trait PullRequestAnnotationService {
 
 /// Enum representing various supported version control services.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[allow(dead_code)]
 pub enum VersionControlService {
     GitHub,
     AzureRepos,
@@ -28,6 +30,7 @@ pub enum VersionControlService {
     GitLab,
 }
 
+#[allow(dead_code)]
 impl VersionControlService {
     /// Returns the base API URL for the service.
     pub fn api_base_url(&self) -> &str {
