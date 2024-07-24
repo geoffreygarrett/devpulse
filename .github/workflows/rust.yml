@@ -16,7 +16,6 @@ on:
 
 env:
   CARGO_TERM_COLOR: always
-  CACHE_NUMBER: 0
 
 jobs:
   build:
@@ -33,7 +32,7 @@ jobs:
           path: |
             ~/.cargo 
             ~/.rustup
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}-${{ env.CACHE_NUMBER }}
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
 

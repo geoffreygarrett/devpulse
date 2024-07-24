@@ -1,22 +1,37 @@
-name: Annotate Push
+name: CI
 
-on: push
+on: [ push, pull_request ]
 
 jobs:
-  annotate:
+  build:
+
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      # Step 0: Checkout the repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v2
+      # Step 1: Cache Cargo dependencies
+      - name: Cache Cargo dependencies
+        uses: actions/cache@v4
         with:
-          python-version: '3.8'
+          path: |
+            ~/.cargo 
+            ~/.rustup
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-
 
-      - name: Install dependencies
-        run: pip install requests
+      # Step 2: Run annotation test
+      - name: Run annotation test
+        run: cargo run --bin annotate
+        working-directory: ./tests
 
-      - name: Run annotation script
-        run: python annotate.py
+      # Step 3: Check for annotations
+      - name: Check for annotations
+        run: python check_annotations.py
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
