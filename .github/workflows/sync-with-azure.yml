@@ -7,9 +7,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # Step 0: Checkout the repository
+      # Step 0: Checkout the repository with full history
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch all history for all branches and tags
 
       # Step 1: Install Azure CLI
       - name: Install Azure CLI
