@@ -7,6 +7,7 @@ mod gitlab;
 mod service;
 
 pub mod prelude {
-    pub use crate::lib::annotations::annotation::Annotation;
-    pub use crate::lib::annotations::annotator::Annotator;
+    pub use crate::library::annotations::annotation::{Annotation, AnnotationType};
+    pub use crate::library::annotations::annotator::Annotator;
+    pub use crate::library::annotations::service::{AnnotationService, Platform};
 }

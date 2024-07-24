@@ -1,12 +1,21 @@
-use anyhow::Result;
+use snafu::Snafu;
 
-use crate::annotations::annotation::Annotation;
+use super::annotation::Annotation;
+
+#[derive(Debug, Snafu)]
+pub enum AnnotatorError {
+    #[snafu(display("Failed to issue annotation: {}", source))]
+    IssueAnnotation { source: Box<dyn std::error::Error> },
+}
+
+pub type Result<T, E = AnnotatorError> = std::result::Result<T, E>;
 
 pub trait Annotator {
     fn get_annotation_string(&self, annotation: &Annotation) -> String;
 
     fn issue_annotation(&self, annotation: Annotation) -> Result<()> {
-        println!("{}", self.get_annotation_string(&annotation));
+        let annotation_str = self.get_annotation_string(&annotation);
+        println!("{}", annotation_str);
         Ok(())
     }
 
@@ -17,7 +26,7 @@ pub trait Annotator {
         Ok(())
     }
 
-    fn get_annotations_strings(&self, annotations: &Vec<Annotation>) -> Vec<String> {
+    fn get_annotations_strings(&self, annotations: &[Annotation]) -> Vec<String> {
         annotations
             .iter()
             .map(|a| self.get_annotation_string(a))

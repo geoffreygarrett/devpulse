@@ -45,6 +45,8 @@ End
 
 ```
 
+## Example Directory Structure from GPT for Inspiration
+
 ```zsh
 devpulse_core/
 │

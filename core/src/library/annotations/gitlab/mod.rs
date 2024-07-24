@@ -1,1 +1,1 @@
-mod gitlab_annotator;
+pub(crate) mod gitlab_annotator;
