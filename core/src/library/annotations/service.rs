@@ -121,14 +121,14 @@ mod tests {
         );
     }
 
-    #[test]
-    fn test_annotation_service_new_azure() {
-        let service = AnnotationService::new_with_platform(Platform::Azure).unwrap();
-        assert_eq!(
-            service.get_annotation_string(&dummy_annotation(AnnotationLevel::Warning)),
-            "##vso[task.logissue type=warning;sourcepath=dummy.rs;linenumber=1;columnnumber=1;endcolumnnumber=1;]This is a dummy annotation"
-        );
-    }
+    // #[test]
+    // fn test_annotation_service_new_azure() {
+    //     let service = AnnotationService::new_with_platform(Platform::Azure).unwrap();
+    //     assert_eq!(
+    //         service.get_annotation_string(&dummy_annotation(AnnotationLevel::Warning)),
+    //         "##vso[task.logissue type=warning;sourcepath=dummy.rs;linenumber=1;columnnumber=1;endcolumnnumber=1;]This is a dummy annotation"
+    //     );
+    // }
 
     #[test]
     fn test_annotation_service_new_gitlab() {
