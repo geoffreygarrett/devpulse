@@ -1,5 +1,42 @@
 ![🚧 Under construction 👷‍♂️](https://i.imgur.com/LEP2R3N.png)
 
+## Build Statuses
+
+### Integration CI
+
+| Component              | Language | Branch    | Status                                                                                                                                 | Details                                                                                                           |
+|------------------------|----------|-----------|----------------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------|
+| **Annotation Service** | -        | `main`    | ![Azure Build Status](https://dev.azure.com/geoffreygarrett/devpulse/_apis/build/status%2Fgeoffreygarrett.devpulse?branchName=main)    | [View Build Logs](https://dev.azure.com/geoffreygarrett/devpulse/_build/latest?definitionId=3&branchName=main)    |
+| **Annotation Service** | -        | `develop` | ![Azure Build Status](https://dev.azure.com/geoffreygarrett/devpulse/_apis/build/status%2Fgeoffreygarrett.devpulse?branchName=develop) | [View Build Logs](https://dev.azure.com/geoffreygarrett/devpulse/_build/latest?definitionId=3&branchName=develop) |
+
+### Rust Client CI
+
+| Component       | Language | Branch    | Status                                                                                                                        | Details                                                                                                               |
+|-----------------|----------|-----------|-------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------|
+| **Rust Client** | Rust     | `main`    | ![GitHub Rust Status](https://github.com/geoffreygarrett/devpulse/actions/workflows/rust-client.yml/badge.svg?branch=main)    | [View Build Logs](https://github.com/geoffreygarrett/devpulse/actions/workflows/rust-client.yml?query=branch%3Amain)  |
+| **Rust Client** | Rust     | `develop` | ![GitHub Rust Status](https://github.com/geoffreygarrett/devpulse/actions/workflows/rust-client.yml/badge.svg?branch=develop) | [View Build Logs](https://github.com/geoffreygarrett/devpulse/actions/workflows/rust-client.yml?query=branch%3Adevel) |
+
+### Python Client CI
+
+| Component         | Language | Branch    | Status                                                                                                                            | Details                                                                                                                 |
+|-------------------|----------|-----------|-----------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|
+| **Python Client** | Python   | `main`    | ![GitHub Python Status](https://github.com/geoffreygarrett/devpulse/actions/workflows/python-client.yml/badge.svg?branch=main)    | [View Build Logs](https://github.com/geoffreygarrett/devpulse/actions/workflows/python-client.yml?query=branch%3Amain)  |
+| **Python Client** | Python   | `develop` | ![GitHub Python Status](https://github.com/geoffreygarrett/devpulse/actions/workflows/python-client.yml/badge.svg?branch=develop) | [View Build Logs](https://github.com/geoffreygarrett/devpulse/actions/workflows/python-client.yml?query=branch%3Adevel) |
+
+### C# Client CI
+
+| Component     | Language | Branch    | Status                                                                                                                        | Details                                                                                                                 |
+|---------------|----------|-----------|-------------------------------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------------------------------|
+| **C# Client** | C#       | `main`    | ![GitHub C# Status](https://github.com/geoffreygarrett/devpulse/actions/workflows/csharp-client.yml/badge.svg?branch=main)    | [View Build Logs](https://github.com/geoffreygarrett/devpulse/actions/workflows/csharp-client.yml?query=branch%3Amain)  |
+| **C# Client** | C#       | `develop` | ![GitHub C# Status](https://github.com/geoffreygarrett/devpulse/actions/workflows/csharp-client.yml/badge.svg?branch=develop) | [View Build Logs](https://github.com/geoffreygarrett/devpulse/actions/workflows/csharp-client.yml?query=branch%3Adevel) |
+
+### TypeScript Client CI
+
+| Component             | Language   | Branch    | Status                                                                                                                                    | Details                                                                                                                     |
+|-----------------------|------------|-----------|-------------------------------------------------------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------------------------------------------------|
+| **TypeScript Client** | TypeScript | `main`    | ![GitHub TypeScript Status](https://github.com/geoffreygarrett/devpulse/actions/workflows/typescript-client.yml/badge.svg?branch=main)    | [View Build Logs](https://github.com/geoffreygarrett/devpulse/actions/workflows/typescript-client.yml?query=branch%3Amain)  |
+| **TypeScript Client** | TypeScript | `develop` | ![GitHub TypeScript Status](https://github.com/geoffreygarrett/devpulse/actions/workflows/typescript-client.yml/badge.svg?branch=develop) | [View Build Logs](https://github.com/geoffreygarrett/devpulse/actions/workflows/typescript-client.yml?query=branch%3Adevel) |
+
 # DevPulse
 
 The DevPulse project is a comprehensive suite designed to analyze developer performance and repository contributions. It
