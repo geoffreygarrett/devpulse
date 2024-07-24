@@ -1,0 +1,12 @@
+[package]
+name = "tests"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "annotate"
+path = "src/bin/annotate.rs"
+
+[dependencies]
+anyhow = "1.0.86"
+devpulse_core = { path = "../core", workspace = true }
