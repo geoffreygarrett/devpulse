@@ -19,6 +19,7 @@ jobs:
           path: |
             ~/.cargo 
             ~/.rustup
+            ./target
           key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: |
             ${{ runner.os }}-cargo-
@@ -26,7 +27,6 @@ jobs:
       # Step 2: Run annotation test
       - name: Run annotation test
         run: cargo run --bin annotate
-        working-directory: ./tests
 
       # Step 3: Check for annotations
       - name: Check for annotations
