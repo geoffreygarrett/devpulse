@@ -18,7 +18,6 @@ impl Annotator for AzureAnnotator {
     ///
     /// # Returns
     /// A string formatted for Azure DevOps logging.
-    // ##[error]consoleapp/main.cs(1,1): error 100: Found an error in the code.
     fn get_annotation_string(&self, annotation: &Annotation) -> String {
         match annotation.annotation_type {
             AnnotationType::Debug => format!(
