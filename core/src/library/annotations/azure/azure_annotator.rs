@@ -21,12 +21,13 @@ impl Annotator for AzureAnnotator {
     fn get_annotation_string(&self, annotation: &Annotation) -> String {
         match annotation.annotation_type {
             AnnotationType::Debug => format!(
-                "##[debug]{}{}({},{})",
-                annotation.message, annotation.file, annotation.line, annotation.start_column
+                "##[debug]{}({},{}){}",
+                annotation.file, annotation.line, annotation.start_column, annotation.message
             ),
             AnnotationType::Notice => format!(
-                "##[command]##[notice]{}{}({},{})",
-                annotation.message, annotation.file, annotation.line, annotation.start_column
+                "##[command]##[notice]{}({},{}){}",
+                annotation.file, annotation.line, annotation.start_column, annotation.message
+
             ),
             _ => format!(
                 "##vso[task.logissue type={};sourcepath={};linenumber={};columnnumber={};endcolumnnumber={};]{}",
