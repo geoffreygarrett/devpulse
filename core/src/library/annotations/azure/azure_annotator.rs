@@ -19,15 +19,22 @@ impl Annotator for AzureAnnotator {
     /// # Returns
     /// A string formatted for Azure DevOps logging.
     fn get_annotation_string(&self, annotation: &Annotation) -> String {
+        let location_str = match (annotation.end_line, annotation.end_column) {
+            (Some(end_line), Some(end_col)) => format!(
+                "{}({},{},{},{})",
+                annotation.file, annotation.line, annotation.start_column, end_line, end_col
+            ),
+            _ => format!("{}({},{})", annotation.file, annotation.line, annotation.start_column),
+        };
+
         match annotation.annotation_type {
             AnnotationType::Debug => format!(
-                "##[debug]{}({},{}){}",
-                annotation.file, annotation.line, annotation.start_column, annotation.message
+                "##[debug]{}: debug : {}",
+                location_str, annotation.message
             ),
             AnnotationType::Notice => format!(
-                "##[command]##[notice]{}({},{}){}",
-                annotation.file, annotation.line, annotation.start_column, annotation.message
-
+                "##[command]##[notice]{}: {}",
+                location_str, annotation.message
             ),
             _ => format!(
                 "##vso[task.logissue type={};sourcepath={};linenumber={};columnnumber={};endcolumnnumber={};]{}",
