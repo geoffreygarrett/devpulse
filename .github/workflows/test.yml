@@ -31,6 +31,7 @@ jobs:
       # Step 3: Check for annotations
       - name: Check for annotations
         run: python check_annotations.py
+        working-directory: ./tests
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
