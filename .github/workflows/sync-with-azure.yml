@@ -1,32 +1,34 @@
 name: Sync with Azure DevOps
 
-on:
-  push:
-    branches:
-      - main  # Change this to your main branch name if different
+on: push
 
 jobs:
   sync:
     runs-on: ubuntu-latest
 
     steps:
+      # Step 0: Checkout the repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # Step 1: Install Azure CLI
       - name: Install Azure CLI
         run: |
           curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
           az extension add --name azure-devops
 
+      # Step 2: Login to Azure DevOps
       - name: Login to Azure DevOps
         env:
           AZURE_DEVOPS_PAT: ${{ secrets.AZURE_DEVOPS_PAT }}
         run: |
           echo "$AZURE_DEVOPS_PAT" | az devops login
-
-      - name: Sync with Azure DevOps
-        env:
-          AZURE_DEVOPS_PAT: ${{ secrets.AZURE_DEVOPS_PAT }}
-        run: |
-          git remote add azure https://dev.azure.com/geoffreygarrett/_git/devpulse
-          git push azure main --force
+          
+          # Step 3: Determine current branch and sync with Azure DevOps
+          - name: Sync with Azure DevOps
+            env:
+              AZURE_DEVOPS_PAT: ${{ secrets.AZURE_DEVOPS_PAT }}
+            run: |
+              current_branch=$(git rev-parse --abbrev-ref HEAD)
+              git remote add azure https://dev.azure.com/geoffreygarrett/_git/devpulse
+              git push azure $current_branch --force
