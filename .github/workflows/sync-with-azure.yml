@@ -23,12 +23,12 @@ jobs:
           AZURE_DEVOPS_PAT: ${{ secrets.AZURE_DEVOPS_PAT }}
         run: |
           echo "$AZURE_DEVOPS_PAT" | az devops login
-          
-          # Step 3: Determine current branch and sync with Azure DevOps
-          - name: Sync with Azure DevOps
-            env:
-              AZURE_DEVOPS_PAT: ${{ secrets.AZURE_DEVOPS_PAT }}
-            run: |
-              current_branch=$(git rev-parse --abbrev-ref HEAD)
-              git remote add azure https://dev.azure.com/geoffreygarrett/_git/devpulse
-              git push azure $current_branch --force
+
+      # Step 3: Determine current branch and sync with Azure DevOps
+      - name: Sync with Azure DevOps
+        env:
+          AZURE_DEVOPS_PAT: ${{ secrets.AZURE_DEVOPS_PAT }}
+        run: |
+          current_branch=$(git rev-parse --abbrev-ref HEAD)
+          git remote add azure https://geoffreygarrett:$AZURE_DEVOPS_PAT@dev.azure.com/geoffreygarrett/_git/devpulse
+          git push azure $current_branch --force
