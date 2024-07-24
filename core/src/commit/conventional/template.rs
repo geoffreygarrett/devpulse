@@ -1,5 +1,3 @@
-use std::fmt;
-
 use handlebars;
 
 use crate::commit::conventional::Commit;
@@ -19,7 +17,7 @@ BREAKING CHANGE: {{breaking_change}}{{/if}}{{#if body}}
 }
 
 /// Adjusted rendering to conditionally include emoji
-pub(crate) fn render_commit_message(
+pub fn render_commit_message(
     commit: &Commit, handlebars: &handlebars::Handlebars,
 ) -> String {
     let data = serde_json::json!({

@@ -1,6 +1,8 @@
 pub use error::*;
 pub use models::*;
 
+use crate::annotations::prelude::*;
+
 pub(crate) mod error;
 pub(crate) mod models;
 pub(crate) mod service;

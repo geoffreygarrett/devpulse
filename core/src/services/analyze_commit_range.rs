@@ -23,7 +23,7 @@ pub async fn analyze_commit_range_service(
     repository: &Repository, start_commit: &str, end_commit: &str,
 ) -> Result<CommitRangeAnalysis, Box<dyn Error>> {
     let repo_manager = RepositoryManager::new(&repository.url(Protocol::Http).unwrap())?;
-    let repo = repo_manager.open_or_clone().await?;
+    let _repo = repo_manager.open_or_clone().await?;
     let local_path = repo_manager.get_local_path();
 
     let code_churn_analyzer = CodeChurnAnalyzer;

@@ -98,7 +98,7 @@ mod tests {
     use std::env;
     use std::sync::Once;
 
-    use crate::annotations::annotation::{Annotation, AnnotationType};
+    use crate::annotations::annotation::{Annotation, AnnotationLevel};
 
     use super::*;
 
@@ -115,7 +115,7 @@ mod tests {
     fn test_annotation_service_new_github() {
         let service = AnnotationService::new_with_platform(Platform::GitHub).unwrap();
         assert_eq!(
-            service.get_annotation_string(&dummy_annotation(AnnotationType::Notice)),
+            service.get_annotation_string(&dummy_annotation(AnnotationLevel::Notice)),
             "::notice file=dummy.rs,line=1,endLine=1,col=1,endColumn=1::This is a dummy annotation"
         );
     }
@@ -124,7 +124,7 @@ mod tests {
     fn test_annotation_service_new_azure() {
         let service = AnnotationService::new_with_platform(Platform::Azure).unwrap();
         assert_eq!(
-            service.get_annotation_string(&dummy_annotation(AnnotationType::Warning)),
+            service.get_annotation_string(&dummy_annotation(AnnotationLevel::Warning)),
             "##vso[task.logissue type=warning;sourcepath=dummy.rs;linenumber=1;columnnumber=1;endcolumnnumber=1;]This is a dummy annotation"
         );
     }
@@ -133,7 +133,7 @@ mod tests {
     fn test_annotation_service_new_gitlab() {
         let service = AnnotationService::new_with_platform(Platform::GitLab).unwrap();
         assert_eq!(
-            service.get_annotation_string(&dummy_annotation(AnnotationType::Error)),
+            service.get_annotation_string(&dummy_annotation(AnnotationLevel::Error)),
             "error in file: dummy.rs on line: 1, column: 1. This is a dummy annotation"
         );
     }
@@ -142,7 +142,7 @@ mod tests {
     fn test_annotation_service_new_bitbucket() {
         let service = AnnotationService::new_with_platform(Platform::Bitbucket).unwrap();
         assert_eq!(
-            service.get_annotation_string(&dummy_annotation(AnnotationType::Error)),
+            service.get_annotation_string(&dummy_annotation(AnnotationLevel::Error)),
             "Annotation: error: This is a dummy annotation in file: dummy.rs on line: 1"
         );
     }
@@ -151,8 +151,8 @@ mod tests {
     fn test_issue_annotations() {
         let service = AnnotationService::new_with_platform(Platform::GitHub).unwrap();
         let annotations = vec![
-            dummy_annotation(AnnotationType::Notice),
-            dummy_annotation(AnnotationType::Notice),
+            dummy_annotation(AnnotationLevel::Notice),
+            dummy_annotation(AnnotationLevel::Notice),
         ];
         assert!(service.issue_annotations(annotations).is_ok());
     }
@@ -160,14 +160,14 @@ mod tests {
     #[test]
     fn test_issue_annotation() {
         let service = AnnotationService::new_with_platform(Platform::GitHub).unwrap();
-        let annotation = dummy_annotation(AnnotationType::Notice);
+        let annotation = dummy_annotation(AnnotationLevel::Notice);
         assert!(service.issue_annotation(annotation).is_ok());
     }
 
     #[test]
     fn test_get_annotation_string() {
         let service = AnnotationService::new_with_platform(Platform::GitHub).unwrap();
-        let annotation = dummy_annotation(AnnotationType::Notice);
+        let annotation = dummy_annotation(AnnotationLevel::Notice);
         assert_eq!(
             service.get_annotation_string(&annotation),
             "::notice file=dummy.rs,line=1,endLine=1,col=1,endColumn=1::This is a dummy annotation"
@@ -178,8 +178,8 @@ mod tests {
     fn test_get_annotations_strings() {
         let service = AnnotationService::new_with_platform(Platform::GitHub).unwrap();
         let annotations = vec![
-            dummy_annotation(AnnotationType::Notice),
-            dummy_annotation(AnnotationType::Notice),
+            dummy_annotation(AnnotationLevel::Notice),
+            dummy_annotation(AnnotationLevel::Notice),
         ];
         let annotation_strings = service.get_annotations_strings(&annotations);
         assert_eq!(annotation_strings.len(), 2);
@@ -193,15 +193,17 @@ mod tests {
         );
     }
 
-    fn dummy_annotation(annotation_type: AnnotationType) -> Annotation {
-        Annotation {
-            file: "dummy.rs".to_string(),
-            line: 1,
-            end_line: 1,
-            start_column: 1,
-            end_column: 1,
-            message: "This is a dummy annotation".to_string(),
-            annotation_type,
-        }
+    fn dummy_annotation(annotation_type: AnnotationLevel) -> Annotation {
+        Annotation::builder()
+            .file("dummy.rs".to_string())
+            .line(1)
+            .end_line(1)
+            .col(1)
+            .end_col(1)
+            .message("This is a dummy annotation".to_string())
+            .level(annotation_type)
+            .build()
+            .unwrap()
     }
+
 }
