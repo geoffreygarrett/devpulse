@@ -1,7 +1,7 @@
 [workspace]
 members = [
     "core",
-    "api",
+    "api", "tests",
 ]
 
 exclude = [
@@ -9,3 +9,7 @@ exclude = [
 ]
 
 resolver = "2"
+
+[workspace.dependencies]
+devpulse_core = { path = "core" }
+devpulse = { path = "api" }

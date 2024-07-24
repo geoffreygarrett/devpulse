@@ -20,7 +20,7 @@ use_field_init_shorthand = true   # Use shorthand for struct field initializatio
 use_try_shorthand = true          # Use shorthand for try operator
 
 # Item & Module Formatting
-item_brace_style = "PreferSameLine" # Prefer braces on the same line for structs, enums, etc.
+#item_brace_style = "PreferSameLine" # Prefer braces on the same line for structs, enums, etc.
 
 # Whitespace Control
 space_before_colon = false        # Do not put space before colons
