@@ -100,8 +100,6 @@ cargo shuttle run
 cargo shuttle run
 ```
 
-This will compile the project and start the server, making the API available locally for integration and testing.
-
 ## Testing the API
 
 To test the API, you can send a request to analyze a range of commits in a repository using `curl`. Here’s how you can
@@ -110,12 +108,20 @@ do it:
 ### Bash
 
 ```bash
-curl --request POST \
-  --url http://127.0.0.1:8000/repository/commit-range?format=yaml \
+# Define the API host and set the default to the public URL
+API_HOST=${API_HOST:-"https://devpulse.shuttleapp.rs"}
+
+curl --request PUT \
+  --url "${API_HOST}/repository/commit-range" \
   --header 'Content-Type: application/json' \
+  --header 'Accept: application/vnd.devpulse.v1+yaml' \
   --data '{
     "end_commit": "6b10ce3",
-    "repository_url": "https://github.com/bazelbuild/rules_rust",
+    "repository": {
+      "type": "github",
+      "owner": "bazelbuild",
+      "name": "rules_rust"
+    },
     "start_commit": "6c2bd67"
 }'
 ```
@@ -123,15 +129,48 @@ curl --request POST \
 ### PowerShell
 
 ```powershell
-curl --request POST `
-  --url http://127.0.0.1:8000/repository/commit-range?format=yaml `
+# Define the API host and set the default to the public URL
+$API_HOST = ${API_HOST:-"https://devpulse.shuttleapp.rs"}
+
+curl --request PUT `
+  --url "$API_HOST/repository/commit-range" `
   --header 'Content-Type: application/json' `
+  --header 'Accept: application/vnd.devpulse.v1+yaml' `
   --data '{
     "end_commit": "6b10ce3",
-    "repository_url": "https://github.com/bazelbuild/rules_rust",
+    "repository": {
+      "type": "github",
+      "owner": "bazelbuild",
+      "name": "rules_rust"
+    },
     "start_commit": "6c2bd67"
 }'
 ```
+
+<details>
+<summary>Expected Output</summary>
+
+```yaml
+repository:
+  type: github
+  owner: bazelbuild
+  name: rules_rust
+commit_range:
+  start_commit: 6c2bd67
+  end_commit: 6b10ce3
+  total_commits: 6
+  total_additions: 1163
+  total_deletions: 59
+  top_contributors:
+    - username: Daniel Wagner-Hall
+      commits: 1144
+    - username: Milan Vukov
+      commits: 60
+    - username: Marcel Hlopko
+      commits: 18
+```
+
+</details>
 
 ## Documentation
 
