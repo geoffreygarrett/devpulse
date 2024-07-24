@@ -24,16 +24,16 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             message: "Ensure the command format is correct.".to_string(),
             annotation_type: AnnotationType::Warning,
         },
-        // Error annotation
-        Annotation {
-            file: "tests/src/main.rs".to_string(),
-            line: 20, // This should have an error
-            end_line: 20,
-            start_column: 5,
-            end_column: 30,
-            message: "This function implementation is incorrect.".to_string(),
-            annotation_type: AnnotationType::Error,
-        },
+        // Error annotation // WORKS BUT COMMENTED OUT
+        // Annotation {
+        //     file: "tests/src/main.rs".to_string(),
+        //     line: 20, // This should have an error
+        //     end_line: 20,
+        //     start_column: 5,
+        //     end_column: 30,
+        //     message: "This function implementation is incorrect.".to_string(),
+        //     annotation_type: AnnotationType::Error,
+        // },
         // Debug annotation
         Annotation {
             file: "tests/src/main.rs".to_string(),
