@@ -1,0 +1,42 @@
+[package]
+name = "notes"
+version = "0.1.0"
+edition = "2021"
+
+
+[[bin]]
+path = "src/bin/di/test_di_basic.rs"
+name = "test_basic"
+
+[[bin]]
+path = "src/bin/di/test_di_lifetimes.rs"
+name = "test_lifetimes"
+
+[[bin]]
+path = "src/bin/di/test_di_traits.rs"
+name = "test_traits"
+
+[[bin]]
+path = "src/bin/di/test_di_modules.rs"
+name = "test_modules"
+
+[[bin]]
+path = "src/bin/di/test_di_modules_extended.rs"
+name = "test_modules_extended"
+
+[[bin]]
+path = "src/bin/di/test_di_domain.rs"
+name = "test_domain"
+
+[dependencies]
+anyhow = "1.0.86"
+devpulse_core = { path = "../core", workspace = true }
+tokio = "1.38.1"
+nject = { version = "0.4", features = ["macro"] }
+async-trait = "0.1.50"
+log = "0.4"
+reqwest = { version = "0.11", features = ["json"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+thiserror = "1.0"
+expunge = "0.3.4"
