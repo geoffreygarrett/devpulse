@@ -9,7 +9,7 @@ newline_style = "unix"            # Unix-style newlines, lowercased to fit conve
 reorder_imports = true            # Reorder imports automatically
 
 # Control Structures
-brace_style = "SameLineWhere"     # Braces start on the same line for control structures
+# brace_style = "SameLineWhere"   # Removed due to nightly requirement
 
 # Function Arguments and Calls
 fn_params_layout = "Compressed"   # Use compressed layout for function arguments
@@ -20,17 +20,17 @@ use_field_init_shorthand = true   # Use shorthand for struct field initializatio
 use_try_shorthand = true          # Use shorthand for try operator
 
 # Item & Module Formatting
-#item_brace_style = "PreferSameLine" # Prefer braces on the same line for structs, enums, etc.
+# item_brace_style = "PreferSameLine" # Removed due to nightly requirement
 
 # Whitespace Control
-space_before_colon = false        # Do not put space before colons
-space_after_colon = true          # Put space after colons
-spaces_around_ranges = false      # No spaces around range operators
+# space_before_colon = false       # Removed due to nightly requirement
+# space_after_colon = true         # Removed due to nightly requirement
+# spaces_around_ranges = false     # Removed due to nightly requirement
 
 # Comment Handling
-wrap_comments = false             # Disabled as it requires nightly
-comment_width = 80                # Adjusted to a standard width
+# wrap_comments = false            # Removed due to nightly requirement
+# comment_width = 80               # Removed due to nightly requirement
 
 # Error Handling
-error_on_line_overflow = false    # Disabled as it requires nightly
-error_on_unformatted = false      # Disabled as it requires nightly
+# error_on_line_overflow = false   # Removed due to nightly requirement
+# error_on_unformatted = false     # Removed due to nightly requirement

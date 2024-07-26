@@ -24,10 +24,17 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-cargo-
 
-      # Step 2: Run annotation test
-      - name: Run annotation test
-        run: cargo run --bin annotate
-        continue-on-error: true
+      # Step 2: Run tests
+      - name: Run Comment Test Action
+        uses: ./.github/actions/test-comment
+        with:
+          rust-version: '1.62.0'
+
+      # Step 2: Run tests
+      - name: Run Annotation Test Action
+        uses: ./.github/actions/test-annotation
+        with:
+          rust-version: '1.62.0'
 
 #      # Step 3: Check for annotations
 #      - name: Check for annotations
