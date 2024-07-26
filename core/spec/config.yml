@@ -1,0 +1,17 @@
+templateDir: my_custom_templates
+additionalProperties:
+  artifactId: kotlin-petstore-client
+  serializableModel: "true"
+  dateLibrary: java8
+files:
+  AUTHORS.md: {}
+  api_interfaces.mustache:
+    templateType: API
+    destinationFilename: Interface.kt
+  api.mustache:
+    templateType: API
+    destinationFilename: Impl.kt
+  other/check.mustache:
+    folder: scripts
+    destinationFilename: check.sh
+    templateType: SupportingFiles

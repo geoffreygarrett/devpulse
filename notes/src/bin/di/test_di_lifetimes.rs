@@ -14,7 +14,9 @@ struct LifetimeProvider {
 }
 
 fn main() {
-    let provider = LifetimeProvider { base: BaseDependency };
+    let provider = LifetimeProvider {
+        base: BaseDependency,
+    };
     let consumer: LifetimeConsumer = provider.provide();
     println!("Consumer has been initialized with a reference to the base dependency.");
 }

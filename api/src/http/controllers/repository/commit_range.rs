@@ -1,13 +1,13 @@
 use axum::{extract::Query, Json, response::IntoResponse};
 use axum::body::Body;
-use axum::http::{header, HeaderMap};
+use axum::http::HeaderMap;
 use axum::response::Response;
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use utoipa::{IntoParams, ToSchema};
 
 use devpulse_core::services::analyze_commit_range_service;
 
-use crate::accept::{JsonV1, serialize_response, TomlV1, XmlV1, YamlV1};
+use crate::accept::serialize_response;
 use crate::models::{
     BadRequest, CommitRangeAnalysisResponse, CommitRangeRequest, InternalServerError,
     ResponseDetail, TooManyRequests, Unauthorized,

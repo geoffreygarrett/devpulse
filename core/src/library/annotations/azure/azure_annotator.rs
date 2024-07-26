@@ -1,3 +1,5 @@
+use super::super::prelude::*;
+
 /// Formats annotations for Azure DevOps logging commands.
 ///
 /// AzureAnnotator is responsible for converting annotation data into a string format
@@ -7,9 +9,51 @@
 ///
 /// # References
 /// - [Azure DevOps Logging Commands](https://learn.microsoft.com/en-us/azure/devops/pipelines/scripts/logging-commands)
-use super::super::prelude::*;
-
 pub struct AzureAnnotator;
+
+impl AzureAnnotator {
+    pub fn new() -> Self {
+        AzureAnnotator {}
+    }
+
+    /// Constructs a location string based on the available fields in the annotation.
+    pub(crate) fn construct_location_string(annotation: &Annotation) -> String {
+        match (annotation.line, annotation.end_line, annotation.col, annotation.end_col) {
+            (Some(line), None, None, None) => {
+                format!("sourcepath={};linenumber={}", annotation.file, line)
+            }
+            (Some(line), Some(end_line), None, None) => format!(
+                "sourcepath={};linenumber={};linenumberEnd={}",
+                annotation.file, line, end_line
+            ),
+            (Some(line), None, Some(col), None) => {
+                format!("sourcepath={};linenumber={};columnnumber={}", annotation.file, line, col)
+            }
+            (Some(line), None, None, Some(end_col)) => format!(
+                "sourcepath={};linenumber={};endcolumnnumber={}",
+                annotation.file, line, end_col
+            ),
+            (Some(line), Some(end_line), Some(col), None) => format!(
+                "sourcepath={};linenumber={};linenumberEnd={};columnnumber={}",
+                annotation.file, line, end_line, col
+            ),
+            (Some(line), Some(end_line), None, Some(end_col)) => format!(
+                "sourcepath={};linenumber={};linenumberEnd={};endcolumnnumber={}",
+                annotation.file, line, end_line, end_col
+            ),
+            (Some(line), None, Some(col), Some(end_col)) => format!(
+                "sourcepath={};linenumber={};columnnumber={};endcolumnnumber={}",
+                annotation.file, line, col, end_col
+            ),
+            (Some(line), Some(end_line), Some(col), Some(end_col)) => format!(
+                "sourcepath={};linenumber={};linenumberEnd={};columnnumber={};endcolumnnumber={}",
+                annotation.file, line, end_line, col, end_col
+            ),
+            (None, None, None, None) => String::new(),
+            _ => format!("sourcepath={}", annotation.file), // Default case to handle unexpected combinations
+        }
+    }
+}
 
 impl Annotator for AzureAnnotator {
     /// Converts an annotation into a formatted string that conforms to Azure DevOps logging commands.
@@ -38,23 +82,7 @@ impl Annotator for AzureAnnotator {
                     _ => unreachable!(),
                 };
 
-                let location_str = match (
-                    annotation.line,
-                    annotation.end_line,
-                    annotation.col,
-                    annotation.end_col,
-                ) {
-                    (Some(line), None, None, None) => format!("sourcepath={};linenumber={}", annotation.file, line),
-                    (Some(line), Some(end_line), None, None) => format!("sourcepath={};linenumber={};linenumberEnd={}", annotation.file, line, end_line),
-                    (Some(line), None, Some(col), None) => format!("sourcepath={};linenumber={};columnnumber={}", annotation.file, line, col),
-                    (Some(line), None, None, Some(end_col)) => format!("sourcepath={};linenumber={};endcolumnnumber={}", annotation.file, line, end_col),
-                    (Some(line), Some(end_line), Some(col), None) => format!("sourcepath={};linenumber={};linenumberEnd={};columnnumber={}", annotation.file, line, end_line, col),
-                    (Some(line), Some(end_line), None, Some(end_col)) => format!("sourcepath={};linenumber={};linenumberEnd={};endcolumnnumber={}", annotation.file, line, end_line, end_col),
-                    (Some(line), None, Some(col), Some(end_col)) => format!("sourcepath={};linenumber={};columnnumber={};endcolumnnumber={}", annotation.file, line, col, end_col),
-                    (Some(line), Some(end_line), Some(col), Some(end_col)) => format!("sourcepath={};linenumber={};linenumberEnd={};columnnumber={};endcolumnnumber={}", annotation.file, line, end_line, col, end_col),
-                    (None, None, None, None) => String::new(),
-                    _ => format!("sourcepath={}", annotation.file), // Default case to handle unexpected combinations
-                };
+                let location_str = Self::construct_location_string(annotation);
 
                 format!(
                     "##vso[task.logissue type={};{}]{}",

@@ -1,9 +1,34 @@
 use serde::{Deserialize, Serialize};
-
 use thiserror::Error;
 
+pub use commit::Commit;
+use commit_author::CommitAuthor;
+pub use commit_commit::CommitCommit;
+pub use commit_commit_tree::CommitCommitTree;
+pub use commit_parents_inner::CommitParentsInner;
+pub use commit_stats::CommitStats;
+pub use commit_status::CommitStatus;
+pub use diff_entry::DiffEntry;
+// mod access_token;
+pub use git_user::GitUser;
+pub use simple_user::SimpleUser;
+pub use verification::Verification;
+
+// mod arc_client;
 mod base;
+mod commit;
+mod commit_author;
+mod commit_commit;
+mod commit_commit_tree;
+mod commit_parents_inner;
+mod commit_stats;
+mod commit_status;
+mod diff_entry;
+mod git_user;
 mod github;
+mod simple_user;
+mod verification;
+// pub(crate) use arc_client::*;
 
 /// Represents the code churn (additions and deletions) for a specific commit.
 #[derive(Debug, Serialize, Deserialize)]
@@ -87,6 +112,50 @@ impl Contributor {
     }
 }
 
+/// A connection method to access repositories.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum Connection {
+    Https,
+    Http,
+    Ssh,
+    Local,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GitHubRepository {
+    pub owner: String,
+    pub name: String,
+    pub connection: Connection,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct GitLabRepository {
+    pub owner: String,
+    pub name: String,
+    pub connection: Connection,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct BitbucketRepository {
+    pub owner: String,
+    pub name: String,
+    pub connection: Connection,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct AzureReposRepository {
+    pub organization: String,
+    pub project: String,
+    pub repository: String,
+    pub connection: Connection,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CustomRepository {
+    pub url: String,
+    pub connection: Connection,
+}
+
 /// A repository.
 ///
 /// This enum represents a repository, which can be of various types depending on the hosting service.
@@ -94,19 +163,19 @@ impl Contributor {
 #[serde(tag = "type")]
 pub enum Repository {
     #[serde(rename = "github")]
-    GitHub { owner: String, name: String },
+    GitHub(GitHubRepository),
+
     #[serde(rename = "gitlab")]
-    GitLab { owner: String, name: String },
+    GitLab(GitLabRepository),
+
     #[serde(rename = "bitbucket")]
-    Bitbucket { owner: String, name: String },
+    Bitbucket(BitbucketRepository),
+
     #[serde(rename = "azure_repos")]
-    AzureRepos {
-        organization: String,
-        project: String,
-        repository: String,
-    },
+    AzureRepos(AzureReposRepository),
+
     #[serde(rename = "custom")]
-    Custom { url: String },
+    Custom(CustomRepository),
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -129,22 +198,22 @@ impl Repository {
     /// Returns the owner of the repository.
     pub fn owner(&self) -> &str {
         match self {
-            Repository::GitHub { owner, .. }
-            | Repository::GitLab { owner, .. }
-            | Repository::Bitbucket { owner, .. } => owner,
-            Repository::AzureRepos { organization, .. } => organization,
-            Repository::Custom { .. } => "",
+            Repository::GitHub(repository) => &repository.owner,
+            Repository::GitLab(repository) => &repository.owner,
+            Repository::Bitbucket(repository) => &repository.owner,
+            Repository::AzureRepos(repository) => &repository.organization,
+            Repository::Custom(_) => "",
         }
     }
 
     /// Returns the name of the repository.
     pub fn name(&self) -> &str {
         match self {
-            Repository::GitHub { name, .. }
-            | Repository::GitLab { name, .. }
-            | Repository::Bitbucket { name, .. } => name,
-            Repository::AzureRepos { repository, .. } => repository,
-            Repository::Custom { url } => url,
+            Repository::GitHub(repository) => &repository.name,
+            Repository::GitLab(repository) => &repository.name,
+            Repository::Bitbucket(repository) => &repository.name,
+            Repository::AzureRepos(repository) => &repository.repository,
+            Repository::Custom(repository) => &repository.url,
         }
     }
 
@@ -152,46 +221,38 @@ impl Repository {
     pub fn url(&self, protocol: Protocol) -> Result<String, RepositoryError> {
         match protocol {
             Protocol::Http => match self {
-                Repository::GitHub { owner, name } => {
-                    Ok(format!("https://github.com/{}/{}", owner, name))
+                Repository::GitHub(repository, ..) => {
+                    Ok(format!("https://github.com/{}/{}", repository.owner, repository.name))
                 }
-                Repository::GitLab { owner, name } => {
-                    Ok(format!("https://gitlab.com/{}/{}", owner, name))
+                Repository::GitLab(repository, ..) => {
+                    Ok(format!("https://gitlab.com/{}/{}", repository.owner, repository.name))
                 }
-                Repository::Bitbucket { owner, name } => {
-                    Ok(format!("https://bitbucket.org/{}/{}", owner, name))
+                Repository::Bitbucket(repository, ..) => {
+                    Ok(format!("https://bitbucket.org/{}/{}", repository.owner, repository.name))
                 }
-                Repository::AzureRepos {
-                    organization,
-                    project,
-                    repository,
-                } => Ok(format!(
+                Repository::AzureRepos(repository, ..) => Ok(format!(
                     "https://dev.azure.com/{}/{}/_git/{}",
-                    organization, project, repository
+                    repository.organization, repository.project, repository.repository
                 )),
-                Repository::Custom { url } => Ok(url.clone()),
+                Repository::Custom(repository, ..) => Ok(repository.url.clone()),
             },
             Protocol::Ssh => match self {
-                Repository::GitHub { owner, name } => {
-                    Ok(format!("git@github.com:{}/{}.git", owner, name))
+                Repository::GitHub(repository, ..) => {
+                    Ok(format!("git@github.com:{}/{}.git", repository.owner, repository.name))
                 }
-                Repository::GitLab { owner, name } => {
-                    Ok(format!("git@gitlab.com:{}/{}.git", owner, name))
+                Repository::GitLab(repository, ..) => {
+                    Ok(format!("git@gitlab.com:{}/{}.git", repository.owner, repository.name))
                 }
-                Repository::Bitbucket { owner, name } => {
-                    Ok(format!("git@bitbucket.org:{}/{}.git", owner, name))
+                Repository::Bitbucket(repository, ..) => {
+                    Ok(format!("git@bitbucket.org:{}/{}.git", repository.owner, repository.name))
                 }
-                Repository::AzureRepos {
-                    organization,
-                    project,
-                    repository,
-                } => Ok(format!(
+                Repository::AzureRepos(repository, ..) => Ok(format!(
                     "git@ssh.dev.azure.com:v3/{}/{}/{}",
-                    organization, project, repository
+                    repository.organization, repository.project, repository.repository
                 )),
-                Repository::Custom { url } => {
-                    if url.starts_with("git@") {
-                        Ok(url.clone())
+                Repository::Custom(repository, ..) => {
+                    if repository.url.starts_with("git@") {
+                        Ok(repository.url.clone())
                     } else {
                         Err(RepositoryError::InvalidUrlFormat)
                     }

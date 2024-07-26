@@ -1,8 +1,8 @@
 use lazy_static::lazy_static;
-use utoipa::{Modify, OpenApi, ToSchema};
 use utoipa::openapi;
-use utoipa::openapi::OpenApiBuilder;
 use utoipa::openapi::security::{HttpAuthScheme, HttpBuilder, SecurityScheme};
+use utoipa::openapi::OpenApiBuilder;
+use utoipa::{Modify, OpenApi, ToSchema};
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const DESCRIPTION: &str = env!("CARGO_PKG_DESCRIPTION");

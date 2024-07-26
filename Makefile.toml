@@ -1,0 +1,2 @@
+#[env]
+#extend = "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/core/Makfile.toml"

@@ -5,8 +5,13 @@ edition = "2021"
 
 [[bin]]
 name = "annotate"
-path = "src/bin/annotate.rs"
+path = "src/bin/test_annotations.rs"
+
+[[bin]]
+name = "test_comments"
+path = "src/bin/test_comments.rs"
 
 [dependencies]
 anyhow = "1.0.86"
 devpulse_core = { path = "../core", workspace = true }
+tokio = "1.38.1"

@@ -1,0 +1,1 @@
+- https://github.com/MicrosoftDocs/vsts-rest-api-specs/blob/master/specification/git/7.2/git.json

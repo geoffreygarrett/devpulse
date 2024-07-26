@@ -1,5 +1,5 @@
-use axum::{Extension, response::IntoResponse};
 use axum::http::HeaderMap;
+use axum::{response::IntoResponse, Extension};
 use utoipa::ToResponse;
 
 use crate::accept::serialize_response;

@@ -1,2 +1,3 @@
 - [derive_builder: Automatically derive the builder pattern for a struct](https://docs.rs/derive_builder/latest/derive_builder/)
 - [SNAFU](https://docs.rs/snafu/latest/snafu/)
+- [cached](https://crates.io/crates/cached)

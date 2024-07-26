@@ -1,19 +1,19 @@
 use std::sync::Arc;
 use std::time::Duration;
 
-use axum::{
-    Router,
-    routing::{get, post},
-};
 use axum::body::Body;
 use axum::error_handling::HandleErrorLayer;
 use axum::http::{Request, StatusCode};
 use axum::response::{IntoResponse, Redirect};
 use axum::routing::put;
+use axum::{
+    routing::{get, post},
+    Router,
+};
 // use crate::http::middleware::RateLimitLayer;
-use tower::{BoxError, buffer::BufferLayer, limit::RateLimitLayer, ServiceBuilder};
-use tower_governor::{governor::GovernorConfigBuilder, GovernorError, GovernorLayer};
+use tower::{buffer::BufferLayer, limit::RateLimitLayer, BoxError, ServiceBuilder};
 use tower_governor::key_extractor::{PeerIpKeyExtractor, SmartIpKeyExtractor};
+use tower_governor::{governor::GovernorConfigBuilder, GovernorError, GovernorLayer};
 use tower_http::trace::TraceLayer;
 use utoipa::Path;
 // use tower::ServiceBuilder;
@@ -22,8 +22,8 @@ use utoipa_redoc::{Redoc, Servable as RedocServable};
 use utoipa_scalar::{Scalar, Servable as ScalarServable};
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::http::*;
 use crate::http::api_doc::API_DOC;
+use crate::http::*;
 use crate::models::TooManyRequests;
 
 #[macro_export]

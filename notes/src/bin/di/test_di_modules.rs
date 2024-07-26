@@ -23,6 +23,10 @@ struct AppProvider {
 }
 
 fn main() {
-    let provider = AppProvider { internal_mod: internal::InternalModule { internal_dep: internal::InternalDependency } };
+    let provider = AppProvider {
+        internal_mod: internal::InternalModule {
+            internal_dep: internal::InternalDependency,
+        },
+    };
     println!("Internal module has been initialized and exported successfully.");
 }

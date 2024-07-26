@@ -1,8 +1,8 @@
 use std::future::Future;
 use std::ops::{Deref, DerefMut};
 
-use axum::{extract::FromRequest, response::IntoResponse};
 use axum::http::{header, HeaderValue, StatusCode};
+use axum::{extract::FromRequest, response::IntoResponse};
 use axum_core::body::Body;
 use axum_core::response::Response;
 use quick_xml::se as serde_xml;
@@ -225,7 +225,7 @@ mod impl_from {
     use crate::application_vnd_devpulse_v1_yaml;
     use crate::text_vnd_devpulse_v1_toml;
 
-    use super::{*, error::*};
+    use super::{error::*, *};
 
     impl_from_request!(
         JsonV1,

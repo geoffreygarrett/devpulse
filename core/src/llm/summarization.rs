@@ -3,9 +3,12 @@ use std::collections::HashMap;
 use anyhow::Result;
 use futures::future::join_all;
 use tera::{Context, Tera};
+// # Get details for a specific commit
+// curl \
+// "https://dev.azure.com/geoffreygarrett/devpulse/_apis/git/repositories/devpulse/commits/9deb6681ce5d28f5b3203b5b052c43121f4686c6?api-version=6.0"
+curl "https://dev.azure.com/geoffreygarrett/devpulse/_apis/git/repositories/devpulse/commits/9deb6681ce5d28f5b3203b5b052c43121f4686c6?api-version=6.0" | jq
 
 use crate::BaseClient;
-// summarization_client.rs
 use crate::llms::llm_client::LlmClient;
 use crate::prompt::format_prompt;
 use crate::settings::Settings;

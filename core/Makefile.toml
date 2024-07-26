@@ -1,0 +1,73 @@
+[tasks.extract-github-spec]
+description = "Extract the GitHub OpenAPI spec"
+cwd = "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/core/spec"
+script = """
+    node extract_github.js
+"""
+
+[tasks.generate-github-client]
+description = "Generate the GitHub client using OpenAPI Generator"
+dependencies = ["extract-github-spec"]
+env = { JAVA_OPTS = "-Dlog.level=off -Dorg.openapitools.codegen.languages.AbstractRustCodegen=off" }
+cwd = "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}"
+script = """
+    export JAVA_OPTS="${JAVA_OPTS} -Dlog.level=off -Dorg.openapitools.codegen.languages.AbstractRustCodegen=off"
+    openapi-generator generate \
+        -i core/spec/api.github.com.extracted.json \
+        -g rust \
+        -o generated/external_github \
+        --template-dir core/templates/rust-templates \
+        --additional-properties=packageName=external_github,useSingleRequestParameter=true,deriveBuilder=true,clientName=GithubClient,enableCache=true,tracing=true 2>&1 | grep -v 'WARN' | grep -v 'INFO'
+"""
+
+[tasks.extract-azure-spec]
+description = "Extract the Azure OpenAPI spec"
+cwd = "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/core/spec"
+script = """
+    node extract_azure.js
+"""
+
+[tasks.generate-azure-client]
+description = "Generate the Azure client using OpenAPI Generator"
+dependencies = ["extract-azure-spec"]
+env = { JAVA_OPTS = "-Dlog.level=off -Dorg.openapitools.codegen.languages.AbstractRustCodegen=off" }
+cwd = "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}"
+script = """
+    export JAVA_OPTS="${JAVA_OPTS} -Dlog.level=off -Dorg.openapitools.codegen.languages.AbstractRustCodegen=off"
+    openapi-generator generate \
+        -i core/spec/dev.azure.com.extracted.json \
+        -g rust \
+        -o generated/external_azure \
+        --template-dir core/templates/rust-templates \
+        --additional-properties=packageName=external_azure,useSingleRequestParameter=true,deriveBuilder=true,clientName=AzureClient,enableCache=true,tracing=true 2>&1 | grep -v 'WARN' | grep -v 'INFO'
+"""
+
+[tasks.format-github-client]
+description = "Format the generated GitHub client code"
+dependencies = ["generate-github-client"]
+cwd = "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}"
+script = """
+    if [ -f generated/external_github/Cargo.toml ]; then
+        cargo fmt --manifest-path generated/external_github/Cargo.toml
+    else
+        echo "Cargo.toml not found for GitHub client"
+        exit 1
+    fi
+"""
+
+[tasks.format-azure-client]
+description = "Format the generated Azure client code"
+dependencies = ["generate-azure-client"]
+cwd = "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}"
+script = """
+    if [ -f generated/external_azure/Cargo.toml ]; then
+        cargo fmt --manifest-path generated/external_azure/Cargo.toml
+    else
+        echo "Cargo.toml not found for Azure client"
+        exit 1
+    fi
+"""
+
+[tasks.generate-clients]
+description = "Generate and format both GitHub and Azure clients"
+dependencies = ["format-github-client", "format-azure-client"]

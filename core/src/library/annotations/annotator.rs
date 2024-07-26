@@ -5,7 +5,9 @@ use super::annotation::Annotation;
 #[derive(Debug, Snafu)]
 pub enum AnnotatorError {
     #[snafu(display("Failed to issue annotation: {}", source))]
-    IssueAnnotation { source: Box<dyn std::error::Error + Send + Sync> },
+    IssueAnnotation {
+        source: Box<dyn std::error::Error + Send + Sync>,
+    },
 }
 
 pub type Result<T, E = AnnotatorError> = std::result::Result<T, E>;
