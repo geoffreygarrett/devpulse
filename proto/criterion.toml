@@ -1,4 +1,7 @@
 [criterion]
-  output_directory = "target/criterion"
-  plotting_backend = "plotters"
-  measurement_time = 10
+output_directory = "target/criterion"
+plotting_backend = "plotters"
+measurement_time = 10
+
+[plot]
+enable = true

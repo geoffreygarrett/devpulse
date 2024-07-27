@@ -1,0 +1,51 @@
+[package]
+name = "proto"
+version = "0.1.0"
+authors = ["Geoffrey Garrett"]
+edition = "2021"
+build = "build/mod.rs"
+include = ["proto/**/*"]
+
+[dependencies]
+prost = "0.13.1"
+prost-types = "0.13.1"
+serde = { version = "1.0.204", features = ["derive"] }
+derive_builder = { version = "0.20.0", optional = true }
+
+[build-dependencies]
+prost-build = "0.13.1"
+serde = { version = "1.0.204", features = ["derive"] }
+reqwest = { version = "0.12.5", features = ["blocking", "json"] }
+serde_json = "1.0.120"
+
+[dev-dependencies]
+criterion = "0.5.1"
+hex = "0.4"
+serde = { version = "1.0.204", features = ["derive"] }
+serde_json = "1.0.120"
+rusqlite = "0.32.1"
+prost-build = "0.13.1"
+
+[features]
+dal = []
+api = []
+core = [
+    "external_github",
+    "external_azure",
+    "dal",
+    "api"
+]
+external_github = []
+external_azure = []
+
+default = []
+server = []
+client = []
+transport = []
+with_builder = ["derive_builder"]
+documentation = ["utoipa"]
+
+[dependencies.utoipa]
+version = "4.0.0"
+optional = true
+features = ["axum_extras", "yaml", "openapi_extensions"]

@@ -1,0 +1,29 @@
+
+syntax = "proto3";
+
+package bpe;
+
+message BpeToken {
+    uint32 id = 1;
+    string token = 2;
+}
+
+message BpeTokens {
+    repeated BpeToken tokens = 1;
+}
+
+message TokenizerRequest {
+    string text = 1;
+}
+
+message TokenizerResponse {
+    repeated uint32 token_ids = 1;
+}
+
+message DetokenizerRequest {
+    repeated uint32 token_ids = 1;
+}
+
+message DetokenizerResponse {
+    string text = 1;
+}
