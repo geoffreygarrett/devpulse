@@ -1,3 +1,25 @@
+[tasks.extract-openai-spec]
+description = "Extract the OpenAI OpenAPI spec"
+cwd = "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/core/spec"
+script = """
+    node extract_openai.js
+"""
+
+[tasks.generate-openai-client]
+description = "Generate the OpenAI client using OpenAPI Generator"
+dependencies = ["extract-openai-spec"]
+env = { JAVA_OPTS = "-Dlog.level=off -Dorg.openapitools.codegen.languages.AbstractRustCodegen=off" }
+cwd = "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}"
+script = """
+    export JAVA_OPTS="${JAVA_OPTS} -Dlog.level=off -Dorg.openapitools.codegen.languages.AbstractRustCodegen=off"
+    openapi-generator generate \
+        -i core/spec/api.openai.com.extracted.json \
+        -g rust \
+        -o generated/external_openai \
+        --template-dir core/templates/rust-templates \
+        --additional-properties=packageName=external_openai,useSingleRequestParameter=true,deriveBuilder=true,clientName=OpenAIClient,enableCache=true,tracing=true 2>&1 | grep -v 'WARN' | grep -v 'INFO'
+"""
+
 [tasks.extract-github-spec]
 description = "Extract the GitHub OpenAPI spec"
 cwd = "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/core/spec"
@@ -68,6 +90,23 @@ script = """
     fi
 """
 
+[tasks.format-openai-client]
+description = "Format the generated OpenAI client code"
+dependencies = ["generate-openai-client"]
+cwd = "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}"
+script = """
+    if [ -f generated/external_openai/Cargo.toml ]; then
+        cargo fmt --manifest-path generated/external_openai/Cargo.toml
+    else
+        echo "Cargo.toml not found for OpenAI client"
+        exit 1
+    fi
+"""
+
+
 [tasks.generate-clients]
-description = "Generate and format both GitHub and Azure clients"
-dependencies = ["format-github-client", "format-azure-client"]
+description = "Generate and format GitHub, Azure, and OpenAI clients"
+dependencies = ["format-github-client", "format-azure-client", "format-openai-client"]
+
+[env]
+CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = true
