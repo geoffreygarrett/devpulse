@@ -1,14 +1,15 @@
 use std::sync::Arc;
 use std::time::SystemTime;
 
-use crate::create_response_enum;
 use axum::http::StatusCode;
-use axum::response::{IntoResponse, Response};
 use axum::Json;
+use axum::response::{IntoResponse, Response};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use tokio::sync::RwLock;
 use utoipa::{ToResponse, ToSchema};
+
+use crate::create_response_enum;
 
 const APPLICATION_VND_DEVPULSE_V1_JSON: &str = "application/vnd.devpulse.v1+json";
 // const APPLICATION_VND_DEVPULSE_V1_YAML: &str = "application/vnd.devpulse.v1+yaml";
@@ -400,52 +401,127 @@ pub enum Repository {
         example = json!({
             "type": "github",
             "owner": "bazelbuild",
-            "name": "rules_rust"
+            "name": "rules_rust",
+            "connection": {
+                "protocol": "https",
+                "token": "example-token"
+            }
         })
     )]
-    GitHub { owner: String, name: String },
+    GitHub(GitHubRepository),
+
     #[serde(rename = "gitlab")]
     #[schema(
         title = "GitLabRepository",
         example = json!({
             "type": "gitlab",
             "owner": "gitlab-org",
-            "name": "gitlab"
+            "name": "gitlab",
+            "connection": {
+                "protocol": "https",
+                "token": "example-token"
+            }
         })
     )]
-    GitLab { owner: String, name: String },
+    GitLab(GitLabRepository),
+
     #[serde(rename = "bitbucket")]
     #[schema(
         title = "BitbucketRepository",
         example = json!({
             "type": "bitbucket",
             "owner": "atlassian",
-            "name": "pyramid"
+            "name": "pyramid",
+            "connection": {
+                "protocol": "https",
+                "token": "example-token"
+            }
         })
     )]
-    Bitbucket { owner: String, name: String },
+    Bitbucket(BitbucketRepository),
+
     #[serde(rename = "azure_repos")]
     #[schema(
-        title = "AzureRepositories",
+        title = "AzureReposRepository",
         example = json!({
             "type": "azure_repos",
             "organization": "Microsoft",
             "project": "vscode",
-            "repository": "vscode"
+            "repository": "vscode",
+            "connection": {
+                "protocol": "https",
+                "token": "example-token"
+            }
         })
     )]
-    AzureRepos {
-        organization: String,
-        project: String,
-        repository: String,
-    },
+    AzureRepos(AzureReposRepository),
+
     #[serde(rename = "custom")]
     #[schema(
         title = "CustomRepository",
         example = json!({
             "type": "custom",
-            "url": "https://custom.repo/url"
+            "url": "https://custom.repo/url",
+            "connection": {
+                "protocol": "https",
+                "token": "example-token"
+            }
         })
     )]
-    Custom { url: String },
+    Custom(CustomRepository),
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+pub struct GitHubRepository {
+    pub owner: String,
+    pub name: String,
+    pub connection: Connection,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+pub struct GitLabRepository {
+    pub owner: String,
+    pub name: String,
+    pub connection: Connection,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+pub struct BitbucketRepository {
+    pub owner: String,
+    pub name: String,
+    pub connection: Connection,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+pub struct AzureReposRepository {
+    pub organization: String,
+    pub project: String,
+    pub repository: String,
+    pub connection: Connection,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+pub struct CustomRepository {
+    pub url: String,
+    pub connection: Connection,
+}
+
+/// A connection method to access repositories.
+#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
+pub struct Connection {
+    pub protocol: Protocol,
+    pub token: Option<String>, // Token might be needed for some connection types
+    pub url: Option<String>,   // URL might be needed for custom connections
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema, Clone)]
+pub enum Protocol {
+    #[serde(rename = "http")]
+    Http,
+    #[serde(rename = "https")]
+    Https,
+    #[serde(rename = "ssh")]
+    Ssh,
+    #[serde(rename = "local")]
+    Local,
 }

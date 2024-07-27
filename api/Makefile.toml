@@ -13,3 +13,5 @@ description = "Starts the local API server and watches for changes, quietly clea
 command = "cargo"
 args = ["watch", "-qcx", "'shuttle run'"]
 
+[env]
+CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = true

@@ -2,6 +2,8 @@ syntax = "proto3";
 
 package devpulse;
 
+import "google/protobuf/empty.proto";
+
 // Server configuration message
 message ServerConfig {
   string host = 1;
@@ -17,8 +19,11 @@ message ServerStats {
   double uptime_seconds = 4;  // Uptime in seconds
 }
 
-// Main server state message
-message ServerState {
-  ServerConfig config = 1;
-  ServerStats stats = 2;
+// Server service definitions
+service ServerService {
+  // Retrieve server configuration
+  rpc GetServerConfig (google.protobuf.Empty) returns (ServerConfig) {}
+
+  // Retrieve server statistics
+  rpc GetServerStats (google.protobuf.Empty) returns (ServerStats) {}
 }

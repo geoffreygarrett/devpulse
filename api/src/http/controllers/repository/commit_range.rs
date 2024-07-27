@@ -12,6 +12,7 @@ use crate::models::{
     BadRequest, CommitRangeAnalysisResponse, CommitRangeRequest, InternalServerError,
     ResponseDetail, TooManyRequests, Unauthorized,
 };
+use crate::route;
 
 #[derive(Debug, Deserialize, IntoParams, ToSchema)]
 #[into_params(style = Form, parameter_in = Query)]
@@ -33,10 +34,10 @@ impl Default for ResponseDetailQuery {
 ///
 /// Create a new analysis for a repository in the commit range, if the analysis exists,
 /// it will be returned.
-#[utoipa::path(
+#[route(
     put,
     path = "/repository/commit-range",
-    operation_id = "create_commit_range_analysis",
+    operation_id = "/repository/create-commit-range-analysis",
     // params(
     //     ResponseDetailQuery
     // ),

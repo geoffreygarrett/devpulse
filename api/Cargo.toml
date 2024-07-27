@@ -1,6 +1,6 @@
 [package]
 name = "devpulse"
-version = "0.1.0"
+version = { workspace = true }
 edition = "2021"
 build = "build.rs"
 description = """
@@ -19,12 +19,11 @@ url = "2.5.2"
 serde = { version = "1.0.196", features = ["derive"] }
 serde_json = "1.0.120"
 headers = "0.4.0"
-utoipa = { version = "4", features = ["axum_extras", "yaml", "openapi_extensions"] }
 thiserror = "1.0.63"
 base64 = "0.22.1"
 futures-util = "0.3.30"
 tower = "0.4.13"
-tower-http = { version = "0.5.2", features = ["trace", "add-extension"] }
+tower-http = { version = "0.5.2", features = ["trace", "add-extension", "fs"] }
 serde_yaml = "0.9.34" # provides YAML serialization and deserialization
 axum-xml-up = "0.2.0"
 axum-yaml = "0.4.0"
@@ -50,7 +49,32 @@ serde-xml-rs = "0.6.0"
 quick-xml = { version = "0.36.0", features = ["serialize"] }
 toml = "0.8.15"
 snafu = "0.8.4"
+async-trait = "0.1.81"
+
+# helper
+auto-route = { path = "../route", workspace = true }
+axum-typed-routing = "0.2.1"
+prost-build = "0.13.1"
 
 [build-dependencies]
 tonic-build = "0.12.1"
+serde = { version = "1.0.196", features = ["derive"] }
+serde_yaml = "0.9.34"
 
+[features]
+default = []
+server = []
+client = []
+transport = []
+use_builder = ["derive_builder"]
+#documentation = ["utoipa"]
+documentation = []
+
+[dependencies.derive_builder]
+package = "derive_builder"
+version = "0.20.0"
+optional = true
+
+[dependencies.utoipa]
+version = "4"
+features = ["axum_extras", "yaml", "openapi_extensions"]

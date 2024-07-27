@@ -1,6 +1,7 @@
 use axum::{extract::Path, response::IntoResponse};
 
 use crate::models::NotImplemented;
+use crate::route;
 
 /// Performance Metrics
 ///
@@ -9,7 +10,7 @@ use crate::models::NotImplemented;
 /// and a list of repository contributions.
 ///
 /// TODO: Implement this endpoint
-#[utoipa::path(
+#[route(
     get,
     path = "/developers/{username}/performance",
     responses(
@@ -20,10 +21,10 @@ use crate::models::NotImplemented;
         (status = 501, response = NotImplemented)
     ),
     params(
-    ("username" = String, Path, description = "Username of the developer to retrieve performance for")
+        ("username" = String, Path, description = "Username of the developer to retrieve performance for")
     ),
     tag = crate::http::TAG_DEVELOPER_ANALYSIS,
 )]
-pub async fn get_developer_performance(Path(_username): Path<String>) -> impl IntoResponse {
+pub async fn get_developer_performance(username: String) -> impl IntoResponse {
     NotImplemented::new("The developer performance analysis endpoint is not implemented yet")
 }

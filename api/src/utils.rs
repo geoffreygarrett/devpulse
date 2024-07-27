@@ -10,3 +10,10 @@ pub fn convert_openapi_to_axum_path(openapi_path: &str) -> String {
     }
     axum_path
 }
+
+pub(crate) mod auto_route {
+    pub(crate) use auto_route::route;
+    pub(crate) use axum_typed_routing::{TypedRouter};
+}
+
+pub(crate) use auto_route::*;

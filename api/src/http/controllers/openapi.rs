@@ -4,16 +4,22 @@ use axum::response::Response;
 use utoipa::OpenApi;
 
 use crate::http::api_doc::API_DOC;
+use crate::utils::auto_route::route;
+
+// macro_rules!  {
+//     () => {};
+// }
 
 /// YAML
-#[utoipa::path(
+#[route(
     get,
-    path = crate::http::openapi_yaml_path(),
+    path = "/docs/openapi.yaml",
     responses(
-    (status = 200, description = "Returns the OpenAPI YAML documentation",
-    content(
-    ("application/yaml" = String),
-    ))
+        (status = 200, description = "Returns the OpenAPI YAML documentation",
+            content(
+                ("application/yaml" = String),
+            )
+        )
     ),
     tag = "General"
 )]
@@ -28,9 +34,9 @@ pub async fn get_openapi_yaml() -> impl IntoResponse {
 
 /// JSON
 #[allow(unused)]
-#[utoipa::path(
+#[route(
     get,
-    path = crate::http::openapi_json_path(),
+    path = "/docs/openapi.json",
     responses(
     (status = 200, description = "Returns the OpenAPI JSON documentation",
     content(

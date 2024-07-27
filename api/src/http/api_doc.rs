@@ -59,7 +59,7 @@ impl Modify for SecurityAddon {
         crate::http::controllers::pull_request::create_pull_request_analysis,
         crate::http::controllers::openapi::get_openapi_json,
         crate::http::controllers::version::version,
-        crate::http::controllers::openapi::get_openapi_yaml,
+        // crate::http::controllers::openapi::get_openapi_yaml,
         crate::http::controllers::health::health_check,
     ),
     components(
@@ -99,7 +99,7 @@ lazy_static! {
 
 pub(crate) fn generate_openapi() -> openapi::OpenApi {
     let builder: OpenApiBuilder = ApiDoc::openapi().into();
-    builder
+    let mut openapi = builder
         .info(
             openapi::InfoBuilder::new()
                 .title("DevPulse API")
@@ -130,5 +130,29 @@ pub(crate) fn generate_openapi() -> openapi::OpenApi {
                 .description(Some(LOCAL_SERVER_DESCRIPTION.to_string()))
                 .build(),
         ]))
-        .build()
+        .build();
+    if let Some(schema) = openapi.components.as_mut() {
+        schema.add_security_scheme(
+            "token_jwt",
+            SecurityScheme::Http(
+                HttpBuilder::new()
+                    .scheme(HttpAuthScheme::Bearer)
+                    .bearer_format("JWT")
+                    .build(),
+            ),
+        );
+    }
+    openapi
+
+    // .components
+    // .as_mut()
+    // .add_security_scheme(
+    //     "token_jwt",
+    //     SecurityScheme::Http(
+    //         HttpBuilder::new()
+    //             .scheme(HttpAuthScheme::Bearer)
+    //             .bearer_format("JWT")
+    //             .build(),
+    //     ),
+    // )
 }

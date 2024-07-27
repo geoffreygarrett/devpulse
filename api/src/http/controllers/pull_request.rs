@@ -2,13 +2,14 @@ use axum::response::IntoResponse;
 use utoipa::OpenApi;
 
 use crate::models::NotImplemented;
+use crate::route;
 
 /// Create Analysis
 ///
 /// Create a new analysis for a pull request, if the analysis exists, it will be returned.
 ///
 /// TODO: Implement this endpoint
-#[utoipa::path(
+#[route(
     put,
     path = "/pull-request",
     operation_id = "create_pull_request_analysis",

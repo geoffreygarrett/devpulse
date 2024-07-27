@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package devpulse;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/wrappers.proto";
+
+
+// Performance analysis for a developer
+message DeveloperPerformanceAnalysis {
+  string username = 1;
+  int32 total_commits = 2;
+  int32 total_prs = 3;
+  string average_time_to_merge = 4;
+  repeated RepositoryContribution repositories = 5;
+}
+
+// Contributions to a repository by a developer
+message RepositoryContribution {
+  string url = 1;
+  int32 commits = 2;
+}
+
+// Developer performance service definitions
+service DeveloperPerformanceService {
+  // Retrieve performance analysis for a specific developer
+  rpc GetDeveloperPerformance (google.protobuf.StringValue) returns (DeveloperPerformanceAnalysis) {}
+
+  // Add a new contribution record for a developer
+  rpc AddRepositoryContribution (RepositoryContribution) returns (google.protobuf.Empty) {}
+}

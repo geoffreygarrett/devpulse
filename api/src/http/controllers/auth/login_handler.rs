@@ -1,18 +1,18 @@
-use crate::config::AppConfig;
-use crate::errors::ServiceError;
-use axum::extract::{Extension, Json};
-use axum::response::IntoResponse;
-use bcrypt::verify;
-use jsonwebtoken::{encode, EncodingKey, Header};
-use serde::{Deserialize, Serialize};
 use std::sync::Arc;
-use std::time::{SystemTime, UNIX_EPOCH};
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct Claims {
-    sub: String,
-    exp: usize,
-}
+use async_trait::async_trait;
+use axum::extract::{Extension, Json};
+use axum::extract::FromRequestParts;
+use axum::http::{request::Parts, StatusCode};
+use axum::response::IntoResponse;
+use axum::TypedHeader;
+use axum_extra::headers::{Authorization, authorization::Bearer};
+use serde::{Deserialize, Serialize};
+use uuid::Uuid;
+
+use crate::core::auth::jwt::{Claims, JwtService};
+use crate::core::auth::user_service::UserService;
+use crate::core::errors::ServiceError;
 
 #[derive(Debug, Deserialize)]
 pub struct LoginRequest {
@@ -25,31 +25,32 @@ pub struct LoginResponse {
     token: String,
 }
 
+/// Handler for user login.
 pub async fn login_handler(
-    Json(payload): Json<LoginRequest>,
-    Extension(config): Extension<Arc<AppConfig>>,
+    Json(payload): Json<LoginRequest>, Extension(user_service): Extension<UserService>,
+    Extension(jwt_service): Extension<JwtService>,
 ) -> Result<impl IntoResponse, ServiceError> {
-    if payload.username == config.admin_username && verify(&payload.password, &config.admin_password).unwrap() {
-        let expiration = SystemTime::now()
-            .duration_since(UNIX_EPOCH)
-            .unwrap()
-            .as_secs() as usize
-            + 60 * 60; // 1 hour
+    let user_id = user_service.verify_user(&payload.username, &payload.password)?;
+    let token = jwt_service.generate_token(&user_id.to_string(), "key1")?;
+    Ok(axum::Json(LoginResponse { token }))
+}
 
-        let claims = Claims {
-            sub: payload.username,
-            exp: expiration,
-        };
+/// Extracts JWT claims from the request.
+#[async_trait]
+impl<S> FromRequestParts<S> for Claims
+where
+    S: Send + Sync,
+{
+    type Rejection = ServiceError;
 
-        let token = encode(
-            &Header::default(),
-            &claims,
-            &EncodingKey::from_secret(config.jwt_secret.as_ref()),
-        )
-            .unwrap();
-
-        Ok(axum::Json(LoginResponse { token }))
-    } else {
-        Err(ServiceError::AuthError)
+    async fn from_request_parts(
+        parts: &mut Parts, Extension(jwt_service): Extension<JwtService>,
+    ) -> Result<Self, Self::Rejection> {
+        let TypedHeader(Authorization(bearer)) = parts
+            .extract::<TypedHeader<Authorization<Bearer>>>()
+            .await
+            .map_err(|_| ServiceError::AuthError)?;
+        let claims = jwt_service.validate_token(bearer.token())?;
+        Ok(claims)
     }
 }

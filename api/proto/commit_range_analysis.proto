@@ -2,7 +2,14 @@ syntax = "proto3";
 
 package devpulse;
 
-import "repository.proto";
+import "common.proto";
+
+// Request structure for commit range analysis
+message CommitRangeRequest {
+  Repository repository = 1;
+  string start_commit = 2;
+  string end_commit = 3;
+}
 
 // Details for commit range analysis
 message CommitRangeDetails {
@@ -14,21 +21,14 @@ message CommitRangeDetails {
   repeated Contributor top_contributors = 6;
 }
 
-// Represents a single contributor within a commit range
-message Contributor {
-  string username = 1;
-  int32 commits = 2;
-}
-
-// Request structure for commit range analysis
-message CommitRangeRequest {
-  Repository repository = 1;
-  string start_commit = 2;
-  string end_commit = 3;
-}
-
 // Response structure for commit range analysis
 message CommitRangeAnalysis {
   Repository repository = 1;
   CommitRangeDetails commit_range = 2;
+}
+
+// Commit analysis service definitions
+service CommitAnalysisService {
+  // Request a commit range analysis
+  rpc AnalyzeCommitRange (CommitRangeRequest) returns (CommitRangeAnalysis) {}
 }
