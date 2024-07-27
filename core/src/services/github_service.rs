@@ -1,5 +1,3 @@
-use reqwest::{self};
-
 use external_github::{apis::GithubClient, models::Commit as GitHubCommit};
 
 use crate::annotations::prelude::{Annotation, Annotator, GitHubAnnotator};

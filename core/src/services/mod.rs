@@ -1,5 +1,4 @@
 pub use analyze_commit_range::*;
-use nject::{injectable, provider};
 
 mod analyze_commit_range;
 mod azure_service;

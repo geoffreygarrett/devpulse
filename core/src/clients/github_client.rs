@@ -1,7 +1,5 @@
 use nject::injectable;
 
-use external_github;
-
 use crate::clients::models::access_token::GitHubAccessToken;
 use crate::clients::models::arc_client::ArcClient;
 
@@ -45,10 +43,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_github_client_2() {
-        use external_github::{
-            apis::configuration::Configuration, apis::repos_api::ReposSlashGetCommitParams,
-            apis::GithubClient,
-        };
+        use external_github::{apis::configuration::Configuration, apis::GithubClient};
         let config = Configuration::builder()
             .base_path("https://api.github.com".to_string())
             .user_agent("OpenAPI-Generator/1.1.4/rust".to_string())

@@ -1,0 +1,14 @@
+syntax = "proto3";
+
+package devpulse;
+
+// Health check response
+message HealthCheck {
+  string status = 1;
+  uint64 uptime = 2;
+}
+
+// Source version response
+message SourceVersionResponse {
+  string version = 1;
+}

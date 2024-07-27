@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package devpulse;
+
+import "repository.proto";
+
+// Details for commit range analysis
+message CommitRangeDetails {
+  string start_commit = 1;
+  string end_commit = 2;
+  int32 total_commits = 3;
+  int32 total_additions = 4;
+  int32 total_deletions = 5;
+  repeated Contributor top_contributors = 6;
+}
+
+// Represents a single contributor within a commit range
+message Contributor {
+  string username = 1;
+  int32 commits = 2;
+}
+
+// Request structure for commit range analysis
+message CommitRangeRequest {
+  Repository repository = 1;
+  string start_commit = 2;
+  string end_commit = 3;
+}
+
+// Response structure for commit range analysis
+message CommitRangeAnalysis {
+  Repository repository = 1;
+  CommitRangeDetails commit_range = 2;
+}

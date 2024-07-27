@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+package devpulse;
+
+// Rate limit error response
+message TooManyRequests {
+  string message = 1;
+  int32 retry_after = 2; // Retry time in seconds
+}
+
+// General error response types
+message BadRequest {
+  string message = 1;
+}
+
+message Unauthorized {
+  string message = 1;
+}
+
+message InternalServerError {
+  string message = 1;
+}
+
+message NotImplemented {
+  string message = 1;
+}

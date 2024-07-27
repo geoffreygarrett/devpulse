@@ -1,0 +1,98 @@
+syntax = "proto3";
+
+package commit;
+
+// Enum for change types
+enum ChangeType {
+  NONE = 0;
+  ADD = 1;
+  EDIT = 2;
+  ENCODING = 3;
+  RENAME = 4;
+  DELETE = 5;
+  UNDELETE = 6;
+  BRANCH = 7;
+  MERGE = 8;
+  LOCK = 9;
+  ROLLBACK = 10;
+  SOURCE_RENAME = 11;
+  TARGET_RENAME = 12;
+  PROPERTY = 13;
+  ALL = 14;
+}
+
+// Enum for state of the status
+enum State {
+  NOT_SET = 0;
+  PENDING = 1;
+  SUCCEEDED = 2;
+  FAILED = 3;
+  ERROR = 4;
+  NOT_APPLICABLE = 5;
+  PARTIALLY_SUCCEEDED = 6;
+}
+
+// Message for user info and date for Git operations
+message GitUserDate {
+  optional string date = 1;
+  optional string email = 2;
+  optional string image_url = 3;
+  optional string name = 4;
+}
+
+// Message for changes included with the commit
+message GitChange {
+  optional int32 change_id = 1;
+  optional string new_content_template = 2;
+  optional string original_path = 3;
+  optional ChangeType change_type = 4;
+  optional string item = 5;
+  optional string new_content = 6;
+  optional string source_server_item = 7;
+  optional string url = 8;
+}
+
+// Message for status metadata from services and extensions
+message GitStatus {
+  optional string context = 1;
+  optional string created_by = 2;
+  optional string creation_date = 3;
+  optional string description = 4;
+  optional int32 id = 5;
+  optional State state = 6;
+  optional string target_url = 7;
+  optional string updated_date = 8;
+}
+
+// Message for resource reference
+message ResourceRef {
+  optional string id = 1;
+  optional string url = 2;
+}
+
+// Message for change count dictionary (assuming a simple key-value structure)
+message ChangeCountDictionary {
+  map<string, int32> change_counts = 1;
+}
+
+// Message for commit
+message Commit {
+  string url = 1;
+  string sha = 2;
+  string node_id = 3;
+  string html_url = 4;
+  string comments_url = 5;
+  optional GitUserDate author = 6;
+  optional GitUserDate committer = 7;
+  repeated GitChange changes = 8;
+  optional string comment = 9;
+  optional bool comment_truncated = 10;
+  optional string commit_id = 11;
+  optional bool commit_too_many_changes = 12;
+  repeated string parents = 13;
+  optional string remote_url = 14;
+  repeated GitStatus statuses = 15;
+  repeated ResourceRef work_items = 16;
+  optional string tree_id = 17;
+  optional ChangeCountDictionary change_counts = 18;
+}

@@ -1,0 +1,75 @@
+syntax = "proto3";
+
+package auth;
+
+// Message for user login request.
+message LoginRequest {
+  string username = 1; // Username of the user.
+  string password = 2; // Password of the user.
+}
+
+// Message containing the authentication tokens.
+message AuthTokens {
+  string access_token = 1; // JWT access token.
+  string refresh_token = 2; // JWT refresh token.
+}
+
+// JWT claims.
+message Claims {
+  string sub = 1; // Subject (usually user ID).
+  uint64 exp = 2; // Expiration time (as Unix timestamp).
+  repeated string roles = 3; // User roles.
+  optional string org = 4; // Organization.
+  optional uint64 iat = 5; // Issued at time (as Unix timestamp).
+  optional string iss = 6; // Issuer.
+  optional string aud = 7; // Audience.
+  optional string jti = 8; // JWT ID.
+}
+
+// Common error message format.
+message Error {
+  string code = 1; // Error code.
+  string message = 2; // Error message.
+}
+
+// Response message for login.
+message LoginResponse {
+  AuthTokens data = 1; // Authentication tokens.
+  optional Error error = 2; // Error information.
+}
+
+// Request message for user registration.
+message RegisterRequest {
+  string username = 1; // Username of the new user.
+  string password = 2; // Password of the new user.
+  string email = 3; // Email of the new user.
+}
+
+// Response message for user registration.
+message RegisterResponse {
+  string message = 1; // Confirmation message.
+  optional Error error = 2; // Error information.
+}
+
+// Request message for refreshing tokens.
+message RefreshRequest {
+  string refresh_token = 1; // JWT refresh token.
+}
+
+// Response message for refreshing tokens.
+message RefreshResponse {
+  AuthTokens data = 1; // Authentication tokens.
+  optional Error error = 2; // Error information.
+}
+
+// Authentication service definition.
+service AuthService {
+  // RPC method for user registration.
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+
+  // RPC method for user login.
+  rpc Login(LoginRequest) returns (LoginResponse);
+
+  // RPC method for refreshing tokens.
+  rpc Refresh(RefreshRequest) returns (RefreshResponse);
+}

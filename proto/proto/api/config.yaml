@@ -1,0 +1,88 @@
+derives:
+  message:
+    - target: "."
+      derive: "derive_builder::Builder"
+      condition: "derive_builder"
+  enum: [ ]
+  all:
+    - target: "."
+      derive: "utoipa::ToSchema"
+      condition: "documentation"
+    - target: "."
+      derive: "serde::Serialize"
+      condition: "documentation"
+    - target: "."
+      derive: "serde::Deserialize"
+      condition: "documentation"
+
+attributes:
+  message:
+    - target: "CommitRangeAnalysis.repository"
+      attribute: |
+        #[schema(example = json!({"type": "github", "owner": "bazelbuild", "name": "rules_rust"}))]
+      condition: "documentation"
+    - target: "CommitRangeAnalysis.commit_range"
+      attribute: |
+        #[schema(example = json!({
+          "start_commit": "6c2bd67",
+          "end_commit": "6b10ce3",
+          "total_commits": 6,
+          "total_additions": 1163,
+          "total_deletions": 59,
+          "top_contributors": [
+            {"username": "Daniel Wagner-Hall", "commits": 1144},
+            {"username": "Milan Vukov", "commits": 60},
+            {"username": "Marcel Hlopko", "commits": 18}
+          ]
+        }))]
+      condition: "documentation"
+    - target: "CommitRangeRequest.repository"
+      attribute: |
+        #[schema(example = json!({"type": "github", "owner": "bazelbuild", "name": "rules_rust"}))]
+      condition: "documentation"
+    - target: "CommitRangeRequest.start_commit"
+      attribute: |
+        #[schema(example = "6c2bd67")]
+      condition: "documentation"
+    - target: "CommitRangeRequest.end_commit"
+      attribute: |
+        #[schema(example = "6b10ce3")]
+      condition: "documentation"
+    - target: "CommitRangeDetails.start_commit"
+      attribute: |
+        #[schema(example = "6c2bd67")]
+      condition: "documentation"
+    - target: "CommitRangeDetails.end_commit"
+      attribute: |
+        #[schema(example = "6b10ce3")]
+      condition: "documentation"
+    - target: "CommitRangeDetails.total_commits"
+      attribute: |
+        #[schema(example = "6")]
+      condition: "documentation"
+    - target: "CommitRangeDetails.total_additions"
+      attribute: |
+        #[schema(example = "1163")]
+      condition: "documentation"
+    - target: "CommitRangeDetails.total_deletions"
+      attribute: |
+        #[schema(example = "59")]
+      condition: "documentation"
+    - target: "CommitRangeDetails.top_contributors"
+      attribute: |
+        #[schema(example = json!([
+          {"username": "Daniel Wagner-Hall", "commits": 1144},
+          {"username": "Milan Vukov", "commits": 60},
+          {"username": "Marcel Hlopko", "commits": 18}
+        ]))]
+      condition: "documentation"
+  enum: [ ]
+  all: [ ]
+
+features:
+  server:
+    build_server: true
+  client:
+    build_client: true
+  transport:
+    build_transport: true

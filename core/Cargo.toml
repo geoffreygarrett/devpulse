@@ -4,10 +4,6 @@ version = "0.1.0"
 edition = "2021"
 build = "build.rs"
 
-[[bin]]
-path = "src/bin/generate_client.rs"
-name = "generate_client"
-
 [dependencies]
 git2 = "0.19.0"
 url = "2.5.2"

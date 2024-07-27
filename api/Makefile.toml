@@ -1,0 +1,15 @@
+[tasks.shuttle-run]
+description = "Starts the local API server"
+command = "cargo"
+args = ["shuttle", "run"]
+
+[tasks.shuttle-run-quiet]
+description = "Starts the local API server and watches for changes"
+command = "cargo"
+args = ["watch", "-x", "'shuttle run'"]
+
+[tasks.shuttle-run-quiet-clear]
+description = "Starts the local API server and watches for changes, quietly clearing the console between runs"
+command = "cargo"
+args = ["watch", "-qcx", "'shuttle run'"]
+

@@ -71,8 +71,6 @@ impl Commit {
 }
 
 mod _impl_azure {
-    use super::models;
-    use external_azure;
 
     // impl From<external_azure::models::GitCommit> for models::Commit {
     //     fn from(commit: external_azure::models::GitCommit) -> Self {

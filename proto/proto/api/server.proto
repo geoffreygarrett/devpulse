@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package devpulse;
+
+import "google/protobuf/empty.proto";
+
+// Server configuration message
+message ServerConfig {
+  string host = 1;
+  uint32 port = 2;
+  uint32 max_connections = 3;
+}
+
+// Server statistics message
+message ServerStats {
+  uint64 total_requests = 1;
+  uint64 successful_requests = 2;
+  uint64 failed_requests = 3;
+  double uptime_seconds = 4;  // Uptime in seconds
+}
+
+// Server service definitions
+service ServerService {
+  // Retrieve server configuration
+  rpc GetServerConfig (google.protobuf.Empty) returns (ServerConfig) {}
+
+  // Retrieve server statistics
+  rpc GetServerStats (google.protobuf.Empty) returns (ServerStats) {}
+}
