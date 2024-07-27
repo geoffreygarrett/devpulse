@@ -1,0 +1,73 @@
+"""bazelbuild/rules_rust - bazel_env/bzlmod example
+
+See https://github.com/buildbuddy-io/bazel_env.bzl.
+"""
+
+module(
+    name = "devpulse",
+    version = "0.0.0",
+)
+
+bazel_dep(name = "platforms", version = "0.0.9")
+bazel_dep(name = "rules_rust", version = "0.48.0")
+
+#local_path_override(
+#    module_name = "rules_rust",
+#    path = "../..",
+#)
+
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(edition = "2021")
+use_repo(
+    rust,
+    "rust_toolchains",
+)
+
+register_toolchains("@rust_toolchains//:all")
+
+crate = use_extension(
+    "@rules_rust//crate_universe:extension.bzl",
+    "crate",
+)
+crate.from_cargo(
+    name = "crates",
+    cargo_lockfile = "//:Cargo.lock",
+    manifests = [
+        "//:Cargo.toml",
+        "//rust/hello_world:Cargo.toml",
+        "//api:Cargo.toml",
+        "//core:Cargo.toml",
+        "//external:Cargo.toml",
+        "//routes:Cargo.toml",
+        "//tests:Cargo.toml",
+        "//proto:Cargo.toml",
+    ],
+)
+use_repo(crate, "crates")
+
+bazel_dep(name = "bazel_env.bzl", version = "0.1.1")
+
+http_archive = use_repo_rule("@bazel_tools//:http.bzl", "http_archive")
+
+# OpenAI OpenAPI Specification
+http_archive(
+    name = "openai_spec",
+    sha256 = "insert_correct_sha256_here",
+    urls = ["https://raw.githubusercontent.com/openai/openai-openapi/cd3c3feb77931b5fd1e8b9c1eb5fb1697821a0d0/openapi.yaml"],
+)
+
+# GitHub REST API Specification
+http_archive(
+    name = "github_spec",
+    sha256 = "insert_correct_sha256_here",
+    urls = ["https://github.com/github/rest-api-description/raw/main/descriptions/api.github.com/api.github.com.2022-11-28.json"],
+)
+
+# Azure REST API Specifications
+http_archive(
+    name = "azure_spec",
+    build_file_content = "exports_files(['dev.azure.com.json'])",
+    sha256 = "insert_correct_sha256_here",
+    strip_prefix = "vsts-rest-api-specs-master",
+    urls = ["https://github.com/MicrosoftDocs/vsts-rest-api-specs/archive/refs/heads/master.zip"],
+)

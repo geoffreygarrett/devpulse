@@ -1,7 +1,13 @@
 [workspace]
 members = [
     "core",
-    "api", "tests", "notes"
+    "api",
+    "tests",
+    "notes",
+    #    "auth",
+    "proto"
+    , "route",
+    "external"
 ]
 
 exclude = [
@@ -13,3 +19,8 @@ resolver = "2"
 [workspace.dependencies]
 devpulse_core = { path = "core" }
 devpulse = { path = "api" }
+proto = { path = "proto" }
+auto-route = { path = "route" }
+
+[workspace.package]
+version = "0.1.0"

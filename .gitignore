@@ -5,3 +5,7 @@ Cargo.lock
 /.idea
 /generated
 /core/spec/node_modules/
+/.clwb
+bazel-out
+bazel-bin
+bazel-env
