@@ -1,112 +1,54 @@
-[tasks.extract-openai-spec]
-description = "Extract the OpenAI OpenAPI spec"
-cwd = "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/core/spec"
-script = """
-    node extract_openai.js
-"""
+[env]
+CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY = "."
+JAVA_OPTS = "-Dlog.level=off -Dorg.openapitools.codegen.languages.AbstractRustCodegen=off"
+API_GENERATOR_COMMAND = "openapi-generator generate -g rust --template-dir core/templates/rust-templates"
+COMMON_PROPERTIES = "useSingleRequestParameter=true,deriveBuilder=true,enableCache=true,tracing=true"
+API_SPEC_PATH = "openapi"
+OUTPUT_PATH = "generated"
 
+[tasks.download-and-extract-spec]
+description = "Download and extract API specification"
+script_runner = "sh"
+env = { JAVA_OPTS = "${JAVA_OPTS}" }
+script = [
+    "echo Downloading and extracting OpenAPI spec for $API_NAME",
+    "curl -L -o ${API_SPEC_PATH}/${API_NAME}_spec.${API_EXT} ${API_URL}",
+    "if [ \"$API_EXT\" = \"yaml\" ]; then",
+    "  command -v yaml2json >/dev/null 2>&1 || { echo >&2 'yaml2json is not installed. Installing...'; npm install -g yaml2json; }",
+    "  yaml2json ${API_SPEC_PATH}/${API_NAME}_spec.yaml > ${API_SPEC_PATH}/${API_NAME}_spec.json",
+    "elif [ \"$API_EXT\" = \"zip\" ]; then",
+    "  unzip -o ${API_SPEC_PATH}/${API_NAME}_spec.zip -d ${API_SPEC_PATH}/${API_NAME}_spec",
+    "  node ${API_SPEC_PATH}/extract_${API_NAME}.js ${API_SPEC_PATH}/${API_NAME}_spec",
+    "else",
+    "  node ${API_SPEC_PATH}/extract_${API_NAME}.js",
+    "fi"
+]
+
+[tasks.generate-client]
+description = "Generate API client"
+dependencies = ["download-and-extract-spec"]
+script_runner = "sh"
+env = { JAVA_OPTS = "${JAVA_OPTS}", API_GENERATOR_COMMAND = "${API_GENERATOR_COMMAND}", COMMON_PROPERTIES = "${COMMON_PROPERTIES}" }
+script = [
+    "echo Generating client for $API_NAME",
+    "${API_GENERATOR_COMMAND} -i ${API_SPEC_PATH}/${API_NAME}_spec.json -o ${OUTPUT_PATH}/external_${API_NAME} --additional-properties=packageName=external_${API_NAME},${COMMON_PROPERTIES} 2>&1 | grep -v 'WARN' | grep -v 'INFO'",
+    "echo Formatting code for $API_NAME",
+    "cargo fmt --manifest-path ${OUTPUT_PATH}/external_${API_NAME}/Cargo.toml"
+]
+
+# Specific tasks for APIs
 [tasks.generate-openai-client]
-description = "Generate the OpenAI client using OpenAPI Generator"
-dependencies = ["extract-openai-spec"]
-env = { JAVA_OPTS = "-Dlog.level=off -Dorg.openapitools.codegen.languages.AbstractRustCodegen=off" }
-cwd = "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}"
-script = """
-    export JAVA_OPTS="${JAVA_OPTS} -Dlog.level=off -Dorg.openapitools.codegen.languages.AbstractRustCodegen=off"
-    openapi-generator generate \
-        -i core/spec/api.openai.com.extracted.json \
-        -g rust \
-        -o generated/external_openai \
-        --template-dir core/templates/rust-templates \
-        --additional-properties=packageName=external_openai,useSingleRequestParameter=true,deriveBuilder=true,clientName=OpenAIClient,enableCache=true,tracing=true 2>&1 | grep -v 'WARN' | grep -v 'INFO'
-"""
-
-[tasks.extract-github-spec]
-description = "Extract the GitHub OpenAPI spec"
-cwd = "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/core/spec"
-script = """
-    node extract_github.js
-"""
+run_task = "download-and-extract-spec"
+env = { API_NAME = "openai", API_URL = "https://raw.githubusercontent.com/openai/openai-openapi/cd3c3feb77931b5fd1e8b9c1eb5fb1697821a0d0/openapi.yaml", API_EXT = "yaml" }
 
 [tasks.generate-github-client]
-description = "Generate the GitHub client using OpenAPI Generator"
-dependencies = ["extract-github-spec"]
-env = { JAVA_OPTS = "-Dlog.level=off -Dorg.openapitools.codegen.languages.AbstractRustCodegen=off" }
-cwd = "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}"
-script = """
-    export JAVA_OPTS="${JAVA_OPTS} -Dlog.level=off -Dorg.openapitools.codegen.languages.AbstractRustCodegen=off"
-    openapi-generator generate \
-        -i core/spec/api.github.com.extracted.json \
-        -g rust \
-        -o generated/external_github \
-        --template-dir core/templates/rust-templates \
-        --additional-properties=packageName=external_github,useSingleRequestParameter=true,deriveBuilder=true,clientName=GithubClient,enableCache=true,tracing=true 2>&1 | grep -v 'WARN' | grep -v 'INFO'
-"""
-
-[tasks.extract-azure-spec]
-description = "Extract the Azure OpenAPI spec"
-cwd = "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}/core/spec"
-script = """
-    node extract_azure.js
-"""
+run_task = "download-and-extract-spec"
+env = { API_NAME = "github", API_URL = "https://github.com/github/rest-api-description/raw/main/descriptions/api.github.com/api.github.com.2022-11-28.json", API_EXT = "json" }
 
 [tasks.generate-azure-client]
-description = "Generate the Azure client using OpenAPI Generator"
-dependencies = ["extract-azure-spec"]
-env = { JAVA_OPTS = "-Dlog.level=off -Dorg.openapitools.codegen.languages.AbstractRustCodegen=off" }
-cwd = "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}"
-script = """
-    export JAVA_OPTS="${JAVA_OPTS} -Dlog.level=off -Dorg.openapitools.codegen.languages.AbstractRustCodegen=off"
-    openapi-generator generate \
-        -i core/spec/dev.azure.com.extracted.json \
-        -g rust \
-        -o generated/external_azure \
-        --template-dir core/templates/rust-templates \
-        --additional-properties=packageName=external_azure,useSingleRequestParameter=true,deriveBuilder=true,clientName=AzureClient,enableCache=true,tracing=true 2>&1 | grep -v 'WARN' | grep -v 'INFO'
-"""
-
-[tasks.format-github-client]
-description = "Format the generated GitHub client code"
-dependencies = ["generate-github-client"]
-cwd = "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}"
-script = """
-    if [ -f generated/external_github/Cargo.toml ]; then
-        cargo fmt --manifest-path generated/external_github/Cargo.toml
-    else
-        echo "Cargo.toml not found for GitHub client"
-        exit 1
-    fi
-"""
-
-[tasks.format-azure-client]
-description = "Format the generated Azure client code"
-dependencies = ["generate-azure-client"]
-cwd = "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}"
-script = """
-    if [ -f generated/external_azure/Cargo.toml ]; then
-        cargo fmt --manifest-path generated/external_azure/Cargo.toml
-    else
-        echo "Cargo.toml not found for Azure client"
-        exit 1
-    fi
-"""
-
-[tasks.format-openai-client]
-description = "Format the generated OpenAI client code"
-dependencies = ["generate-openai-client"]
-cwd = "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}"
-script = """
-    if [ -f generated/external_openai/Cargo.toml ]; then
-        cargo fmt --manifest-path generated/external_openai/Cargo.toml
-    else
-        echo "Cargo.toml not found for OpenAI client"
-        exit 1
-    fi
-"""
-
+run_task = "download-and-extract-spec"
+env = { API_NAME = "azure", API_URL = "https://github.com/MicrosoftDocs/vsts-rest-api-specs/archive/refs/heads/master.zip", API_EXT = "zip" }
 
 [tasks.generate-clients]
 description = "Generate and format GitHub, Azure, and OpenAI clients"
-dependencies = ["format-github-client", "format-azure-client", "format-openai-client"]
-
-[env]
-CARGO_MAKE_EXTEND_WORKSPACE_MAKEFILE = true
+dependencies = ["generate-github-client", "generate-azure-client", "generate-openai-client"]
