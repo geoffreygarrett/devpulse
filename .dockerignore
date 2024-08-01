@@ -1,0 +1,34 @@
+# Ignore Rust build artifacts
+target/
+Cargo.lock
+
+# Ignore temporary and backup files
+*.rs.bk
+*.log
+
+# Ignore version control directories and files
+.git/
+.gitignore
+
+# Ignore Docker and general configuration files
+.dockerignore
+README.md
+
+# Ignore documentation and editor files
+docs/
+*.md
+*.swp
+*.swo
+
+# Ignore node modules, Bazel build outputs, and distribution directories
+node_modules/
+bazel-out/
+bazel-bin/
+dist/
+bazel-*
+
+# Additional ignores for Rust project
+#Cargo.toml
+#*.toml
+Dockerfile
+.env

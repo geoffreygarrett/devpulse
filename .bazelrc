@@ -1,15 +1,78 @@
-# Required on windows
+# ========================================
+# Common Settings
+# ========================================
+
+# Enable platform-specific configurations
 common --enable_platform_specific_config
-startup --windows_enable_symlinks
-build:windows --enable_runfiles
 
-build --experimental_enable_bzlmod
-
-# This isn't currently the defaut in Bazel, but we enable it to test we'll be ready if/when it flips.
+# Disallow empty glob patterns (future-proofing)
 build --incompatible_disallow_empty_glob
+
+# Enable Bzlmod (Bazel's new module system)
+build --experimental_enable_bzlmod
 
 # Required for cargo_build_script support before Bazel 7
 build --incompatible_merge_fixed_and_default_shell_env
 
-# Do not import the PATH etc. from the host environment
-common --incompatible_strict_action_env
+# ========================================
+# Windows-Specific Settings
+# ========================================
+
+# Enable symlink support on Windows
+startup --windows_enable_symlinks
+
+# Enable runfiles support on Windows
+build:windows --enable_runfiles
+
+# ========================================
+# Project-Specific Settings (Future)
+# ========================================
+
+# Uncomment and modify these lines as needed for your project
+
+# # Enable optimizations
+# build --compilation_mode=opt
+
+# # Enable verbose logging
+# build --verbose_failures
+
+# # Specify target platforms
+# build --platforms=@io_bazel_rules_rust//rust/toolchains:cross_compile
+
+# # Enable remote caching
+# build --remote_cache=<cache-url>
+
+# # Enable remote execution
+# build --remote_executor=<executor-url>
+
+# ========================================
+# Additional Toolchains and Configurations
+# ========================================
+
+# # Rust-specific settings
+# build --host_platform=@io_bazel_rules_rust//rust/toolchains:host_toolchain
+# build --toolchain_resolution --extra_toolchains=@io_bazel_rules_rust//rust/toolchains:rust_toolchain
+
+# # Custom build configurations
+# build:debug --compilation_mode=dbg
+# build:release --compilation_mode=opt
+
+# ========================================
+# Potential Custom Rules and Macros
+# ========================================
+
+# Load custom rules and macros
+# load("@my_custom_rules//:my_rules.bzl", "my_custom_rule")
+
+# ========================================
+# Project Phases and CI/CD Integration
+# ========================================
+
+# # Define build phases (e.g., build, test, deploy)
+# build:build_phase --output_groups=+build
+# build:test_phase --output_groups=+test
+# build:deploy_phase --output_groups=+deploy
+
+# # CI/CD integration settings
+# build:ci --config=ci
+# build:cd --config=cd
