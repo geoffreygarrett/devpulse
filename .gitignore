@@ -9,3 +9,6 @@ Cargo.lock
 bazel-out
 bazel-bin
 bazel-env
+.env.local
+.env.postgres
+.env
