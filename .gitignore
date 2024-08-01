@@ -11,4 +11,4 @@ bazel-bin
 bazel-env
 .env.local
 .env.postgres
-.env
+.envexternals/openapi/node_modules
