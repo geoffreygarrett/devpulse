@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package opendrift;
+
+message SimulationRequest {
+    string model_name = 1;
+    float lon = 2;
+    float lat = 3;
+    float radius = 4;
+    string start_time = 5;
+    string end_time = 6;
+    int32 duration_hours = 7;
+}
+
+message SimulationResponse {
+    string status = 1;
+    string result_file = 2;
+}
+
+service OpenDriftSimulator {
+    rpc RunSimulation (SimulationRequest) returns (SimulationResponse);
+}

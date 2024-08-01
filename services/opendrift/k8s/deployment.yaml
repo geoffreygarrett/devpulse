@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: opendrift-deployment
+  namespace: opendrift
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: opendrift
+  template:
+    metadata:
+      labels:
+        app: opendrift
+    spec:
+      containers:
+      - name: opendrift-container
+        image: yourusername/opendrift-simulation:latest
+        ports:
+        - containerPort: 8080 # REST API port
+        - containerPort: 50051 # gRPC API port
+        resources:
+          requests:
+            memory: "64Mi"
+            cpu: "250m"
+          limits:
+            memory: "128Mi"
+            cpu: "500m"

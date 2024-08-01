@@ -1,0 +1,9 @@
+flask
+grpcio
+grpcio-tools
+protobuf
+opendrift
+matplotlib
+Pillow
+numpy
+snafu
