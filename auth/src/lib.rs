@@ -1,11 +1,11 @@
-pub mod errors;
-pub mod jwt;
-pub mod password;
-pub mod user_service;
-pub mod config;
-pub mod models;
+pub(crate) mod errors;
+pub(crate) mod models;
+pub(crate) mod services;
 
-pub use jwt::service::JwtService;
-pub use password::PasswordService;
-pub use user_service::UserService;
-pub use config::AppConfig;
+pub mod prelude {
+    pub use jsonwebtoken::Validation;
+
+    pub use crate::models::claims::Claims;
+    pub use crate::models::config::AuthConfig;
+    pub use crate::models::keys::Keys;
+}
