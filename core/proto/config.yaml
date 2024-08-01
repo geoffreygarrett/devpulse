@@ -1,0 +1,30 @@
+derives:
+  message:
+    - target: "."
+      derive: "derive_builder::Builder"
+      condition: "use_builder"
+  enum: [ ]
+  all:
+    - target: "."
+      derive: "utoipa::ToSchema"
+      condition: "documentation"
+    - target: "."
+      derive: "serde::Serialize"
+      condition: "documentation"
+    - target: "."
+      derive: "serde::Deserialize"
+      condition: "documentation"
+
+
+attributes:
+  message: [ ]
+  enum: [ ]
+  all: [ ]
+
+features:
+  server:
+    build_server: true
+  client:
+    build_client: true
+  transport:
+    build_transport: true

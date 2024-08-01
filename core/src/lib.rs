@@ -1,5 +1,12 @@
+extern crate devpulse_externals as externals;
 pub use library::*;
 
+
+pub(crate) mod github {
+    pub use externals::external_github::*;
+}
+
+mod adapters;
 pub(crate) mod analyzers;
 mod clients;
 pub(crate) mod commit;

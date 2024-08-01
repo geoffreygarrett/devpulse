@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package api.health.v1;
+
+// Request message for health check.
+message HealthCheckRequest {
+  // Name of the service to check the health status.
+  string service = 1;
+}
+
+// Response message for health check.
+message HealthCheckResponse {
+  // Enum representing the serving status of the service.
+  enum ServingStatus {
+    UNKNOWN = 0;         // The serving status is unknown.
+    SERVING = 1;         // The service is up and running.
+    NOT_SERVING = 2;     // The service is not serving.
+    SERVICE_UNKNOWN = 3; // The service is unknown. Used only by the Watch method.
+  }
+  // The serving status of the service.
+  ServingStatus status = 1;
+}
+
+// Service definition for health checks.
+service Health {
+  // Unary RPC for checking the health status of a service.
+  rpc Check(HealthCheckRequest) returns (HealthCheckResponse);
+
+  // Server-streaming RPC for continuously checking the health status of a service.
+  rpc Watch(HealthCheckRequest) returns (stream HealthCheckResponse);
+}

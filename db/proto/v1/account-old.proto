@@ -1,0 +1,83 @@
+syntax = "proto3";
+
+package db.account.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "v1/filter.proto";  // Assuming this is where FilterCondition is defined
+
+message OperationStatus {
+  bool success = 1;
+  string message = 2;
+}
+
+message AccountResponse {
+  AccountModel result = 1;
+  OperationStatus status = 2;
+}
+
+message AccountModel {
+  int32 id = 1;
+  string uuid = 2;
+  string given_name = 3;
+  string email = 4;
+  string hash = 5;
+  string avatar_url = 6;
+  string created_at = 7;
+}
+
+message SharedInput {
+  repeated db.filter.v1.FilterCondition filters = 2;
+  bool return = 3;
+}
+
+message AccountInsert {
+  optional google.protobuf.StringValue uuid = 1;
+  optional google.protobuf.StringValue given_name = 2;
+  google.protobuf.StringValue email = 3;
+  google.protobuf.StringValue hash = 4;
+  optional google.protobuf.StringValue avatar_url = 5;
+}
+
+message AccountUpdate {
+  optional google.protobuf.StringValue given_name = 3;
+  optional google.protobuf.StringValue email = 4;
+  optional google.protobuf.StringValue hash = 5;
+  optional google.protobuf.StringValue avatar_url = 6;
+}
+
+message AccountDeleteRequest {
+  SharedInput params = 2;
+}
+
+// Request message for updating an account
+message AccountUpdateRequest {
+  repeated AccountUpdate account = 1;
+  SharedInput params = 2;
+}
+
+message AccountInsertRequest {
+  repeated AccountInsert account = 1;
+  SharedInput params = 2;
+}
+
+message AccountSelectRequest {
+  repeated db.filter.v1.FilterCondition filters = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+  int32 count = 4;
+  string order_by = 5;
+  string order = 6;
+}
+
+message AccountsResponse {
+  repeated AccountModel accounts = 1;
+  OperationStatus status = 2;
+}
+
+service AccountService {
+  rpc Insert (AccountInsertRequest) returns (AccountsResponse) {}
+  rpc Update (AccountUpdateRequest) returns (AccountsResponse) {}
+  rpc Delete (AccountDeleteRequest) returns (AccountsResponse) {}
+  rpc Select (AccountSelectRequest) returns (AccountsResponse) {}
+}

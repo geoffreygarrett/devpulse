@@ -1,0 +1,115 @@
+syntax = "proto3";
+
+package db.filter.v1;
+
+import "google/protobuf/wrappers.proto"; // Import wrappers for nullable fields handling
+
+// Enum to define logical operations
+enum LogicalOperator {
+  AND = 0;
+  OR = 1;
+  NOT = 2;
+}
+
+// Base filter condition, supports various types of filters including logical grouping
+message FilterCondition {
+  string column = 1;
+
+  oneof condition {
+    StringFilter string_filter = 2;
+    NumberFilter number_filter = 3;
+    DateFilter date_filter = 4;
+    BooleanFilter boolean_filter = 5;
+    CompositeFilter composite = 6; // For logical compositions of multiple conditions
+  }
+}
+
+// Filters specific to string operations
+message StringFilter {
+  oneof type {
+    EqualFilter eq = 1;
+    LikeFilter like = 2;
+    InStringFilter in = 3;
+  }
+}
+
+message EqualFilter {
+  google.protobuf.StringValue value = 1; // Nullable value
+}
+
+message LikeFilter {
+  string pattern = 1;
+}
+
+message InStringFilter {
+  repeated string values = 1;
+}
+
+// Filters specific to numerical operations
+message NumberFilter {
+  oneof type {
+    LtFilter lt = 1;
+    GtFilter gt = 2;
+    RangeFilter range = 3;
+  }
+}
+
+message LtFilter {
+  double value = 1;
+}
+
+message GtFilter {
+  double value = 1;
+}
+
+message RangeFilter {
+  double from = 1;
+  double to = 2;
+}
+
+// Filters for date fields using ISO 8601 formats
+message DateFilter {
+  oneof type {
+    DateEqualFilter eq = 1;
+    DateRangeFilter range = 2;
+  }
+}
+
+message DateEqualFilter {
+  string value = 1;
+}
+
+message DateRangeFilter {
+  string from = 1;
+  string to = 2;
+}
+
+// Boolean filter for direct true/false checks
+message BooleanFilter {
+  bool value = 1;
+}
+
+// Composite filter for logical combinations
+message CompositeFilter {
+  repeated FilterCondition conditions = 1;
+  LogicalOperator operator = 2;
+}
+
+// Service definitions to use these filters
+service FilterService {
+  rpc ApplyFilter(QueryRequest) returns (QueryResponse);
+}
+
+// Request and Response messages
+message QueryRequest {
+  repeated FilterCondition conditions = 1;
+  optional string returns = 2; // Optionally specify fields to return, like SELECT in SQL
+}
+
+message DataRow {
+  map<string, string> fields = 1; // Generic data row representation
+}
+
+message QueryResponse {
+  repeated DataRow rows = 1; // Resulting rows from the query
+}

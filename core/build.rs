@@ -1,99 +1,188 @@
-// use std::path::Path;
-// use std::process::Command;
-// use std::{env, fs};
+use std::collections::{HashMap, HashSet};
+use std::fs;
+use std::path::Path;
 
-// // Constants for paths and the CLI tool
-// const OPENAPI_SPEC_PATH: &str = "./spec/api.github.com.extracted.json";
-// const OUTPUT_DIR: &str = "generated";
-// const OPENAPI_GENERATOR_CLI_PATH: &str = "openapi-generator";
-//
-// fn prepare_generated_lib(output_path: &Path) {
-//     // Create the output directory if it doesn't exist
-//     if !output_path.exists() {
-//         fs::create_dir_all(output_path).expect("Failed to create output directory");
-//         // Optionally, create a basic Cargo.toml if your generator does not do it
-//         let cargo_toml_contents = r#"
-//             [package]
-//             name = "external_github"
-//             version = "0.1.0"
-//             edition = "2018"
-//
-//             [dependencies]
-//         "#;
-//         fs::write(output_path.join("Cargo.toml"), cargo_toml_contents)
-//             .expect("Failed to create Cargo.toml");
-//     }
-// }
-//
-// fn generate_external_github_client() {
-//     // Build the full path to the OpenAPI specification file
-//     prepare_generated_lib(&env::current_dir().unwrap().join(OUTPUT_DIR));
-//     let spec_path = env::current_dir().unwrap().join(OPENAPI_SPEC_PATH);
-//
-//     // Check if the OpenAPI specification file exists
-//     if !spec_path.exists() {
-//         panic!("The specification file {:?} does not exist.", spec_path);
-//     }
-//
-//     // Ensure the output directory exists or create it
-//     let output_path = env::current_dir().unwrap().join(OUTPUT_DIR);
-//     if !output_path.exists() {
-//         std::fs::create_dir_all(&output_path).expect("Failed to create output directory");
-//     }
-//
-//     // Debug prints
-//     println!("Running OpenAPI Generator...");
-//     println!("Spec path: {:?}", spec_path);
-//     println!("Output directory: {:?}", output_path);
-//
-//     // Check if the OpenAPI Generator CLI is installed
-//     let generator_path = Command::new("which")
-//         .arg(OPENAPI_GENERATOR_CLI_PATH)
-//         .output()
-//         .expect("Failed to run `which` command");
-//
-//     if generator_path.stdout.is_empty() {
-//         panic!("OpenAPI Generator CLI not found. Please install it.");
-//     }
-//
-//     // Print the location of the OpenAPI Generator CLI if found
-//     println!(
-//         "OpenAPI Generator CLI found at: {:?}",
-//         String::from_utf8_lossy(&generator_path.stdout)
-//     );
-//
-//     // Run the OpenAPI Generator command
-//     let status = Command::new(OPENAPI_GENERATOR_CLI_PATH)
-//         .arg("generate")
-//         .arg("-i")
-//         .arg(spec_path.to_str().unwrap())
-//         .arg("-g")
-//         .arg("rust")
-//         .arg("-o")
-//         .arg(output_path.to_str().unwrap())
-//         .arg("--additional-properties=useSingleRequestParameter=true,packageName=external_github")
-//         .status()
-//         .expect("Failed to run OpenAPI Generator");
-//
-//     // print command first
-//
-//     if !status.success() {
-//         panic!("OpenAPI Generator failed with status: {}", status);
-//     }
-//
-//     println!("OpenAPI Generator ran successfully");
-//
-//     // Copy the generated files to the desired output directory
-//     let out_dir = env::var("OUT_DIR").expect("OUT_DIR environment variable is not set");
-//     let src_path = output_path.join("src/lib.rs");
-//     let dest_path = Path::new(&out_dir).join("__external_github_client.rs");
-//
-//     std::fs::copy(&src_path, &dest_path)
-//         .expect("Failed to copy generated file to output directory");
-// }
+use serde::{Deserialize, Serialize};
+use tonic_build::Builder as TonicConfig;
+
+#[derive(Debug, Serialize, Deserialize)]
+struct Config {
+    derives: DerivesConfig,
+    attributes: AttributesConfig,
+    features: FeaturesConfig,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct DerivesConfig {
+    message: Vec<DeriveEntry>,
+    #[serde(rename = "enum")]
+    enum_: Vec<DeriveEntry>,
+    all: Vec<DeriveEntry>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct AttributesConfig {
+    message: Vec<AttributeEntry>,
+    #[serde(rename = "enum")]
+    enum_: Vec<AttributeEntry>,
+    all: Vec<AttributeEntry>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct FeaturesConfig {
+    server: Option<FeatureConfig>,
+    client: Option<FeatureConfig>,
+    transport: Option<FeatureConfig>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct FeatureConfig {
+    build_server: Option<bool>,
+    build_client: Option<bool>,
+    build_transport: Option<bool>,
+    use_arc_self: Option<bool>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct DeriveEntry {
+    target: String,
+    derive: String,
+    condition: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+struct AttributeEntry {
+    target: String,
+    attribute: String,
+    condition: Option<String>,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+enum Feature {
+    Server,
+    Client,
+    Transport,
+    UseBuilder,
+    Documentation,
+}
 
 fn main() {
-    // println!("cargo:rerun-if-changed=build.rs");
-    // println!("cargo:rerun-if-changed={}", OPENAPI_SPEC_PATH);
-    // generate_external_github_client();
+    let config = load_config();
+    let mut tonic_config = tonic_build::configure();
+
+    apply_features(&mut tonic_config, &config.features);
+    tonic_config = apply_configurations(tonic_config, &config);
+    compile_protos(&tonic_config);
+}
+
+fn load_config() -> Config {
+    let config_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("proto/config.yaml");
+    let config_str = fs::read_to_string(config_path).expect("Failed to read config.yaml");
+    serde_yaml::from_str(&config_str).expect("Failed to parse YAML")
+}
+
+fn apply_features(tonic_config: &mut TonicConfig, features: &FeaturesConfig) {
+    if let Some(server) = &features.server {
+        if server.build_server.unwrap_or(false) {
+            *tonic_config = tonic_config.clone().build_server(true);
+        }
+        if server.use_arc_self.unwrap_or(false) {
+            *tonic_config = tonic_config.clone().use_arc_self(true);
+        }
+    }
+
+    if let Some(client) = &features.client {
+        if client.build_client.unwrap_or(false) {
+            *tonic_config = tonic_config.clone().build_client(true);
+        }
+    }
+
+    if let Some(transport) = &features.transport {
+        if transport.build_transport.unwrap_or(false) {
+            *tonic_config = tonic_config.clone().build_transport(true);
+        }
+    }
+}
+
+// Assuming TonicConfig is `tonic_build::Builder`
+fn message_attribute_wrapper(tonic_config: &mut TonicConfig, target: &str, attributes: &str) {
+    *tonic_config = tonic_config.clone().message_attribute(target, attributes);
+}
+
+fn type_attribute_wrapper(tonic_config: &mut TonicConfig, target: &str, attributes: &str) {
+    *tonic_config = tonic_config.clone().type_attribute(target, attributes);
+}
+
+// Adjusted to use mutable references
+fn accumulate_and_apply_derives(
+    tonic_config: &mut TonicConfig, derives: &[DeriveEntry],
+    attribute_applier: fn(&mut TonicConfig, &str, &str),
+) {
+    let mut derive_map: HashMap<String, HashSet<String>> = HashMap::new();
+
+    for derive in derives {
+        if cfg_matches(&derive.condition) {
+            derive_map
+                .entry(derive.target.clone())
+                .or_insert_with(HashSet::new)
+                .insert(derive.derive.clone());
+        }
+    }
+
+    for (target, derives) in derive_map {
+        let derives_list: Vec<String> = derives.into_iter().collect();
+        let derives_string = format!("#[derive({})]", derives_list.join(", "));
+        attribute_applier(tonic_config, &target, &derives_string);
+    }
+}
+
+fn apply_attributes(
+    tonic_config: &mut TonicConfig, attributes: &[AttributeEntry],
+    attribute_applier: fn(&mut TonicConfig, &str, &str),
+) {
+    for attribute in attributes {
+        if cfg_matches(&attribute.condition) {
+            attribute_applier(tonic_config, &attribute.target, &attribute.attribute);
+        }
+    }
+}
+
+fn apply_configurations(mut tonic_config: TonicConfig, config: &Config) -> TonicConfig {
+    accumulate_and_apply_derives(
+        &mut tonic_config,
+        &config.derives.message,
+        message_attribute_wrapper,
+    );
+
+    apply_attributes(&mut tonic_config, &config.attributes.message, message_attribute_wrapper);
+
+    // Apply all-type derive attributes
+    accumulate_and_apply_derives(&mut tonic_config, &config.derives.all, type_attribute_wrapper);
+
+    // Apply all-type attributes
+    apply_attributes(&mut tonic_config, &config.attributes.all, type_attribute_wrapper);
+
+    tonic_config
+}
+
+fn cfg_matches(condition: &Option<String>) -> bool {
+    match condition {
+        Some(cond) => match cond.as_str() {
+            "server" => cfg!(feature = "server"),
+            "client" => cfg!(feature = "client"),
+            "transport" => cfg!(feature = "transport"),
+            "use_builder" => cfg!(feature = "use_builder"),
+            "documentation" => cfg!(feature = "documentation"),
+            _ => true,
+        },
+        None => true,
+    }
+}
+
+fn compile_protos(tonic_config: &TonicConfig) {
+    tonic_config
+        .clone()
+        .compile(&["proto/auth.proto", "proto/commit.proto"], &["proto/"])
+        .expect("Failed to compile proto files");
 }

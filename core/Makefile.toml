@@ -37,9 +37,9 @@ script = """
     openapi-generator generate \
         -i core/spec/api.github.com.extracted.json \
         -g rust \
-        -o generated/external_github \
+        -o generated/externals::external_github \
         --template-dir core/templates/rust-templates \
-        --additional-properties=packageName=external_github,useSingleRequestParameter=true,deriveBuilder=true,clientName=GithubClient,enableCache=true,tracing=true 2>&1 | grep -v 'WARN' | grep -v 'INFO'
+        --additional-properties=packageName=externals::external_github,useSingleRequestParameter=true,deriveBuilder=true,clientName=GithubClient,enableCache=true,tracing=true 2>&1 | grep -v 'WARN' | grep -v 'INFO'
 """
 
 [tasks.extract-azure-spec]
@@ -59,9 +59,9 @@ script = """
     openapi-generator generate \
         -i core/spec/dev.azure.com.extracted.json \
         -g rust \
-        -o generated/external_azure \
+        -o generated/internal::external_azure \
         --template-dir core/templates/rust-templates \
-        --additional-properties=packageName=external_azure,useSingleRequestParameter=true,deriveBuilder=true,clientName=AzureClient,enableCache=true,tracing=true 2>&1 | grep -v 'WARN' | grep -v 'INFO'
+        --additional-properties=packageName=internal::external_azure,useSingleRequestParameter=true,deriveBuilder=true,clientName=AzureClient,enableCache=true,tracing=true 2>&1 | grep -v 'WARN' | grep -v 'INFO'
 """
 
 [tasks.format-github-client]
@@ -69,8 +69,8 @@ description = "Format the generated GitHub client code"
 dependencies = ["generate-github-client"]
 cwd = "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}"
 script = """
-    if [ -f generated/external_github/Cargo.toml ]; then
-        cargo fmt --manifest-path generated/external_github/Cargo.toml
+    if [ -f generated/externals::external_github/Cargo.toml ]; then
+        cargo fmt --manifest-path generated/externals::external_github/Cargo.toml
     else
         echo "Cargo.toml not found for GitHub client"
         exit 1
@@ -82,8 +82,8 @@ description = "Format the generated Azure client code"
 dependencies = ["generate-azure-client"]
 cwd = "${CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY}"
 script = """
-    if [ -f generated/external_azure/Cargo.toml ]; then
-        cargo fmt --manifest-path generated/external_azure/Cargo.toml
+    if [ -f generated/internal::external_azure/Cargo.toml ]; then
+        cargo fmt --manifest-path generated/internal::external_azure/Cargo.toml
     else
         echo "Cargo.toml not found for Azure client"
         exit 1

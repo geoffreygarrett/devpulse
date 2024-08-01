@@ -6,10 +6,15 @@ use axum::Json;
 use axum::response::{IntoResponse, Response};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use sysinfo::RefreshKind;
+use sysinfo::Signal::Sys;
+use sysinfo::System;
 use tokio::sync::RwLock;
 use utoipa::{ToResponse, ToSchema};
 
 use crate::create_response_enum;
+
+tonic::include_proto!("repository");
 
 const APPLICATION_VND_DEVPULSE_V1_JSON: &str = "application/vnd.devpulse.v1+json";
 // const APPLICATION_VND_DEVPULSE_V1_YAML: &str = "application/vnd.devpulse.v1+yaml";
@@ -29,6 +34,62 @@ pub struct CommitRangeRequest {
     pub start_commit: String,
     #[schema(example = "6b10ce3")]
     pub end_commit: String,
+}
+
+/// Represents a request to analyze a specific commit range in a repository.
+#[derive(Serialize, Deserialize, ToSchema)]
+pub struct SummarizeCommitRequest {
+    #[schema(example = json!({
+        "type": "github",
+        "owner": "bazelbuild",
+        "name": "rules_rust"
+    }))]
+    pub repository: Repository,
+    #[schema(example = "6c2bd67")]
+    pub commit: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, ToSchema)]
+pub struct SummarizedCommit {
+    #[schema(example = json!({
+        "type": "github",
+        "owner": "bazelbuild",
+        "name": "rules_rust"
+    }))]
+    pub repository: Repository,
+
+    #[schema(example = "6c2bd67")]
+    pub commit: String,
+
+    #[schema(example = "2021-08-01T12:00:00Z")]
+    pub date: String,
+
+    #[schema(example = "Daniel Wagner-Hall")]
+    pub author: String,
+
+    #[schema(example = "Initial commit")]
+    pub message: String,
+
+    #[schema(example = "6")]
+    pub additions: i32,
+
+    #[schema(example = "0")]
+    pub deletions: i32,
+
+    #[schema(example = r#"
+        - Fixed bug in serialization.
+        - Added feature flags for optional components.
+    "#)]
+    pub summary: String,
+}
+
+#[derive(ToResponse)]
+#[allow(unused)]
+pub(crate) enum SummarizedCommitResponse {
+    Json(#[content("application/vnd.devpulse.v1+json")] SummarizedCommit),
+    Yaml(#[content("application/vnd.devpulse.v1+yaml")] SummarizedCommit),
+    Toml(#[content("application/vnd.devpulse.v1+toml")] SummarizedCommit),
+    Xml(#[content("application/vnd.devpulse.v1+xml")] SummarizedCommit),
 }
 
 /// Represents the response containing the results from analyzing a commit range.
@@ -314,42 +375,58 @@ impl NotImplemented {
 
 impl_into_response!(NotImplemented);
 
-#[derive(Clone)]
-pub struct ServerState {
-    start_time: Arc<RwLock<SystemTime>>,
+#[derive(Clone, Debug)]
+pub(crate) struct ServerState {
+    start_time: Arc<tokio::sync::RwLock<SystemTime>>,
+    version: String,
+    system: Arc<tokio::sync::RwLock<System>>,
 }
 
 impl ServerState {
-    pub fn new(start_time: Arc<RwLock<SystemTime>>) -> Self {
-        ServerState { start_time }
-    }
-
-    pub async fn get_uptime_as_secs(&self) -> u64 {
-        self.start_time
-            .read()
-            .await
-            .elapsed()
-            .unwrap_or_default()
-            .as_secs()
-    }
-}
-
-#[derive(Serialize, ToSchema, Deserialize)]
-pub struct HealthCheck {
-    status: String,
-    uptime: u64,
-}
-
-impl HealthCheck {
-    pub fn new(status: &str, uptime: u64) -> Self {
-        HealthCheck {
-            status: status.to_string(),
-            uptime,
+    pub(crate) fn new(start_time: Arc<RwLock<SystemTime>>) -> Self {
+        let system = System::new_all();
+        ServerState {
+            start_time,
+            version: env!("CARGO_PKG_VERSION").to_string(),
+            system: Arc::new(RwLock::new(system)),
         }
     }
+
+    pub(crate) async fn get_uptime_as_secs(&self) -> u64 {
+        self.start_time.read().await.elapsed().unwrap().as_secs()
+    }
+
+    pub(crate) async fn get_cpu_load(&self) -> f64 {
+        let mut system = self.system.write().await;
+        system.refresh_cpu_usage();
+        system
+            .cpus()
+            .iter()
+            .map(|cpu| cpu.cpu_usage() as f64)
+            .sum::<f64>()
+            / system.cpus().len() as f64
+    }
+
+    pub(crate) async fn get_memory_usage(&self) -> u64 {
+        let mut system = self.system.write().await;
+        system.refresh_memory();
+        system.used_memory() * 1024 // Return memory usage in bytes
+    }
+
+    // pub(crate) async fn health_check(&self) -> HealthCheckResponse {
+    //     // HealthCheck {
+    //     //     status: "OK".to_string(),
+    //     //     uptime: self.get_uptime_as_secs().await,
+    //     //     version: self.version.clone(),
+    //     //     cpu_load: self.get_cpu_load().await,
+    //     //     memory_usage: self.get_memory_usage().await,
+    //     // }
+    // }
 }
 
-create_response_enum!(HealthCheckResponse, "Health Check", HealthCheck);
+tonic::include_proto!("operational");
+
+// create_response_enum!(HealthCheckResponse, "Health Check", HealthCheck);
 
 // impl HealthCheckResponse {
 //     pub fn new(status: &str, uptime: u64) -> Self {
@@ -390,138 +467,4 @@ impl IntoResponse for SourceVersionResponse {
     fn into_response(self) -> Response {
         (StatusCode::OK, Json(self)).into_response()
     }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
-#[serde(tag = "type")]
-pub enum Repository {
-    #[serde(rename = "github")]
-    #[schema(
-        title = "GitHubRepository",
-        example = json!({
-            "type": "github",
-            "owner": "bazelbuild",
-            "name": "rules_rust",
-            "connection": {
-                "protocol": "https",
-                "token": "example-token"
-            }
-        })
-    )]
-    GitHub(GitHubRepository),
-
-    #[serde(rename = "gitlab")]
-    #[schema(
-        title = "GitLabRepository",
-        example = json!({
-            "type": "gitlab",
-            "owner": "gitlab-org",
-            "name": "gitlab",
-            "connection": {
-                "protocol": "https",
-                "token": "example-token"
-            }
-        })
-    )]
-    GitLab(GitLabRepository),
-
-    #[serde(rename = "bitbucket")]
-    #[schema(
-        title = "BitbucketRepository",
-        example = json!({
-            "type": "bitbucket",
-            "owner": "atlassian",
-            "name": "pyramid",
-            "connection": {
-                "protocol": "https",
-                "token": "example-token"
-            }
-        })
-    )]
-    Bitbucket(BitbucketRepository),
-
-    #[serde(rename = "azure_repos")]
-    #[schema(
-        title = "AzureReposRepository",
-        example = json!({
-            "type": "azure_repos",
-            "organization": "Microsoft",
-            "project": "vscode",
-            "repository": "vscode",
-            "connection": {
-                "protocol": "https",
-                "token": "example-token"
-            }
-        })
-    )]
-    AzureRepos(AzureReposRepository),
-
-    #[serde(rename = "custom")]
-    #[schema(
-        title = "CustomRepository",
-        example = json!({
-            "type": "custom",
-            "url": "https://custom.repo/url",
-            "connection": {
-                "protocol": "https",
-                "token": "example-token"
-            }
-        })
-    )]
-    Custom(CustomRepository),
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
-pub struct GitHubRepository {
-    pub owner: String,
-    pub name: String,
-    pub connection: Connection,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
-pub struct GitLabRepository {
-    pub owner: String,
-    pub name: String,
-    pub connection: Connection,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
-pub struct BitbucketRepository {
-    pub owner: String,
-    pub name: String,
-    pub connection: Connection,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
-pub struct AzureReposRepository {
-    pub organization: String,
-    pub project: String,
-    pub repository: String,
-    pub connection: Connection,
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
-pub struct CustomRepository {
-    pub url: String,
-    pub connection: Connection,
-}
-
-/// A connection method to access repositories.
-#[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
-pub struct Connection {
-    pub protocol: Protocol,
-    pub token: Option<String>, // Token might be needed for some connection types
-    pub url: Option<String>,   // URL might be needed for custom connections
-}
-
-#[derive(Debug, Serialize, Deserialize, ToSchema, Clone)]
-pub enum Protocol {
-    #[serde(rename = "http")]
-    Http,
-    #[serde(rename = "https")]
-    Https,
-    #[serde(rename = "ssh")]
-    Ssh,
-    #[serde(rename = "local")]
-    Local,
 }

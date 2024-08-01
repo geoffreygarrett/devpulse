@@ -34,6 +34,7 @@ macro_rules! path {
         concat!("__", stringify!($controller), "::path()")
     };
 }
+
 pub(crate) fn create_router() -> Router {
     // Configure tracing if desired
     // construct a subscriber that prints formatted traces to stdout
@@ -76,10 +77,12 @@ pub(crate) fn create_router() -> Router {
     let doc = API_DOC.clone();
     let base_router = Router::new()
         .route("/", get(|| async { Redirect::permanent("/scalar") }))
+        .typed_route(controllers::chat::data_handler)
+        .typed_route(controllers::chat_2::chat_relay)
         .typed_route(controllers::openapi::get_openapi_yaml)
         .typed_route(controllers::pull_request::create_pull_request_analysis)
-        .typed_route(controllers::developer::get_developer_performance)
-        .typed_route(controllers::repository::create_commit_range_analysis);
+        .typed_route(controllers::developer::get_developer_performance);
+    // .typed_route(controllers::repository::create_commit_range_analysis);
 
     let router = if std::env::var("SHUTTLE").is_ok() {
         base_router.layer(GovernorLayer {
@@ -94,12 +97,14 @@ pub(crate) fn create_router() -> Router {
         .merge(RapiDoc::new(openapi_json_path()).path(RAPIDOC_PATH))
         .merge(Redoc::with_url("/redoc", doc.clone()))
         .merge(Scalar::with_url("/scalar", doc.clone()))
-        .route(
-            &*crate::utils::convert_openapi_to_axum_path(
-                controllers::health::__path_health_check::path().as_str(),
-            ),
-            get(controllers::health::health_check),
-        )
+        // .typed_route(controllers::operational::health_check)
+        .typed_route(controllers::operational::health_check)
+        // .route(
+        //     &*crate::utils::convert_openapi_to_axum_path(
+        //         controllers::health::__path_health_check::path().as_str(),
+        //     ),
+        //     get(controllers::health::health_check),
+        // )
         .route(
             &*crate::utils::convert_openapi_to_axum_path(
                 controllers::version::__path_version::path().as_str(),

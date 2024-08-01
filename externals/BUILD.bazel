@@ -1,0 +1,146 @@
+# BUILD.bazel
+
+load("@openapi_tools_generator_bazel//:defs.bzl", "openapi_generator")
+
+#
+## Generate OpenAI client
+openapi_generator(
+    name = "generate_openai_client",
+    additional_properties = {
+        "packageName": "external_openai",
+        "useSingleRequestParameter": "true",
+        "deriveBuilder": "true",
+        "enableCache": "true",
+        "tracing": "true",
+    },
+    generator = "rust",
+    spec = "api.openai.com.json",
+)
+#
+## File: tools/build_rules/BUILD.bazel
+#load(":bazel/openapi_generator.bazl", "openapi_generator")
+
+#genrule(
+#    name = "generate_rust_client",
+#    srcs = ["@target//file:your_openapi_file.json"],  # Adjust the target to point to your actual OpenAPI spec file
+#    outs = ["rust_client.tar"],  # Output as a tar for simplicity
+#    cmd = """
+#    $(location openapi-generator-cli) generate \
+#        -g rust \
+#        --additional-properties=packageName=external_github,useSingleRequestParameter=true,deriveBuilder=true,enableCache=true,tracing=true \
+#        -i $(location @target//file:your_openapi_file.json) \
+#        -o $(@D)/rust_client && \
+#    tar -cvf $@ -C $(@D)/rust_client .
+#    """,
+#    tools = ["//tools:openapi-generator-cli"],  # Path to the openapi-generator CLI tool if you have it as a Bazel target
+#)
+
+## Generate GitHub client
+#openapi_generator(
+#    name = "generate_github_client",
+#    additional_properties = {
+#        "packageName": "external_github",
+#        "useSingleRequestParameter": "true",
+#        "deriveBuilder": "true",
+#        "enableCache": "true",
+#        "tracing": "true",
+#    },
+#    generator = "rust",
+#    spec = "@github_spec//file",
+#)
+
+# Generate Azure client
+#openapi_generator(
+#    name = "generate_azure_client",
+#    additional_properties = {
+#        "packageName": "external_azure",
+#        "useSingleRequestParameter": "true",
+#        "deriveBuilder": "true",
+#        "enableCache": "true",
+#        "tracing": "true",
+#    },
+#    generator = "rust",
+#    spec = "$(
+#
+#    @azure_spec//:azure_spec_git_7_1_git_json",
+#)
+
+#genrule(
+#    name = "generate_azure_client",
+#    srcs = [
+#        "@azure_spec//:azure_spec_git_7_1_git_json",  # Input specification file
+#    ],
+#    outs = ["azure_client_output.txt"],  # The generated file
+#    cmd = "openapi_generator --spec $(location @azure_spec//:azure_spec_git_7_1_git_json) > $(location azure_client_output.txt)",
+#    tools = ["//path/to:openapi_generator_tool"],  # Adjust this if you have specific tools
+#)
+
+## Generate GitHub client
+#openapi_generator(
+#    name = "generate_github_client",
+#    additional_properties = {
+#        "packageName": "external_github",
+#        "useSingleRequestParameter": "true",
+#        "deriveBuilder": "true",
+#        "enableCache": "true",
+#        "tracing": "true",
+#    },
+#    generator = "rust",
+#    spec = "@github_spec//file",
+#)
+
+load("@bazel_skylib//rules:build_test.bzl", "build_test")
+load("@crates//:defs.bzl", "all_crate_deps")
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_doc", "rust_library")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_binary(
+    name = "main",
+    srcs = ["src/main.rs"],
+    deps = all_crate_deps(normal = True) + [
+        ":lib",
+    ],
+)
+
+rust_library(
+    name = "lib",
+    #        srcs = ["src/lib.rs"],
+    deps = all_crate_deps(normal = True) + [
+        ":generate_openai_client",
+    ],
+)
+
+rust_doc(
+    name = "all_crate_deps_doc",
+    crate = ":all_crate_deps",
+)
+
+sh_test(
+    name = "all_crate_deps_test",
+    size = "small",
+    srcs = ["all_crate_deps_test.sh"],
+    args = [
+        "$(rlocationpath :all_crate_deps)",
+    ],
+    data = [
+        ":all_crate_deps",
+    ],
+    deps = [
+        "@bazel_tools//tools/bash/runfiles",
+    ],
+)
+
+build_test(
+    name = "gen_rust_project",
+    targets = [
+        "@rules_rust//tools/rust_analyzer:gen_rust_project",
+    ],
+)
+
+build_test(
+    name = "rust_fmt",
+    targets = [
+        "@rules_rust//:rustfmt",
+    ],
+)

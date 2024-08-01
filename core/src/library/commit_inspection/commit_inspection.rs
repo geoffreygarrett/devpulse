@@ -20,5 +20,5 @@ pub trait CommitInspection<T> {
         -> Result<models::Commit, VcsError>;
     async fn list_changes(
         &self, repo: &T, commit_id: &str,
-    ) -> Result<Option<Vec<models::DiffEntry>>, VcsError>;
+    ) -> Result<Option<Vec<models::FileChange>>, VcsError>;
 }

@@ -1,0 +1,96 @@
+[env]
+CARGO_MAKE_WORKSPACE_WORKING_DIRECTORY = "."
+JAVA_OPTS = "-Dlog.level=off -Dorg.openapitools.codegen.languages.AbstractRustCodegen=off"
+API_GENERATOR_COMMAND = "openapi-generator generate -g rust --template-dir templates/rust-templates --skip-validate-spec"
+COMMON_PROPERTIES = ""
+API_SPEC_PATH = "openapi"
+OUTPUT_PATH = "libs"
+
+[tasks.download-and-extract-spec]
+description = "Download and extract API specification"
+script_runner = "sh"
+env = { JAVA_OPTS = "${JAVA_OPTS}" }
+script = [
+    '''
+    mkdir -p ${API_SPEC_PATH}/${API_NAME}
+    echo Downloading and extracting OpenAPI spec for $API_NAME
+    curl -L -o ${API_SPEC_PATH}/${API_NAME}/${API_NAME}_spec.${API_EXT} ${API_URL}
+    if [ "$API_EXT" = "yaml" ]; then
+      command -v yq >/dev/null 2>&1 || { echo >&2 'yq is not installed. Installing...'; brew install yq; }
+      yq eval -o=json ${API_SPEC_PATH}/${API_NAME}/${API_NAME}_spec.yaml > ${API_SPEC_PATH}/${API_NAME}/${API_NAME}_spec.json
+    elif [ "$API_EXT" = "zip" ]; then
+      unzip -o -q "${API_SPEC_PATH}/${API_NAME}/${API_NAME}_spec.zip" -d "${API_SPEC_PATH}/${API_NAME}"
+      cp -R ${API_SPEC_PATH}/${API_NAME}/vsts-rest-api-specs-master${SPEC_SUBDIR}/* ${API_SPEC_PATH}/${API_NAME}
+      mv ${API_SPEC_PATH}/${API_NAME}/git.json ${API_SPEC_PATH}/${API_NAME}/${API_NAME}_spec.json
+    elif [ "$API_EXT" = "json" ]; then
+      echo "No need to extract JSON spec"
+    else
+      echo 'Unsupported file extension: ${API_EXT}'
+      exit 1
+    fi
+    node ${API_SPEC_PATH}/${API_NAME}/extract_${API_NAME}.js ${API_SPEC_PATH}/${API_NAME}/${API_NAME}_spec.json
+    '''
+]
+
+[tasks.generate-client]
+description = "Generate API client"
+dependencies = ["download-and-extract-spec"]
+script_runner = "sh"
+env = { JAVA_OPTS = "${JAVA_OPTS}", API_GENERATOR_COMMAND = "${API_GENERATOR_COMMAND}", COMMON_PROPERTIES = "${COMMON_PROPERTIES}" }
+script = [
+    '''
+    echo Generating client for $API_NAME
+    ${API_GENERATOR_COMMAND} \
+        -i ${API_SPEC_PATH}/${API_NAME}/${API_FILE} \
+        -o ${OUTPUT_PATH}/external_${API_NAME} \
+        -c ${API_SPEC_PATH}/rust-${API_NAME}-config.json \
+        --additional-properties=packageName=external_${API_NAME},${COMMON_PROPERTIES} 2>&1 | grep -v 'WARN' | grep -v 'INFO'
+    echo Formatting code for $API_NAME
+    cargo fmt --manifest-path ${OUTPUT_PATH}/external_${API_NAME}/Cargo.toml
+    '''
+]
+
+# Define specific tasks for APIs
+[tasks.download-and-extract-openai-spec]
+run_task = "download-and-extract-spec"
+env = { API_NAME = "openai", API_FILE = "openai_spec.extracted.json", API_URL = "https://raw.githubusercontent.com/openai/openai-openapi/cd3c3feb77931b5fd1e8b9c1eb5fb1697821a0d0/openapi.yaml", API_EXT = "yaml", SPEC_SUBDIR = "" }
+
+[tasks.download-and-extract-github-spec]
+run_task = "download-and-extract-spec"
+env = { API_NAME = "github", API_FILE = "github_spec.extracted.json", API_URL = "https://github.com/github/rest-api-description/raw/main/descriptions/api.github.com/api.github.com.2022-11-28.json", API_EXT = "json", SPEC_SUBDIR = "" }
+
+[tasks.download-and-extract-azure-spec]
+run_task = "download-and-extract-spec"
+env = { API_NAME = "azure", API_FILE = "azure_spec.extracted.json", API_URL = "https://github.com/MicrosoftDocs/vsts-rest-api-specs/archive/refs/heads/master.zip", API_EXT = "zip", SPEC_SUBDIR = "/specification/git/7.1" }
+
+[tasks.generate-openai-client]
+dependencies = ["download-and-extract-openai-spec"]
+run_task = "generate-client"
+env = { API_NAME = "openai" }
+
+[tasks.generate-github-client]
+dependencies = ["download-and-extract-github-spec"]
+run_task = "generate-client"
+env = { API_NAME = "github" }
+
+[tasks.generate-azure-client]
+dependencies = ["download-and-extract-azure-spec"]
+run_task = "generate-client"
+env = { API_NAME = "azure" }
+
+[tasks.generate-clients]
+description = "Generate and format GitHub, Azure, and OpenAI clients"
+dependencies = ["generate-github-client", "generate-azure-client", "generate-openai-client"]
+script_runner = "sh"
+script = """
+# Clean generated Rust code
+find ${OUTPUT_PATH} -type f -name '*.rs' -exec sed -i '' 's/models::models::/models::/g' {} +
+find ${OUTPUT_PATH} -type f -name '*.rs' -exec sed -i '' 's/pub mod model;/pub mod api_model;/g' {} +
+find ${OUTPUT_PATH} -type f -name '*.rs' -exec sed -i '' 's/models::model/models::api_model/g' {} +
+find ${OUTPUT_PATH} -type f -name '*.rs' -exec sed -i '' 's/self::model/self::api_model/g' {} +
+find ${OUTPUT_PATH} -type f -name 'model.rs' -execdir mv {} api_model.rs \\;
+"""
+
+
+
+

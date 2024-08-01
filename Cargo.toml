@@ -4,23 +4,38 @@ members = [
     "api",
     "tests",
     "notes",
-    #    "auth",
-    "proto"
-    , "route",
-    "external"
-]
+    "auth",
+    "proto",
+    "util/route",
+    "util/proto",
+    "externals",
+    "db"]
 
 exclude = [
-    "integrations/github"
+    "integrations/github",
+    "externals/libs/external_github",
+    "externals/libs/external_azure",
+    "externals/libs/external_openai",
 ]
 
 resolver = "2"
 
 [workspace.dependencies]
 devpulse_core = { path = "core" }
+devpulse_externals = { path = "externals" }
 devpulse = { path = "api" }
 proto = { path = "proto" }
-auto-route = { path = "route" }
+auto-route = { path = "util/route" }
+util-proto = { path = "util/proto" }
+derive_builder = "0.20.0"
+
+# build deps
+tonic-build = "0.12.1"
+serde = { version = "1.0.196", features = ["derive"] }
+serde_yaml = "0.9.34"
+prost-build = "0.13.1"
+prost = "0.13.1"
+prost-types = "0.13.1"
 
 [workspace.package]
 version = "0.1.0"

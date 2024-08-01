@@ -1,0 +1,58 @@
+derives:
+  message:
+    - target: "QueryRequest"
+      derive: "derive_builder::Builder"
+      condition: "use_builder"
+  #    - target: "AccountCreate"
+  #      derive: "db_interface::IntoSqlInsert"
+  #      condition: "postgres"
+  enum: [ ]
+  all: [ ]
+
+attributes:
+  field:
+  #    - target: ".db.auth.v1.Account.uuid"
+  #      attribute: |
+  #        #[sqlx(try_from = "crate::adapters::models::InternalUuid")]
+  #      condition: "postgres"
+  #    - target: ".db.auth.v1.AccountCreate.uuid"
+  #      attribute: |
+  #        #[sqlx(try_from = "crate::adapters::models::InternalUuid")]
+  #      condition: "postgres"
+
+#    - target: ".db.auth.v1.Account.uuid"
+#      attribute: |
+#        #[sqlx(try_from = "sqlx::types::Uuid")]
+#    - target: ".db.auth.v1.Account.created_at"
+#      attribute: |
+#        #[sqlx(try_from = "sqlx::types::chrono::DateTime<sqlx::types::chrono::Utc>")]
+
+
+
+
+
+  message:
+    - target: ".db.auth.v1.AccountCreate"
+      attribute: |
+        #[derive(sqlx::FromRow)]
+      condition: "postgres"
+#    - target: ".db.types.v1.Uuid"
+#      attribute: |
+#        #[derive(sqlx::Type)]
+#      condition: "postgres"
+
+#    - target: ".db.account.v1.AccountModel"
+#      attribute: |
+#        #[derive(sqlx::FromRow)]
+#      condition: "postgres"
+#    - target: ".db.auth.v1.Account"
+#      attribute: |
+#        #[derive(sqlx::FromRow)]
+#      condition: "postgres"
+#    - target: ".db.auth.v1.Account"
+#      attribute: |
+#        #[derive(db_macros::Wrapper)]
+#      condition: "postgres"
+
+  enum: [ ]
+  all: [ ]

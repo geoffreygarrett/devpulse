@@ -2,18 +2,26 @@ derives:
   message:
     - target: "."
       derive: "derive_builder::Builder"
-      condition: "derive_builder"
+      condition: "use_builder"
+    - target: "."
+      derive: "utoipa::ToSchema"
+    - target: "."
+      derive: "serde::Serialize"
+    - target: "."
+      derive: "serde::Deserialize"
   enum: [ ]
   all:
     - target: "."
       derive: "utoipa::ToSchema"
-      condition: "documentation"
     - target: "."
       derive: "serde::Serialize"
       condition: "documentation"
     - target: "."
       derive: "serde::Deserialize"
       condition: "documentation"
+    - target: "Repository"
+      derive: "utoipa::ToSchema"
+
 
 attributes:
   message:
@@ -75,7 +83,79 @@ attributes:
           {"username": "Milan Vukov", "commits": 60},
           {"username": "Marcel Hlopko", "commits": 18}
         ]))]
-      condition: "documentation"
+    #    - target: "Repository"
+    #      attribute: |
+    #        #[serde::serde(tag = "type")]
+    - target: "repository_details.Specifics.GitHubRepository"
+      attribute: |
+        #[schema(
+        title = "GitHubRepository",
+        example = json!({
+            "type": "github",
+            "owner": "bazelbuild",
+            "name": "rules_rust",
+            "connection": {
+            "protocol": "https",
+            "token": "example-token"
+            }
+        })
+        )]
+    - target: "repository_details.Specifics.GitHubRepository"
+      attribute: |
+        #[schema(
+        title = "GitLabRepository",
+        example = json!({
+            "type": "gitlab",
+            "owner": "gitlab-org",
+            "name": "gitlab",
+            "connection": {
+            "protocol": "https",
+            "token": "example-token"
+            }
+        })
+        )]
+    - target: "repository_details.Specifics.GitHubRepository"
+      attribute: |
+        #[schema(
+        title = "BitbucketRepository",
+        example = json!({
+            "type": "bitbucket",
+            "owner": "atlassian",
+            "name": "pyramid",
+            "connection": {
+            "protocol": "https",
+            "token": "example-token"
+            }
+        })
+        )]
+    - target: "repository_details.Specifics.AzureReposRepository"
+      attribute: |
+        #[schema(
+        title = "AzureReposRepository",
+        example = json!({
+            "type": "azure_repos",
+            "organization": "Microsoft",
+            "project": "vscode",
+            "repository": "vscode",
+            "connection": {
+            "protocol": "https",
+            "token": "example-token"
+            }
+        })
+        )]
+    - target: "repository_details.Specifics.CustomRepository"
+      attribute: |
+        #[schema(
+        title = "CustomRepository",
+        example = json!({
+            "type": "custom",
+            "url": "https://custom.repo/url",
+            "connection": {
+            "protocol": "https",
+            "token": "example-token"
+            }
+        })
+        )]
   enum: [ ]
   all: [ ]
 
@@ -86,3 +166,5 @@ features:
     build_client: true
   transport:
     build_transport: true
+
+

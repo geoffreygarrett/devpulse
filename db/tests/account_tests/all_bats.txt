@@ -1,0 +1,366 @@
+#!/usr/bin/env bats
+
+setup() {
+  # Ensure the test environment is clean by deleting the test account if it exists
+  grpcurl -plaintext -d '{
+    "params": {
+      "filters": [{
+        "uuid_filter": {"equals": "00000000-0000-0000-0000-000000000000"}
+      }]
+    }
+  }' localhost:50051 db.account.v1.AccountService/Delete >/dev/null 2>&1
+
+  # Insert a test account
+  result=$(grpcurl -plaintext -d '{
+    "accounts": [{
+      "uuid": "00000000-0000-0000-0000-000000000000",
+      "given_name": "John",
+      "email": "john.doe@example.com",
+      "hash": "hashedpassword",
+      "avatar_url": "http://example.com/avatar.jpg"
+    }]
+  }' localhost:50051 db.account.v1.AccountService/Insert)
+  echo "$result"
+  echo "$result" | grep -q '"success": true'
+  [ $? -eq 0 ]
+}
+
+teardown() {
+  # Clean up - Delete the test account
+  grpcurl -plaintext -d '{
+    "params": {
+      "filters": [{
+        "uuid_filter": {"equals": "00000000-0000-0000-0000-000000000000"}
+      }]
+    }
+  }' localhost:50051 db.account.v1.AccountService/Delete >/dev/null 2>&1
+}
+
+@test "Delete Account" {
+  # Perform the delete operation
+  result=$(grpcurl -plaintext -d '{
+    "params": {
+      "filters": [{
+        "uuid_filter": {"equals": "00000000-0000-0000-0000-000000000000"}
+      }]
+    }
+  }' localhost:50051 db.account.v1.AccountService/Delete)
+
+  echo "$result"
+  echo "$result" | grep -q '"success": true'
+  [ $? -eq 0 ]
+
+  # Verify the account is actually deleted
+  verify_result=$(grpcurl -plaintext -d '{
+    "filters": [{
+      "uuid_filter": {"equals": "00000000-0000-0000-0000-000000000000"}
+    }],
+    "limit": 10,
+    "offset": 0
+  }' localhost:50051 db.account.v1.AccountService/Select)
+
+  if echo "$verify_result" | grep -q '"success": true'; then
+    echo "Account successfully deleted."
+  else
+    echo "Account still exists after deletion."
+    exit 1
+  fi
+}
+#!/usr/bin/env bats
+
+setup() {
+  # Ensure the test environment is clean by deleting any existing test accounts
+  grpcurl -plaintext -d '{
+    "params": {
+      "filters": [{
+        "uuid_filter": {"equals": "123e4567-e89b-12d3-a456-426614174000"}
+      }]
+    }
+  }' localhost:50051 db.account.v1.AccountService/Delete >/dev/null
+
+  grpcurl -plaintext -d '{
+    "params": {
+      "filters": [{
+        "uuid_filter": {"equals": "223e4567-e89b-12d3-a456-426614174001"}
+      }]
+    }
+  }' localhost:50051 db.account.v1.AccountService/Delete >/dev/null
+
+  grpcurl -plaintext -d '{
+    "params": {
+      "filters": [{
+        "email_filter": {"equals": "john.doe@example.com"}
+      }]
+    }
+  }' localhost:50051 db.account.v1.AccountService/Delete >/dev/null
+
+  grpcurl -plaintext -d '{
+    "params": {
+      "filters": [{
+        "email_filter": {"equals": "jane.doe@example.com"}
+      }]
+    }
+  }' localhost:50051 db.account.v1.AccountService/Delete >/dev/null
+
+  # Insert test accounts for the select tests
+  grpcurl -plaintext -d '{
+    "accounts": [
+      {
+        "uuid": "123e4567-e89b-12d3-a456-426614174000",
+        "given_name": "John",
+        "email": "john.doe@example.com",
+        "hash": "hashedpassword",
+        "avatar_url": "https://example.com/avatar.jpg"
+      },
+      {
+        "uuid": "223e4567-e89b-12d3-a456-426614174001",
+        "given_name": "Jane",
+        "email": "jane.doe@example.com",
+        "hash": "anotherhashedpassword",
+        "avatar_url": "https://example.com/avatar2.jpg"
+      }
+    ]
+  }' localhost:50051 db.account.v1.AccountService/Insert >/dev/null
+}
+
+teardown() {
+  # Clean up - Delete the test accounts
+  grpcurl -plaintext -d '{
+    "params": {
+      "filters": [{
+        "uuid_filter": {"equals": "123e4567-e89b-12d3-a456-426614174000"}
+      },
+      {
+        "uuid_filter": {"equals": "223e4567-e89b-12d3-a456-426614174001"}
+      }]
+    }
+  }' localhost:50051 db.account.v1.AccountService/Delete >/dev/null
+}
+
+@test "Select Account by email" {
+  result=$(grpcurl -plaintext -d '{
+    "filters": [{
+      "email_filter": {"equals": "john.doe@example.com"}
+    }],
+    "limit": 10,
+    "offset": 0
+  }' localhost:50051 db.account.v1.AccountService/Select)
+
+  echo "$result" | grep -q '"success": true'
+  [ $? -eq 0 ]
+}
+
+@test "Select Account by given name like" {
+  result=$(grpcurl -plaintext -d '{
+    "filters": [{
+      "given_name_filter": {"like": "Jo"}
+    }],
+    "limit": 10,
+    "offset": 0
+  }' localhost:50051 db.account.v1.AccountService/Select)
+
+  echo "$result" | grep -q '"success": true'
+  [ $? -eq 0 ]
+}
+
+@test "Select Account by hash not equals" {
+  result=$(grpcurl -plaintext -d '{
+    "filters": [{
+      "hash_filter": {"not_equals": "hashedpassword"}
+    }],
+    "limit": 10,
+    "offset": 0
+  }' localhost:50051 db.account.v1.AccountService/Select)
+
+  echo "$result" | grep -q '"success": true'
+  [ $? -eq 0 ]
+}
+
+@test "Select Account by avatar URL" {
+  result=$(grpcurl -plaintext -d '{
+    "filters": [{
+      "avatar_url_filter": {"equals": "https://example.com/avatar.jpg"}
+    }],
+    "limit": 10,
+    "offset": 0
+  }' localhost:50051 db.account.v1.AccountService/Select)
+
+  echo "$result" | grep -q '"success": true'
+  [ $? -eq 0 ]
+}
+
+@test "Select Account by created at range" {
+  result=$(grpcurl -plaintext -d '{
+    "filters": [{
+      "created_at_filter": {"after": "2021-01-01T00:00:00Z", "before": "2023-12-31T23:59:59Z"}
+    }],
+    "limit": 10,
+    "offset": 0
+  }' localhost:50051 db.account.v1.AccountService/Select)
+
+  echo "$result" | grep -q '"success": true'
+  [ $? -eq 0 ]
+}
+
+@test "Select Account with composite filter" {
+  result=$(grpcurl -plaintext -d '{
+    "filters": [{
+      "given_name_filter": {"equals": "John"}
+    }, {
+      "email_filter": {"equals": "john.doe@example.com"}
+    }],
+    "limit": 10,
+    "offset": 0
+  }' localhost:50051 db.account.v1.AccountService/Select)
+
+  echo "$result" | grep -q '"success": true'
+  [ $? -eq 0 ]
+}
+#!/usr/bin/env bats
+
+setup() {
+  # Ensure the account to be tested doesn't exist before the test
+  grpcurl -plaintext -d '{
+    "params": {
+      "filters": [{
+        "uuid_filter": {"equals": "123e4567-e89b-12d3-a456-426614174000"}
+      }]
+    }
+  }' localhost:50051 db.account.v1.AccountService/Delete > /dev/null
+}
+
+teardown() {
+  # Clean up - Delete the test account
+  grpcurl -plaintext -d '{
+    "params": {
+      "filters": [{
+        "uuid_filter": {"equals": "123e4567-e89b-12d3-a456-426614174000"}
+      }]
+    }
+  }' localhost:50051 db.account.v1.AccountService/Delete > /dev/null
+}
+
+@test "Insert Account" {
+  result=$(grpcurl -plaintext -d '{
+    "accounts": [{
+      "uuid": "123e4567-e89b-12d3-a456-426614174000",
+      "given_name": "John",
+      "email": "john.doe@example.com",
+      "hash": "hashedpassword",
+      "avatar_url": "https://example.com/avatar.jpg"
+    }]
+  }' localhost:50051 db.account.v1.AccountService/Insert)
+
+  echo "$result" | grep -q '"success": true'
+  [ $? -eq 0 ]
+}
+#!/usr/bin/env bats
+
+setup() {
+  # Ensure the test environment is clean by deleting any existing test accounts
+  grpcurl -plaintext -d '{
+    "params": {
+      "filters": [{
+        "uuid_filter": {"equals": "123e4567-e89b-12d3-a456-426614174000"}
+      }]
+    }
+  }' localhost:50051 db.account.v1.AccountService/Delete >/dev/null
+
+  # Insert a test account for the select test
+  grpcurl -plaintext -d '{
+    "accounts": [{
+      "uuid": "123e4567-e89b-12d3-a456-426614174000",
+      "given_name": "John Updated",
+      "email": "john.updated@example.com",
+      "hash": "hashedpassword",
+      "avatar_url": "https://example.com/avatar.jpg"
+    }]
+  }' localhost:50051 db.account.v1.AccountService/Insert >/dev/null
+}
+
+teardown() {
+  # Clean up - Delete the test account
+  grpcurl -plaintext -d '{
+    "params": {
+      "filters": [{
+        "uuid_filter": {"equals": "123e4567-e89b-12d3-a456-426614174000"}
+      }]
+    }
+  }' localhost:50051 db.account.v1.AccountService/Delete >/dev/null
+}
+
+@test "Select Account" {
+  result=$(grpcurl -plaintext -d '{
+    "filters": [{
+      "email_filter": {"equals": "john.updated@example.com"}
+    }],
+    "limit": 10,
+    "offset": 0
+  }' localhost:50051 db.account.v1.AccountService/Select)
+
+  echo "$result" | grep -q '"success": true'
+  [ $? -eq 0 ]
+}
+#!/usr/bin/env bats
+
+setup() {
+  # Create Account for testing
+  result=$(grpcurl -plaintext -d '{
+    "accounts": [{
+      "uuid": "123e4567-e89b-12d3-a456-426614174000",
+      "given_name": "John",
+      "email": "john.doe@example.com",
+      "hash": "hashedpassword",
+      "avatar_url":"https://example.com/avatar.jpg"
+    }]
+  }' localhost:50051 db.account.v1.AccountService/Insert)
+
+  echo "$result" | grep -q '"success": true'
+  [ $? -eq 0 ]
+}
+
+teardown() {
+  # Delete Account after testing
+  result=$(grpcurl -plaintext -d '{
+    "params": {
+      "filters": [{
+        "uuid_filter": {"equals": "123e4567-e89b-12d3-a456-426614174000"}
+      }]
+    }
+  }' localhost:50051 db.account.v1.AccountService/Delete)
+
+  echo "$result" | grep -q '"success": true'
+  [ $? -eq 0 ]
+}
+
+@test "Update Account" {
+  result=$(grpcurl -plaintext -d '{
+    "accounts": [{
+      "given_name": "John Updated",
+      "email": "john.updated@example.com",
+      "hash": "updatedhashedpassword",
+      "avatar_url": "https://example.com/avatar-updated.jpg"
+    }],
+    "params": {
+      "filters": [{
+        "uuid_filter": {"equals": "123e4567-e89b-12d3-a456-426614174000"}
+      }]
+    }
+  }' localhost:50051 db.account.v1.AccountService/Update)
+
+  echo "$result" | grep -q '"success": true'
+  [ $? -eq 0 ]
+}
+
+@test "Select Account" {
+  result=$(grpcurl -plaintext -d '{
+    "filters": [{
+      "uuid_filter": {"equals": "123e4567-e89b-12d3-a456-426614174000"}
+    }],
+    "limit": 1,
+    "offset": 0
+  }' localhost:50051 db.account.v1.AccountService/Select)
+
+  echo "$result" | grep -q '"uuid": "123e4567-e89b-12d3-a456-426614174000"'
+  [ $? -eq 0 ]
+}

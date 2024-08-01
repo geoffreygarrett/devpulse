@@ -1,0 +1,174 @@
+syntax = "proto3";
+
+package db.account.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+import "v1/types.proto";
+
+// General operation status message
+message OperationStatus {
+  bool success = 1;
+  string message = 2;
+}
+
+// Response message for account operations
+message AccountResponse {
+  AccountModel result = 1;
+  OperationStatus status = 2;
+}
+
+
+
+//// TimestampZ message
+//message Timestamp {
+//  google.protobuf.Timestamp value = 1;
+//}
+//
+//// Email message
+//message NullableString {
+//  string value = 1;
+//}
+
+// Model representing an account
+message AccountModel {
+  int32 id = 1;
+  string uuid = 2;
+  optional string given_name = 3;
+  string email = 4;
+  optional string hash = 5;
+  optional string avatar_url = 6;
+  string created_at = 7;
+}
+
+// Shared input for filtering and return flag
+message SharedInput {
+  repeated AccountFilterCondition filters = 1;
+  bool return_data = 2;
+}
+
+// Custom filter conditions for the Account model
+message AccountFilterCondition {
+  oneof condition {
+    IdFilter id_filter = 1;
+    UuidFilter uuid_filter = 2;
+    GivenNameFilter given_name_filter = 3;
+    EmailFilter email_filter = 4;
+    HashFilter hash_filter = 5;
+    AvatarUrlFilter avatar_url_filter = 6;
+    CreatedAtFilter created_at_filter = 7;
+  }
+}
+
+message IdFilter {
+  oneof type {
+    int32 equals = 1;
+    int32 not_equals = 2;
+    int32 greater_than = 3;
+    int32 less_than = 4;
+  }
+}
+
+message UuidFilter {
+  oneof type {
+    string equals = 1;
+    string not_equals = 2;
+  }
+}
+
+message GivenNameFilter {
+  oneof type {
+    string equals = 1;
+    string not_equals = 2;
+    string like = 3;
+  }
+}
+
+message EmailFilter {
+  oneof type {
+    string equals = 1;
+    string not_equals = 2;
+    string like = 3;
+  }
+}
+
+message HashFilter {
+  oneof type {
+    string equals = 1;
+    string not_equals = 2;
+  }
+}
+
+message AvatarUrlFilter {
+  oneof type {
+    string equals = 1;
+    string not_equals = 2;
+  }
+}
+
+message CreatedAtFilter {
+  oneof type {
+    string equals = 1;
+    string not_equals = 2;
+    string before = 3;
+    string after = 4;
+  }
+}
+
+// Message for inserting a new account
+message AccountInsert {
+  optional string uuid = 1;
+  optional string given_name = 2;
+  optional string email = 3;
+  optional string hash = 4;
+  optional string avatar_url = 5;
+}
+
+// Message for updating an existing account
+message AccountUpdate {
+  optional string given_name = 1;
+  optional string email = 2;
+  optional string hash = 3;
+  optional string avatar_url = 4;
+}
+
+// Request message for deleting an account
+message AccountDeleteRequest {
+  SharedInput params = 1;
+}
+
+// Request message for updating accounts
+message AccountUpdateRequest {
+  repeated AccountUpdate accounts = 1;
+  SharedInput params = 2;
+}
+
+// Request message for inserting accounts
+message AccountInsertRequest {
+  repeated AccountInsert accounts = 1;
+  SharedInput params = 2;
+}
+
+// Request message for selecting accounts
+message AccountSelectRequest {
+  repeated AccountFilterCondition filters = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+  bool count = 4;
+  string order_by = 5;
+  string order = 6;
+}
+
+// Response message containing a list of accounts
+message AccountsResponse {
+  repeated AccountModel accounts = 1;
+  OperationStatus status = 2;
+}
+
+// Account service definition
+service AccountService {
+  rpc Insert (AccountInsertRequest) returns (AccountsResponse) {}
+  rpc Update (AccountUpdateRequest) returns (AccountsResponse) {}
+  rpc Delete (AccountDeleteRequest) returns (AccountsResponse) {}
+  rpc Select (AccountSelectRequest) returns (AccountsResponse) {}
+}

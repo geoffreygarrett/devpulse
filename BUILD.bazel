@@ -1,0 +1,31 @@
+# Function to conditionally include dependencies based on flags
+def internal_dependencies(openai=True, github=True, azure=True):
+    # OpenAI OpenAPI Specification
+    if openai:
+        _maybe(
+            http_archive,
+            name="openai_spec",
+            sha256="insert_correct_sha256_here",
+            urls=["https://raw.githubusercontent.com/openai/openai-openapi/cd3c3feb77931b5fd1e8b9c1eb5fb1697821a0d0/openapi.yaml"],
+        )
+
+    # GitHub REST API Specification
+    if github:
+        _maybe(
+            http_archive,
+            name="github_spec",
+            sha256="insert_correct_sha256_here",
+            urls=["https://github.com/github/rest-api-description/raw/main/descriptions/api.github.com/api.github.com.2022-11-28.json"],
+        )
+
+    # Azure REST API Specifications
+    if azure:
+        _maybe(
+            http_archive,
+            name="azure_spec",
+            build_file_content="exports_files(['dev.azure.com.json'])",
+            sha256="insert_correct_sha256_here",
+            strip_prefix="vsts-rest-api-specs-master",
+            urls=["https://github.com/MicrosoftDocs/vsts-rest-api-specs/archive/refs/heads/master.zip"],
+        )
+

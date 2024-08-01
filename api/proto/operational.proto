@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package operational;
+import "google/protobuf/empty.proto";
+
+
+// Uptime response
+message Uptime {
+  uint64 uptime = 1;
+}
+
+// Metrics response
+message Metrics {
+  double cpu_load = 1;
+  uint64 memory_usage = 2;
+  uint64 uptime = 3;
+}
+
+// Application status response
+message ApplicationStatus {
+  string status = 1;
+  string message = 2;
+  uint64 timestamp = 3;
+}
+
+// Service definition for operational checks
+service OperationalService {
+  // RPC for uptime
+  rpc GetUptime(google.protobuf.Empty) returns (Uptime);
+
+  // RPC for metrics
+  rpc GetMetrics(google.protobuf.Empty) returns (Metrics);
+
+  // RPC for application status
+  rpc GetApplicationStatus(google.protobuf.Empty) returns (ApplicationStatus);
+}
+

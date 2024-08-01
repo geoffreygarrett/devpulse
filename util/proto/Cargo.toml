@@ -1,0 +1,19 @@
+[package]
+name = "util-proto"
+version = { workspace = true }
+edition = "2018"
+
+[features]
+default = ["tonic-build/prost"]
+build = ["tonic-build", "prost-types", "serde_yaml", "serde"]
+
+[dependencies]
+serde = { version = "1.0.204", features = ["derive"], optional = true }
+serde_yaml = { version = "0.9.34", optional = true }
+tonic-build = { version = "0.12.1", optional = true, features = ["prost"] }
+prost-types = { version = "0.13.1", optional = true }
+async-trait = { version = "0.1", optional = true }
+#prost = { version = "*", optional = true }
+
+[lib]
+path = "src/lib.rs"

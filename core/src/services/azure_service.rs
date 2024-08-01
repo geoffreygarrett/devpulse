@@ -1,67 +1,78 @@
-// use reqwest::Client;
-// use serde::de::DeserializeOwned;
-//
-// use crate::annotations::prelude::{Annotation, Annotator, AzureAnnotator};
-// use crate::models::AzureReposRepository;
-// use crate::prelude::*;
-//
-// type Result<T> = std::result::Result<T, VcsError>;
-//
-// /// Azure DevOps service.
-// struct AzureDevOps {
-//     api_token: String,
-//     organization: String,
-//     project: String,
-//     repository: String,
-// }
-//
-// impl AzureDevOps {
-//     /// Fetches data from a given URL using the provided API token.
-//     async fn fetch_data<T: DeserializeOwned>(&self, url: &str) -> Result<T> {
-//         Client::new()
-//             .get(url)
-//             .bearer_auth(&self.api_token)
-//             .send()
-//             .await
-//             .map_err(|e| VcsError::Network(e.to_string()))?
-//             .json::<T>()
-//             .await
-//             .map_err(|e| VcsError::DataParsing(e.to_string()))
-//     }
-// }
-//
-// /// Implement commit inspection for Azure DevOps.
-// #[async_trait::async_trait]
-// impl CommitInspection<AzureReposRepository> for AzureDevOps {
-//     async fn get_commit_details(
-//         &self, repository: &AzureReposRepository, commit_id: &str,
-//     ) -> Result<CommitDetails> {
-//         let url = format!(
-//             "https://dev.azure.com/{}/{}/_apis/git/repositories/{}/commits/{}",
-//             self.organization, self.project, repository.repository, commit_id
-//         );
-//         self.fetch_data(&url).await
-//     }
-//
-//     async fn list_changes(
-//         &self, repository: &AzureReposRepository, commit_id: &str,
-//     ) -> Result<Vec<FileChange>> {
-//         let url = format!(
-//             "https://dev.azure.com/{}/{}/_apis/git/repositories/{}/commits/{}/changes",
-//             self.organization, self.project, repository.repository, commit_id
-//         );
-//         self.fetch_data(&url).await
-//     }
-// }
-//
-// /// Implement annotation for Azure DevOps.
-// impl Annotator for AzureDevOps {
-//     fn get_annotation_string(&self, annotation: &Annotation) -> String {
-//         let location_str = AzureAnnotator::construct_location_string(annotation);
-//         format!("::{} {}::{}", annotation.level.to_string(), location_str, annotation.message)
-//     }
-// }
-//
+use externals::external_azure as azure;
+
+use crate::annotations::prelude::{Annotation, Annotator, AzureAnnotator};
+use crate::models;
+use crate::models::AzureReposRepository;
+use crate::prelude::*;
+
+use super::Result;
+
+/// Azure DevOps service.
+struct AzureService {
+    client: azure::apis::AzureClient,
+}
+
+/// Implement commit inspection for Azure DevOps.
+#[async_trait::async_trait]
+impl CommitInspection<AzureReposRepository> for AzureService {
+    async fn get_commit(
+        &self, repository: &AzureReposRepository, commit_id: &str,
+    ) -> Result<models::Commit> {
+        let params = azure::apis::commits_api::CommitsGetParams::builder()
+            .organization(repository.organization.clone())
+            .project(repository.project.clone())
+            .repository_id(repository.repository.clone())
+            .commit_id(commit_id.to_string())
+            .api_version("6.0".to_string())
+            .build()
+            .map_err(|e| VcsError::DataParsing(e.to_string()))?;
+        self.client
+            .commits_get(params)
+            .await
+            .map_err(|e| VcsError::Network(e.to_string()))
+            .map(Into::into)
+    }
+    async fn list_changes(
+        &self, repository: &AzureReposRepository, commit_id: &str,
+    ) -> Result<Option<Vec<models::FileChange>>> {
+        let params = azure::apis::commits_api::CommitsGetChangesParams::builder()
+            .organization(repository.organization.clone())
+            .project(repository.project.clone())
+            .repository_id(repository.repository.clone())
+            .commit_id(commit_id.to_string())
+            .api_version("6.0".to_string())
+            .build()
+            .map_err(|e| VcsError::DataParsing(e.to_string()))?;
+
+        let changes_result = self
+            .client
+            .commits_get_changes(params)
+            .await
+            .map_err(|e| VcsError::Network(e.to_string()));
+
+        changes_result.map(|changes| {
+            changes.changes.map_or(None, |git_changes| {
+                let file_changes: Vec<_> = git_changes.into_iter()
+                    .map(|x| x.into()) // Assuming you have implemented From<GitChange> for FileChange
+                    .collect();
+                if file_changes.is_empty() {
+                    None
+                } else {
+                    Some(file_changes)
+                }
+            })
+        })
+    }
+}
+
+/// Implement annotation for Azure DevOps.
+impl Annotator for AzureService {
+    fn get_annotation_string(&self, annotation: &Annotation) -> String {
+        let location_str = AzureAnnotator::construct_location_string(annotation);
+        format!("::{} {}::{}", annotation.level.to_string(), location_str, annotation.message)
+    }
+}
+
 // #[cfg(test)]
 // mod tests {
 //     use tokio;

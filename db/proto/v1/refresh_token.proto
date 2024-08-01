@@ -1,0 +1,147 @@
+syntax = "proto3";
+
+package db.refresh_token.v1;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/wrappers.proto";
+
+// General operation status message
+message OperationStatus {
+  bool success = 1;
+  string message = 2;
+}
+
+// Model representing a refresh token
+message RefreshTokenModel {
+  int32 id = 1;
+  int32 account_id = 2;
+  google.protobuf.Timestamp issued_at = 3;
+  google.protobuf.Timestamp expires = 4;
+  bool revoked = 5;
+  google.protobuf.Timestamp revocation_time = 6;
+  string token = 7;
+}
+
+// Message for inserting a new refresh token
+message RefreshTokenInsert {
+  int32 account_id = 1;
+  google.protobuf.Timestamp expires = 2;
+  string token = 3;
+}
+
+// Message for updating an existing refresh token
+message RefreshTokenUpdate {
+  optional bool revoked = 1;
+  optional google.protobuf.Timestamp expires = 2;
+  optional google.protobuf.Timestamp revocation_time = 3;
+}
+
+// Custom filter conditions for the RefreshToken model
+message RefreshTokenFilterCondition {
+  oneof condition {
+    IdFilter id_filter = 1;
+    AccountIdFilter account_id_filter = 2;
+    IssuedAtFilter issued_at_filter = 3;
+    ExpiresFilter expires_filter = 4;
+    RevokedFilter revoked_filter = 5;
+    TokenFilter token_filter = 6;
+  }
+}
+
+message IdFilter {
+  oneof type {
+    int32 equals = 1;
+    int32 not_equals = 2;
+    int32 greater_than = 3;
+    int32 less_than = 4;
+  }
+}
+
+message AccountIdFilter {
+  oneof type {
+    int32 equals = 1;
+    int32 not_equals = 2;
+    int32 greater_than = 3;
+    int32 less_than = 4;
+  }
+}
+
+message IssuedAtFilter {
+  oneof type {
+    google.protobuf.Timestamp equals = 1;
+    google.protobuf.Timestamp not_equals = 2;
+    google.protobuf.Timestamp before = 3;
+    google.protobuf.Timestamp after = 4;
+  }
+}
+
+message ExpiresFilter {
+  oneof type {
+    google.protobuf.Timestamp equals = 1;
+    google.protobuf.Timestamp not_equals = 2;
+    google.protobuf.Timestamp before = 3;
+    google.protobuf.Timestamp after = 4;
+  }
+}
+
+message RevokedFilter {
+  oneof type {
+    bool equals = 1;
+    bool not_equals = 2;
+  }
+}
+
+message TokenFilter {
+  oneof type {
+    string equals = 1;
+    string not_equals = 2;
+    string contains = 3;
+  }
+}
+
+// Shared input for filtering and return flag
+message SharedInput {
+  repeated RefreshTokenFilterCondition filters = 1;
+  bool return_data = 2;
+}
+
+// Request message for deleting a refresh token
+message RefreshTokenDeleteRequest {
+  SharedInput params = 1;
+}
+
+// Request message for inserting refresh tokens
+message RefreshTokenInsertRequest {
+  repeated RefreshTokenInsert tokens = 1;
+  SharedInput params = 2;
+}
+
+// Request message for updating refresh tokens
+message RefreshTokenUpdateRequest {
+  repeated RefreshTokenUpdate tokens = 1;
+  SharedInput params = 2;
+}
+
+// Request message for selecting refresh tokens
+message RefreshTokenSelectRequest {
+  repeated RefreshTokenFilterCondition filters = 1;
+  int32 limit = 2;
+  int32 offset = 3;
+  bool count = 4;
+  string order_by = 5;
+  string order = 6;
+}
+
+// Response message containing a list of refresh tokens
+message RefreshTokensResponse {
+  repeated RefreshTokenModel tokens = 1;
+  OperationStatus status = 2;
+}
+
+// Refresh token service definition
+service RefreshTokenService {
+  rpc Insert (RefreshTokenInsertRequest) returns (RefreshTokensResponse) {}
+  rpc Update (RefreshTokenUpdateRequest) returns (RefreshTokensResponse) {}
+  rpc Delete (RefreshTokenDeleteRequest) returns (RefreshTokensResponse) {}
+  rpc Select (RefreshTokenSelectRequest) returns (RefreshTokensResponse) {}
+}

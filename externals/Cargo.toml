@@ -1,0 +1,35 @@
+[package]
+name = "devpulse_externals"
+version = "0.1.0"
+authors = ["Geoffrey Garrett"]
+edition = "2021"
+description = "A Rust package for interacting with various external APIs."
+repository = "http://example.com/external/repository"
+documentation = "http://example.com/external/documentation"
+homepage = "http://example.com/external"
+build = "build.rs"
+
+[features]
+default = ["use_github", "use_azure", "use_openai"]
+use_github = ["external_github"]
+use_azure = ["external_azure"]
+use_openai = ["external_openai", "rs_openai", "futures"]
+
+## General dependencies across all external APIs
+[dependencies]
+external_github = { path = "libs/external_github", optional = true }
+external_azure = { path = "libs/external_azure", optional = true }
+external_openai = { path = "libs/external_openai", optional = true }
+futures = { version = "0.3.17", optional = true }
+rs_openai = { version = "0.4.1", optional = true }
+dotenv = "0.15.0"
+
+[build-dependencies]
+wait-timeout = "0.2"
+cargo-make = "0.37.14"
+tokio = "1.39.2"
+
+[dev-dependencies]
+tokio = "1.39.2"
+reqwest = "0.12.5"
+

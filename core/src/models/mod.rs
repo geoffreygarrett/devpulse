@@ -1,34 +1,34 @@
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-pub use commit::Commit;
-use commit_author::CommitAuthor;
-pub use commit_commit::CommitCommit;
-pub use commit_commit_tree::CommitCommitTree;
-pub use commit_parents_inner::CommitParentsInner;
-pub use commit_stats::CommitStats;
-pub use commit_status::CommitStatus;
-pub use diff_entry::DiffEntry;
-// mod access_token;
-pub use git_user::GitUser;
-pub use simple_user::SimpleUser;
-pub use verification::Verification;
+pub use crate::adapters::to_core_commit_from_github::*;
+
+// pub use commit::Commit;
+// pub use crate::proto::CommitAuthor;
+// pub use commit_commit::CommitCommit;
+// pub use commit_parents_inner::CommitParentsInner;
+// pub use commit_stats::CommitStats;
+// pub use commit_status::CommitStatus;
+// // mod access_token;
+// pub use verification::Verification;
+
+// pub use crate::adapters::prelude::*;
+//
+// // pub(crate) mod proto {
+// tonic::include_proto!("commit");
+
+// use proto::*;
+tonic::include_proto!("commit");
 
 // mod arc_client;
-mod base;
-mod commit;
-mod commit_author;
-mod commit_commit;
-mod commit_commit_tree;
-mod commit_parents_inner;
-mod commit_stats;
-mod commit_status;
-mod diff_entry;
-mod git_user;
-mod github;
-mod simple_user;
-mod verification;
-// pub(crate) use arc_client::*;
+// mod commit_author;
+// mod commit_commit;
+// mod commit_commit;
+// mod commit_parents_inner;
+// mod commit_stats;
+// mod commit_status;
+// mod verification;
+// // pub(crate) use arc_client::*;
 
 /// Represents the code churn (additions and deletions) for a specific commit.
 #[derive(Debug, Serialize, Deserialize)]

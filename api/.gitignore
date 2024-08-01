@@ -1,3 +1,10 @@
 /target
 .shuttle-storage
 Secrets*.toml
+
+#
+my_ca.pem
+server.csr
+server.key
+server.pem
+certs

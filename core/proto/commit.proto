@@ -2,97 +2,132 @@ syntax = "proto3";
 
 package commit;
 
-// Enum for change types
+import "google/protobuf/timestamp.proto";
+
+// Enum for the type of change to a file in a commit
 enum ChangeType {
   NONE = 0;
   ADD = 1;
   EDIT = 2;
-  ENCODING = 3;
+  DELETE = 3;
   RENAME = 4;
-  DELETE = 5;
-  UNDELETE = 6;
-  BRANCH = 7;
-  MERGE = 8;
-  LOCK = 9;
-  ROLLBACK = 10;
-  SOURCE_RENAME = 11;
-  TARGET_RENAME = 12;
-  PROPERTY = 13;
-  ALL = 14;
+  COPY = 5;
+  MERGE = 6;
+  LOCK = 7;
+  UNDELETE = 8;
+  ROLLBACK = 9;
+  SOURCE_RENAME = 10;
+  TARGET_RENAME = 11;
+  PROPERTY_CHANGE = 12;
+  ALL = 13;
 }
 
 // Enum for state of the status
-enum State {
+enum GitStatusState {
   NOT_SET = 0;
   PENDING = 1;
   SUCCEEDED = 2;
   FAILED = 3;
   ERROR = 4;
   NOT_APPLICABLE = 5;
-  PARTIALLY_SUCCEEDED = 6;
+  PARTIALLY_SUCCEEDED = 6; // Added from previous definition
 }
 
-// Message for user info and date for Git operations
-message GitUserDate {
-  optional string date = 1;
+
+
+
+// Detailed information about file changes within a commit
+message FileChange {
+  string filename = 1;
+  ChangeType change_type = 2;
+  int32 additions = 3;
+  int32 deletions = 4;
+  string patch = 5;
+  string previous_filename = 6;
+  string content_type = 7;  // Add content type to handle different data formats.
+}
+
+
+// Information about the author or committer
+message GitUser {
+  optional string name = 1;
   optional string email = 2;
-  optional string image_url = 3;
-  optional string name = 4;
-}
-
-// Message for changes included with the commit
-message GitChange {
-  optional int32 change_id = 1;
-  optional string new_content_template = 2;
-  optional string original_path = 3;
-  optional ChangeType change_type = 4;
-  optional string item = 5;
-  optional string new_content = 6;
-  optional string source_server_item = 7;
+  google.protobuf.Timestamp date = 3;
+  optional string login = 4;
+  optional int64 id = 5;
+  optional string node_id = 6;
+  optional string avatar_url = 7;
   optional string url = 8;
+  optional string html_url = 9;
+  bool site_admin = 10;
 }
 
-// Message for status metadata from services and extensions
+// Main Commit message that includes references to other detailed messages
+message Commit {
+  string sha = 1;
+  string url = 2;
+  google.protobuf.Timestamp commit_date = 3;
+  string message = 4;
+  repeated FileChange file_changes = 5;
+  repeated string parent_shas = 6;
+  GitUser author = 7;
+  GitUser committer = 8;
+  repeated ResourceRef associated_work_items = 9;
+  repeated GitPushRef push_refs = 10;
+  repeated GitStatus statuses = 11;
+  optional ChangeCountDictionary change_counts = 12; // Merged from old definition
+}
+
+// Repository metadata for additional links and resources
+message RepositoryLinks {
+  string html_url = 1;
+  string commits_url = 2;
+  string issues_url = 3;
+  string pull_requests_url = 4;
+}
+
+// GitPushRef represents a reference to a Git push action
+message GitPushRef {
+  string date = 1;
+  GitUser pushed_by = 2;
+  int32 push_id = 3;
+  string url = 4;
+}
+
+// GitStatus represents the current state and metadata about a commit's status
 message GitStatus {
-  optional string context = 1;
-  optional string created_by = 2;
-  optional string creation_date = 3;
-  optional string description = 4;
-  optional int32 id = 5;
-  optional State state = 6;
-  optional string target_url = 7;
-  optional string updated_date = 8;
+  GitStatusContext context = 1;
+  GitUser created_by = 2;
+  google.protobuf.Timestamp creation_date = 3;
+  string description = 4;
+  int32 id = 5;
+  GitStatusState state = 6;
+  string target_url = 7;
+  google.protobuf.Timestamp updated_date = 8;
 }
 
-// Message for resource reference
-message ResourceRef {
-  optional string id = 1;
-  optional string url = 2;
-}
-
-// Message for change count dictionary (assuming a simple key-value structure)
+// Represents a change count dictionary (key-value pairs of changes)
 message ChangeCountDictionary {
   map<string, int32> change_counts = 1;
 }
 
-// Message for commit
-message Commit {
-  string url = 1;
-  string sha = 2;
-  string node_id = 3;
-  string html_url = 4;
-  string comments_url = 5;
-  optional GitUserDate author = 6;
-  optional GitUserDate committer = 7;
-  repeated GitChange changes = 8;
-  optional string comment = 9;
-  optional bool comment_truncated = 10;
-  optional string commit_id = 11;
-  optional bool commit_too_many_changes = 12;
-  repeated string parents = 13;
-  optional string remote_url = 14;
-  repeated GitStatus statuses = 15;
-  repeated ResourceRef work_items = 16;
-  optional string tree_id = 17;
-  optional ChangeCountDictionary change_counts = 18;
+// Enum to describe the type of a repository (mainly for Azure integration)
+enum RepositoryType {
+  GIT = 0;
+  TFVC = 1;
+}
+
+// Represents resource ref used by azure
+message ResourceRef {
+  optional string id = 1;
+  optional string url = 2;
+  optional string name = 3;
+  optional string type = 4;
+}
+
+
+// Update your proto definitions to include GitStatusContext
+message GitStatusContext {
+  string genre = 1;
+  string name = 2;  // Name should be a non-nullable string in protobuf
 }

@@ -1,0 +1,112 @@
+syntax = "proto3";
+
+package db.auth.v1;
+
+import "google/protobuf/wrappers.proto"; // Import wrappers for handling nullable fields
+
+// Define a message that can encapsulate different kinds of filter operations more granularly.
+message FilterCondition {
+  string column = 1;
+
+  oneof condition {
+    StringFilter string_filter = 2;
+    NumberFilter number_filter = 3;
+    DateFilter date_filter = 4;
+    BooleanFilter boolean_filter = 5;
+    LogicalFilter logical = 6; // Allow logical grouping at the top level
+  }
+}
+
+// String specific filters
+message StringFilter {
+  oneof type {
+    EqFilter eq = 1;
+    LikeFilter like = 2;
+    InFilter in = 3;
+  }
+}
+
+message EqFilter {
+  google.protobuf.StringValue value = 1; // Use wrapper to handle null
+}
+
+message LikeFilter {
+  string pattern = 1;
+}
+
+message InFilter {
+  repeated string values = 1;
+}
+
+// Number specific filters
+message NumberFilter {
+  oneof type {
+    LtFilter lt = 1;
+    GtFilter gt = 2;
+    RangeFilter range = 3;
+  }
+}
+
+message LtFilter {
+  double value = 1;
+}
+
+message GtFilter {
+  double value = 1;
+}
+
+message RangeFilter {
+  double from = 1;
+  double to = 2;
+}
+
+// Date specific filters
+message DateFilter {
+  oneof type {
+    DateEqFilter eq = 1;
+    DateRangeFilter range = 2;
+  }
+}
+
+message DateEqFilter {
+  string value = 1; // Use ISO 8601 date format
+}
+
+message DateRangeFilter {
+  string from = 1; // Use ISO 8601 date format
+  string to = 2;   // Use ISO 8601 date format
+}
+
+// Boolean filters for is true, is false, is not
+message BooleanFilter {
+  bool value = 1; // Directly use the boolean
+}
+
+// Logical filters to combine multiple conditions
+message LogicalFilter {
+  repeated FilterCondition conditions = 1;
+  LogicalOperator operator = 2;
+}
+
+enum LogicalOperator {
+  AND = 0;
+  OR = 1;
+  NOT = 2;
+}
+
+// Request and Response definitions
+message QueryRequest {
+  repeated FilterCondition conditions = 1;
+}
+
+message DataRow {
+  map<string, string> fields = 1; // Consider using more structured data types here
+}
+
+message QueryResponse {
+  repeated DataRow rows = 1;
+}
+
+service DatabaseService {
+  rpc Query(QueryRequest) returns (QueryResponse);
+}

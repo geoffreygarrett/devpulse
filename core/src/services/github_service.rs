@@ -1,12 +1,12 @@
-use external_github::{apis::GithubClient, models::Commit as GitHubCommit};
+use externals::external_github;
+use externals::external_github::apis::GithubClient;
 
 use crate::annotations::prelude::{Annotation, Annotator, GitHubAnnotator};
 use crate::models;
 use crate::models::GitHubRepository;
 use crate::prelude::*;
 
-/// A result type for VCS operations.
-type Result<T> = std::result::Result<T, VcsError>;
+use super::Result;
 
 #[nject::provider]
 struct Provider;
@@ -39,14 +39,14 @@ impl CommitInspection<GitHubRepository> for GitHubService {
             .repos_slash_get_commit(params)
             .await
             .map_err(|e| VcsError::Network(e.to_string()))
-            .map(|commit: GitHubCommit| commit.into())
+            .map(Into::into)
     }
 
     async fn list_changes(
         &self, repository: &GitHubRepository, commit_id: &str,
-    ) -> Result<Option<Vec<models::DiffEntry>>> {
+    ) -> Result<Option<Vec<models::FileChange>>> {
         let commit = self.get_commit(repository, commit_id).await?;
-        Ok(commit.files)
+        Ok(Some(commit.file_changes))
     }
 }
 

@@ -54,13 +54,13 @@ impl Modify for SecurityAddon {
         )
     ),
     paths(
-        crate::http::controllers::repository::create_commit_range_analysis,
+        // crate::http::controllers::repository::create_commit_range_analysis,
         crate::http::controllers::developer::get_developer_performance,
         crate::http::controllers::pull_request::create_pull_request_analysis,
         crate::http::controllers::openapi::get_openapi_json,
         crate::http::controllers::version::version,
         // crate::http::controllers::openapi::get_openapi_yaml,
-        crate::http::controllers::health::health_check,
+        crate::http::controllers::operational::health_check,
     ),
     components(
         responses(
@@ -71,19 +71,21 @@ impl Modify for SecurityAddon {
             crate::models::SourceVersionResponse,
             crate::models::NotImplemented,
             crate::models::CommitRangeAnalysisResponse,
-            crate::models::HealthCheckResponse,
+            crate::models::SummarizedCommitResponse,
+            // crate::models::HealthCheckResponse,
         ),
         // headers(),
         schemas(
             crate::models::Repository,
-            crate::models::HealthCheck,
+            // crate::models::HealthCheck,
             crate::models::CommitRangeRequest,
             crate::models::CommitRangeAnalysis,
             crate::models::CommitRangeDetails,
+            crate::models::SummarizedCommit,
             crate::models::ResponseDetail,
             crate::models::ResponseFormat,
             crate::models::RepositoryContribution,
-            crate::models::HealthCheckResponse,
+            // crate::models::HealthCheckResponse,
             crate::models::DeveloperPerformanceAnalysis,
             crate::models::Contributor,
             crate::errors::DevPulseError

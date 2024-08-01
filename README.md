@@ -181,3 +181,26 @@ the [official DevPulse documentation](https://devpulse.shuttleapp.rs).
 
 For support, issues, or contributions, please visit
 the [project repository](https://github.com/geoffreygarrett/devpulse).
+
+###
+
+```text
+    +-------------------+
+    |   Presentation    |
+    +-------------------+
+    |    Application    |
+    +-------------------+
+    |      Service      |
+    +-------------------+
+    |      Domain       |
+    +-------------------+
+    |  Data Access /    |
+    |   Repository      |
+    +-------------------+
+    |  External /       |
+    | Integration       |
+    |       (DAO)       |
+    +-------------------+
+    |    Database       |
+    +-------------------+
+```

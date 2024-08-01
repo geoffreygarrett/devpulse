@@ -2,8 +2,10 @@ pub(crate) use routes::*;
 
 pub(crate) mod api_doc;
 pub(crate) mod controllers;
+pub(crate) mod language_model;
 pub(crate) mod middleware;
 pub(crate) mod routes;
+pub(crate) mod stream_provider;
 
 pub const TAG_DEVELOPER_ANALYSIS: &str = "Developer";
 

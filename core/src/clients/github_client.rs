@@ -13,21 +13,21 @@ struct GithubClient {
 mod tests {
     #[tokio::test]
     async fn test_github_client() {
-        let config = external_github::apis::configuration::Configuration::builder()
+        let config = externals::external_github::apis::configuration::Configuration::builder()
             .base_path("https://api.github.com".to_string())
             .user_agent("OpenAPI-Generator/1.1.4/rust".to_string())
             .client(reqwest::Client::new())
             .build()
             .unwrap();
 
-        let params = external_github::apis::repos_api::ReposSlashGetCommitParams::builder()
+        let params = externals::external_github::apis::repos_api::ReposSlashGetCommitParams::builder()
             .owner("geoffreygarrett".to_string())
             .repo("devpulse".to_string())
             .r#ref("1e14522488cf65e0e7e9142fae7a8a395414b424".to_string())
             .build()
             .unwrap();
 
-        let result = external_github::apis::repos_api::repos_slash_get_commit(&config, params)
+        let result = externals::external_github::apis::repos_api::repos_slash_get_commit(&config, params)
             .await
             .expect("TODO: panic message");
 
@@ -43,7 +43,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_github_client_2() {
-        use external_github::{apis::configuration::Configuration, apis::GithubClient};
+        use externals::external_github::{apis::configuration::Configuration, apis::GithubClient};
         let config = Configuration::builder()
             .base_path("https://api.github.com".to_string())
             .user_agent("OpenAPI-Generator/1.1.4/rust".to_string())
@@ -51,7 +51,7 @@ mod tests {
             .build()
             .unwrap();
 
-        let params = external_github::apis::repos_api::ReposSlashGetCommitParams::builder()
+        let params = externals::external_github::apis::repos_api::ReposSlashGetCommitParams::builder()
             .owner("geoffreygarrett".to_string())
             .repo("devpulse".to_string())
             .r#ref("1e14522488cf65e0e7e9142fae7a8a395414b424".to_string())

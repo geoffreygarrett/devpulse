@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package db.types.v1;
+
+import "google/protobuf/timestamp.proto";
+
+//// Uuid message
+message Uuid {
+  string value = 1;
+}
+
+//// Timestamp message
+message Timestamp {
+  google.protobuf.Timestamp value = 1;
+}

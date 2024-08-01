@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+package repository;
+
+message Repository {
+  oneof input {
+    string url = 1;
+    RepositoryDetails details = 2;
+  }
+}
+
+message RepositoryDetails {
+  RepositoryType type = 1;
+  string url = 2; // Complete repository URL
+  oneof specifics {
+    GitHubRepository github = 3;
+    GitLabRepository gitlab = 4;
+    BitbucketRepository bitbucket = 5;
+    AzureReposRepository azure_repos = 6;
+    CustomRepository custom = 7;
+  }
+}
+
+enum RepositoryType {
+  UNKNOWN = 0;
+  GITHUB = 1;
+  GITLAB = 2;
+  BITBUCKET = 3;
+  AZURE_REPOS = 4;
+  CUSTOM = 5;
+}
+
+message GitHubRepository {
+  string owner = 1;
+  string repo = 2;
+}
+
+message GitLabRepository {
+  string owner = 1;
+  string repo = 2;
+}
+
+message BitbucketRepository {
+  string owner = 1;
+  string repo = 2;
+}
+
+message AzureReposRepository {
+  string organization = 1;
+  string project = 2;
+  string repo = 3;
+}
+
+message CustomRepository {
+  string custom_url = 1;
+}

@@ -1,0 +1,147 @@
+syntax = "proto3";
+
+package db.auth.v1;
+
+import "google/protobuf/empty.proto";
+import "google/protobuf/timestamp.proto";
+
+
+message Uuid {
+  string value = 1;
+}
+
+// Timestamp message for storing time values, defined in google/protobuf/timestamp.proto
+message Timestamp {
+  google.protobuf.Timestamp value = 1;
+}
+
+// Enum for identity source types
+enum IdentitySource {
+  PASSWORD = 0;
+  GOOGLE = 1;
+}
+
+message OperationStatus {
+  bool success = 1;
+  string message = 2;
+}
+
+message AccountResponse {
+  Account account = 1;
+  OperationStatus status = 2;
+}
+
+message AccountListResponse {
+  repeated Account accounts = 1;
+  OperationStatus status = 2;
+}
+
+// Message corresponding to the Account table
+message Account {
+  int32 id = 1;
+  string uuid = 2;
+  string given_name = 3;
+  string email = 4;
+  string hash = 5;
+  string avatar_url = 6;
+  string created_at = 7;
+}
+
+// Message for creating a new Account
+message AccountCreate {
+  string uuid = 1;
+  string given_name = 2;
+  string email = 3;
+  string hash = 4;
+  string avatar_url = 5;
+}
+
+// Message for updating an Account
+message AccountUpdate {
+  int32 id = 1;
+  string uuid = 2;
+  string given_name = 3;
+  string email = 4;
+  string hash = 5;
+  string avatar_url = 6;
+}
+
+// Message for deleting an Account
+message AccountDelete {
+  int32 id = 1;
+}
+
+// Response message containing a list of Account records
+message AccountsResponse {
+  repeated Account accounts = 1;
+}
+
+// Service definition for account-related operations
+service AccountService {
+  rpc Insert (AccountCreate) returns (AccountResponse) {}
+  rpc Update (AccountUpdate) returns (AccountResponse) {}
+  rpc Delete (AccountDelete) returns (OperationStatus) {}
+  rpc List (google.protobuf.Empty) returns (AccountListResponse) {}
+}
+
+// Message corresponding to the Identity table
+message Identity {
+  int32 id = 1;
+  int32 account_id = 2;
+  IdentitySource source = 3;
+}
+
+// Message for creating a new Identity
+message IdentityCreate {
+  int32 account_id = 1;
+  IdentitySource source = 2;
+}
+
+// Request message for retrieving identities by account ID
+message GetIdentitiesRequest {
+  int32 account_id = 1;
+}
+
+// Response message containing a list of Identity records
+message IdentitiesResponse {
+  repeated Identity identities = 1;
+}
+
+// Message corresponding to the RefreshToken table
+message RefreshToken {
+  int32 id = 1;
+  int32 account_id = 2;
+  string issued_at = 3;
+  string expires = 4;
+  bool revoked = 5;
+  string revocation_time = 6;
+  string token = 7;
+}
+
+// Message for creating a new Refresh Token
+message RefreshTokenCreate {
+  int32 account_id = 1;
+  string expires = 2;
+  string token = 3;
+}
+
+
+
+// Service definition for identity-related operations
+service IdentityService {
+  rpc Insert (IdentityCreate) returns (Identity) {}
+  rpc List (GetIdentitiesRequest) returns (IdentitiesResponse) {}
+}
+
+// Definition for a flexible account identifier
+message AccountIdentifier {
+  oneof identifier {
+    int32 id = 1;
+    string email = 2;
+  }
+}
+
+// Service definition for refresh token-related operations
+service RefreshTokenService {
+  rpc Issue (AccountIdentifier) returns (RefreshToken) {}
+}
