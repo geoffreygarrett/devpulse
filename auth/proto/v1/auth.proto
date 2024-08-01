@@ -1,0 +1,74 @@
+syntax = "proto3";
+package com.gg.auth;
+import "google/protobuf/timestamp.proto";
+
+message RegistrationRequest {
+  string email = 1;
+  string password = 2;
+  map<string, string> data = 3;
+}
+
+message PasswordLoginRequest {
+  string email = 1;
+  string password = 2;
+}
+
+message RefreshTokenRequest {
+  string refresh_token = 1;
+}
+
+message ValidateTokenRequest {
+  string token = 1;
+}
+
+message Session {
+  string access_token = 1;
+  string refresh_token = 2;
+}
+
+enum AuthErrorType {
+  BAD_CODE_VERIFIER = 0;
+  BAD_JSON = 1;
+  BAD_JWT = 2;
+  CAPTCHA_FAILED = 3;
+  EMAIL_NOT_CONFIRMED = 4;
+  INSUFFICIENT_AAL = 5;
+  INVITE_NOT_FOUND = 6;
+  NOT_ADMIN = 7;
+  REAUTHENTICATION_NEEDED = 8;
+  REAUTHENTICATION_NOT_VALID = 9;
+  SESSION_NOT_FOUND = 10;
+  SIGNUP_DISABLED = 11;
+  UNEXPECTED_AUDIENCE = 12;
+  UNEXPECTED_FAILURE = 13;
+  USER_ALREADY_EXISTS = 14;
+  USER_BANNED = 15;
+  USER_NOT_FOUND = 16;
+  USER_SSO_MANAGED = 17;
+  VALIDATION_FAILED = 18;
+  WEAK_PASSWORD = 19;
+  CONFLICT = 20;
+  EMAIL_EXISTS = 21;
+  SAME_PASSWORD = 22;
+}
+
+message AuthError {
+  AuthErrorType error_type = 1;
+  string message = 2;
+}
+
+message AuthResponse {
+  Session session = 1;
+  AuthError error = 3;
+}
+
+message ValidateTokenResponse {
+  bool valid = 1;
+}
+
+service Auth {
+  rpc RegisterUser(RegistrationRequest) returns (AuthResponse);
+  rpc LoginWithPassword(PasswordLoginRequest) returns (AuthResponse);
+  rpc RefreshToken(RefreshTokenRequest) returns (AuthResponse);
+  rpc ValidateToken(ValidateTokenRequest) returns (ValidateTokenResponse);
+}
