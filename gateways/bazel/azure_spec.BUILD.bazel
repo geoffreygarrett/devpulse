@@ -1,0 +1,3 @@
+load("@devpulse//internal:bazel/azure_specs.bzl", "create_azure_filegroups")
+
+create_azure_filegroups()

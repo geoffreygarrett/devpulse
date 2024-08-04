@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package api;
+
+import "acl.proto";
+import "zookie.proto";
+
+
+service AccessService {
+  rpc Read(ReadRequest) returns (ReadResponse);
+  rpc Write(WriteRequest) returns (WriteResponse);
+  rpc Watch(WatchRequest) returns (WatchResponse);
+  rpc Check(CheckRequest) returns (CheckResponse);
+  rpc Expand(ExpandRequest) returns (ExpandResponse);
+}
+
+message ReadRequest {
+  repeated string tuplesets = 1;
+  zookie.Zookie zookie = 2;
+}
+
+message ReadResponse {
+  repeated acl.RelationTuple tuples = 1;
+}
+
+message WriteRequest {
+  acl.RelationTuple acl = 1;
+  zookie.Zookie zookie = 2;
+}
+
+message WriteResponse {
+  zookie.Zookie zookie = 1;
+}
+
+message WatchRequest {
+  repeated string namespaces = 1;
+  zookie.Zookie zookie = 2;
+}
+
+message WatchResponse {
+  repeated acl.RelationTuple tuples = 1;
+  zookie.Zookie heartbeat_zookie = 2;
+}
+
+message CheckRequest {
+  string object_relation = 1;
+  string user = 2;
+  zookie.Zookie zookie = 3;
+}
+
+message CheckResponse {
+  bool access = 1;
+}
+
+message ExpandRequest {
+  string object_relation = 1;
+  zookie.Zookie zookie = 2;
+}
+
+message ExpandResponse {
+  repeated acl.RelationTuple tuples = 1;
+}

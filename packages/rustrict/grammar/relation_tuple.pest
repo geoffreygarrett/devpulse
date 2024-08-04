@@ -1,0 +1,13 @@
+WHITESPACE             = _{ " " | "\t" | NEWLINE }
+RESERVED               = _{ ":" | "#" | "@" }
+
+namespace              = @{ (!RESERVED ~ (ASCII_ALPHANUMERIC | "." | "-" | "_"))+ }
+object_id              = @{ (!RESERVED ~ (ASCII_ALPHANUMERIC | "." | "-" | "_"))+ }
+relation               = @{ (!RESERVED ~ (ASCII_ALPHANUMERIC | "." | "-" | "_"))+ }
+user                   = @{ (!RESERVED ~ (ASCII_ALPHANUMERIC | "." | "-" | "_"))+ }
+object                 = { namespace ~ ":" ~ object_id }
+userset                = { object ~ "#" ~ relation }
+subject                = _{ userset | user }
+relationship           = { object ~ "#" ~ relation ~ "@" ~ subject }
+
+start                  = { SOI ~ relationship ~ EOI }

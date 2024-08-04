@@ -1,0 +1,8 @@
+{
+  "dependencies": {
+    "g": "^2.0.1",
+    "openapi-extract": "^1.3.0",
+    "openapi-filter": "^3.2.3",
+    "semver": "^5.7.2"
+  }
+}

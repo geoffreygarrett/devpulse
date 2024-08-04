@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package acl;
+
+message Object {
+  string name = 1;
+  string id = 2;
+}
+
+message Userset {
+  Object object = 1;
+  string relation = 2;
+}
+
+message RelationTuple {
+  Object object = 1;
+  string relation = 2;
+  oneof subject {
+    string id = 3;
+    Userset userset = 4;
+  }
+}

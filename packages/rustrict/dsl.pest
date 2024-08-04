@@ -1,0 +1,16 @@
+// Define the grammar rules
+WHITESPACE = _{ " " | "\t" | "\n" | "\r" }
+COMMENT = _{ "#" ~ (!NEWLINE ~ ANY)* ~ NEWLINE }
+
+schema = { SOI ~ "schema" ~ WS+ ~ FLOAT ~ EOI }
+type_definition = { "type" ~ WS+ ~ IDENTIFIER ~ WS* ~ "{" ~ WS* ~ relation_block* ~ WS* ~ "}" }
+relation_block = _{ "relations" ~ WS+ ~ "{" ~ WS* ~ relation_definition+ ~ WS* ~ "}" }
+relation_definition = { "define" ~ WS+ ~ IDENTIFIER ~ ":" ~ WS* ~ "[" ~ relation_target ~ "]" }
+
+relation_target = _{ (IDENTIFIER ~ "#" ~ IDENTIFIER) | IDENTIFIER }
+
+IDENTIFIER = @{ ASCII_ALPHANUMERIC+ }
+FLOAT = @{ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT+ }
+WS = _{ " " | "\t" }
+
+start = { schema ~ (type_definition)+ }

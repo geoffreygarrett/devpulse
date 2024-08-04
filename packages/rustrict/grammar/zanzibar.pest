@@ -1,0 +1,33 @@
+WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
+COMMENT = _{ "#" ~ (!"\n" ~ ANY)* ~ "\n" }
+WHITESPACE_OR_COMMENT = _{ WHITESPACE | COMMENT }
+name = @{ ASCII_ALPHANUMERIC+ }
+key = { ASCII_ALPHANUMERIC+ }
+value = { string | number | boolean }
+pair = { key ~ ":" ~ value }
+string = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
+number = @{
+    "-"?
+    ~ ("0" | ASCII_NONZERO_DIGIT ~ ASCII_DIGIT*)
+    ~ ("." ~ ASCII_DIGIT*)?
+    ~ (^"e" ~ ("+" | "-")? ~ ASCII_DIGIT+)?
+}
+name_pair = { "name" ~ ":" ~ value }
+block = { key ~ "{" ~ (pair | block | WHITESPACE_OR_COMMENT)* ~ "}" }
+variable = { "$" ~ "TUPLE_USERSET_OBJECT" }
+boolean = { "true" | "false" }
+relation_name = { "relation" }
+relation_block = _{ relation_name ~ "{" ~ relation_body* ~ "}" }
+relation_body = { name ~ ":" ~ value | userset_rewrite }
+userset_rewrite = { "userset_rewrite" ~ "{" ~ union_block ~ "}" }
+union_block = { "union" ~ "{" ~ child_block* ~ "}" }
+child_block = { "child" ~ "{" ~ child_type ~ "}" }
+_this = { "_this" ~ "{" ~ "}" }
+child_type = { _this | computed_userset | tuple_to_userset }
+computed_userset = { "computed_userset" ~ "{" ~ "relation:" ~ string ~ "}" }
+tuple_to_userset = { "tuple_to_userset" ~ "{" ~ tupleset ~ computed_userset ~ "}" }
+tupleset = { "tupleset" ~ "{" ~ "relation:" ~ string ~ "}" }
+config = { SOI ~ name ~ ":" ~ string ~ relation_block* ~ EOI }
+userset_rewrite_block = { "userset_rewrite" ~ "{" ~ union_block* ~ "}" }
+_this_block = { "_this" ~ "{" ~ "}" }
+

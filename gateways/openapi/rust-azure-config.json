@@ -1,0 +1,19 @@
+{
+  "packageName": "external_azure",
+  "packageVersion": "1.0.0",
+  "library": "reqwest",
+  "supportAsync": true,
+  "useSingleRequestParameter": true,
+  "deriveBuilder": true,
+  "clientName": "AzureClient",
+  "enableCache": true,
+  "tracing": true,
+  "avoidBoxedModels": false,
+  "bestFitInt": false,
+  "preferUnsignedInt": false,
+  "enumNameSuffix": "",
+  "hideGenerationTimestamp": true,
+  "supportMiddleware": false,
+  "supportMultipleResponses": false,
+  "withAWSV4Signature": false
+}

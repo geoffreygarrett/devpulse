@@ -1,0 +1,38 @@
+syntax = "proto3";
+
+package config;
+
+message ComputedUserset {
+  string relation = 1;
+}
+
+message TupleToUserset {
+  string tupleset_relation = 1;
+  ComputedUserset computed_userset = 2;
+}
+
+message Child {
+  oneof child {
+    bool _this = 1;
+    ComputedUserset computed_userset = 2;
+    TupleToUserset tuple_to_userset = 3;
+  }
+}
+
+message Union {
+  repeated Child children = 1;
+}
+
+message UsersetRewrite {
+  Union union = 1;
+}
+
+message RelationConfig {
+  string name = 1;
+  UsersetRewrite userset_rewrite = 2;
+}
+
+message NamespaceConfig {
+  string name = 1;
+  repeated RelationConfig relations = 2;
+}
