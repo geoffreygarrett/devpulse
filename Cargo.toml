@@ -4,12 +4,13 @@ members = [
     "api",
     "tests",
     "notes",
-    "auth",
     "proto",
     "util/route",
     "util/proto",
     "externals",
-    "db"]
+    "packages/rustrict",
+    "services/auth",
+    "services/database"]
 
 exclude = [
     "integrations/github",
