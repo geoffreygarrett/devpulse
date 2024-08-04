@@ -21,3 +21,4 @@ gateways/openapi/azure/vsts-rest-api-specs-master/
 **/.envexternals
 **/.envexternals/*node_modules/
 gateways/openapi/azure/vsts-rest-api-specs-master/
+externals/openapi/azure/vsts-rest-api-specs-master/
