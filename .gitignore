@@ -19,4 +19,5 @@ gateways/openapi/azure/vsts-rest-api-specs-master/
 **/.env.local
 **/.env.postgres
 **/.envexternals
-**/.envexternals/*
+**/.envexternals/*node_modules/
+gateways/openapi/azure/vsts-rest-api-specs-master/
