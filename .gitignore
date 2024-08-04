@@ -12,3 +12,4 @@ bazel-env
 .env.local
 .env.postgres
 .envexternals/openapi/node_modules
+gateways/openapi/azure/vsts-rest-api-specs-master/
