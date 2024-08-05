@@ -1,0 +1,83 @@
+// Okta DSL Pest Grammar
+// Version: 1.0.0
+// Date: 2024-08-04
+// Description: Grammar definitions for model, type, and expression handling.
+////////////////////////////////////////
+
+// General Setup and Whitespace Handling
+////////////////////////////////////////
+
+WHITESPACE        = _{ " " | "\t" | COMMENT_NEWLINE }
+COMMENT_NEWLINE   = _{ COMMENT? ~ NEWLINE }
+COMMENT           = _{ "//" ~ (!NEWLINE ~ ANY)* }
+
+// Model Definitions
+////////////////////////////////////////
+
+model             =  _{ "model" ~ schema }
+input             =  { WHITESPACE* ~ module? ~ model ~ type_definition* }
+module            =  { "module" ~ identifier }
+schema            =  { "schema" ~ version }
+version           = @{ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT+ }
+
+// Type Definitions and Relations
+////////////////////////////////////////
+
+type_definition    = { "type" ~ identifier ~ relations? }
+relations         = { "relations" ~ definition+ }
+definition         = { "define" ~ identifier ~ ":" ~ expression }
+
+// Expression Definitions
+////////////////////////////////////////
+
+self_reference    = @{ identifier }
+from_reference    =  { identifier ~ "from" ~ identifier }
+reference         = _{ from_reference | self_reference }
+direct            =  { direct_relationships }
+union             =  { "or" ~ reference }
+exclusion         =  { "but" ~ "not" ~ reference }
+intersection      =  { "and" ~ reference }
+
+expression        = _{
+    (direct | reference) ~
+    (exclusion | intersection | union)*
+}
+
+// Array and Direct Type Restriction Handling
+////////////////////////////////////////
+
+square_bracket_left  = _{ "[" }
+square_bracket_right = _{ "]" }
+
+type_specifier = _{
+    direct_type_relation |
+    direct_type_wildcard |
+    direct_type
+}
+
+direct_type          = @{ identifier }                  // <type>
+direct_type_wildcard = @{ identifier ~ ":*" }           // <type:*>
+direct_type_relation = @{ type_relation }               // <type>#<relation>
+
+direct_relationships = _{
+    square_bracket_left ~
+    (type_specifier ~ ("," ~ type_specifier)*)? ~
+    square_bracket_right
+}
+
+// Identifier Definitions
+////////////////////////////////////////
+
+identifier           = @{ (ASCII_ALPHANUMERIC | "_")+ }
+type_name           = { identifier }
+relation_name       = @{ identifier }
+type_relation       = { type_name ~ "#" ~ relation_name }
+
+// Character Handling for Various Constructs
+////////////////////////////////////////
+
+char = _{
+    !("\"" | "\\") ~ ANY
+    | "\\" ~ ("\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t")
+    | "\\" ~ ("u" ~ ASCII_HEX_DIGIT{4})
+}
