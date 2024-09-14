@@ -9,7 +9,7 @@ members = [
     "util/proto",
     "externals",
     "packages/rustrict",
-    "services/auth",
+    "services/rustproof",
     "services/database"]
 
 exclude = [

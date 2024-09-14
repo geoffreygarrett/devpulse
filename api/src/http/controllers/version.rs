@@ -9,11 +9,11 @@ use crate::models::SourceVersionResponse;
 /// It can be useful for clients to determine the exact version
 /// of the API they are interacting with, especially for debugging
 /// and compatibility purposes.
-#[utoipa::path(
+#[auto_route::route(
     get,
     path = "/version",
     responses(
-        (status = 200, response=SourceVersionResponse)
+        (status = 200, response = SourceVersionResponse)
     ),
     tag = "General"
 )]

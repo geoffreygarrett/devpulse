@@ -9,123 +9,10 @@ use pest::{
 use pest_derive::Parser;
 use serde::{Deserialize, Serialize};
 
+use crate::models::config::{DirectUserset, Metadata, ModelConfig, ObjectRelation, RelationMetadata, RelationReference, Schema, SourceInfo, TupleToUserset, TypeDefinition, UsersetRewrite, Wildcard};
+
 mod error;
-#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
-struct DirectUserset {}
 
-#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
-pub struct Wildcard {}
-
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-pub struct ObjectRelation {
-    #[serde(rename = "object", skip_serializing_if = "Option::is_none")]
-    pub object: Option<String>,
-    #[serde(rename = "relation")]
-    pub relation: Option<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-pub struct RelationReference {
-    #[serde(rename = "type")]
-    pub _type: String,
-    #[serde(rename = "relation", skip_serializing_if = "Option::is_none")]
-    pub relation: Option<String>,
-    #[serde(rename = "wildcard", skip_serializing_if = "Option::is_none")]
-    pub wildcard: Option<Wildcard>,
-    #[serde(rename = "condition", skip_serializing_if = "Option::is_none")]
-    pub condition: Option<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-pub struct TupleToUserset {
-    #[serde(rename = "tupleset")]
-    pub tupleset: ObjectRelation,
-    #[serde(rename = "computedUserset")]
-    pub computed_userset: ObjectRelation,
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
-enum Child {
-    #[serde(rename = "direct_userset")]
-    DirectUserset(DirectUserset),
-    #[serde(rename = "tuple_to_userset")]
-    TupleToUserset(TupleToUserset),
-    #[serde(rename = "computed_userset")]
-    ComputedUserset(ObjectRelation),
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
-struct Children {
-    child: Vec<Child>,
-}
-
-// #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
-// struct UsersetRewrite {
-//     union: Option<Children>,
-//     intersection: Option<Children>,
-//     exclusion: Option<Children>,
-// }
-
-// #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
-// struct Relation {
-//     name: String,
-//     userset_rewrite: Option<UsersetRewrite>,
-// }
-
-#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
-struct Schema {
-    version: String,
-}
-#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
-struct ModelConfig {
-    schema: Schema,
-    types: Vec<TypeDefinition>,
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
-struct SourceInfo {
-    file: String,
-    line: u32,
-    line_end: u32,
-    column: u32,
-    column_end: u32,
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
-struct UserType {
-    #[serde(rename = "type")]
-    _type: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    relation: Option<String>,
-}
-
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-pub struct RelationMetadata {
-    #[serde(rename = "directly_related_user_types")]
-    pub directly_related_user_types: Option<Vec<RelationReference>>,
-    #[serde(rename = "module")]
-    pub module: Option<String>,
-    #[serde(rename = "source_info")]
-    pub source_info: Option<SourceInfo>,
-}
-
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-pub struct Metadata {
-    #[serde(rename = "relations")]
-    pub relations: HashMap<String, RelationMetadata>,
-    #[serde(rename = "module")]
-    pub module: Option<String>,
-    #[serde(rename = "source_info")]
-    pub source_info: Option<SourceInfo>,
-}
-
-#[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
-struct TypeDefinition {
-    #[serde(rename = "type")]
-    pub _type: String,
-    relations: Option<HashMap<String, UsersetRewrite>>,
-    metadata: Option<Metadata>,
-}
 
 macro_rules! unexpected_parser_syntax {
     ($pair:expr) => {
@@ -157,21 +44,6 @@ fn query_string_from_pair(pair: Pair<Rule>) -> String {
     pair.as_str().to_string()
 }
 
-#[derive(Debug, Serialize, Deserialize, PartialEq, Clone)]
-pub struct UsersetRewrite {
-    #[serde(rename = "this", skip_serializing_if = "Option::is_none")]
-    pub this: Option<DirectUserset>,
-    #[serde(rename = "computedUserset", skip_serializing_if = "Option::is_none")]
-    pub computed_userset: Option<ObjectRelation>,
-    #[serde(rename = "tupleToUserset", skip_serializing_if = "Option::is_none")]
-    pub tuple_to_userset: Option<TupleToUserset>,
-    #[serde(rename = "union", skip_serializing_if = "Option::is_none")]
-    pub union: Option<Vec<Box<UsersetRewrite>>>,
-    #[serde(rename = "intersection", skip_serializing_if = "Option::is_none")]
-    pub intersection: Option<Vec<Box<UsersetRewrite>>>,
-    #[serde(rename = "exclusion", skip_serializing_if = "Option::is_none")]
-    pub exclusion: Option<Vec<Box<UsersetRewrite>>>,
-}
 
 fn parse_identifier(pair: Pair<Rule>) -> String {
     query_string_from_pair(pair)
@@ -316,17 +188,10 @@ fn parse_relation_definition(pair: Pair<Rule>) -> (String, RelationMetadata, Use
     let (userset_rewrite, references) = userset_rewrite.unwrap();
 
     if let Some(name) = name {
-        let pair_span = pair.as_span();
         (name, RelationMetadata {
             directly_related_user_types: Some(references),
             module: None,
-            source_info: Some(SourceInfo {
-                file: "file".to_string(),
-                line: pair_span.start_pos().line_col().0 as u32,
-                line_end: pair_span.end_pos().line_col().0 as u32,
-                column: pair_span.start_pos().line_col().1 as u32,
-                column_end: pair_span.end_pos().line_col().1 as u32,
-            }),
+            source_info: Some(source_info_from_pair(pair)),
         },
          userset_rewrite)
     } else {
@@ -340,13 +205,25 @@ fn parse_relations(pair: Pair<Rule>) -> (HashMap<String, RelationMetadata>, Hash
     let mut metadata: HashMap<String, RelationMetadata> = HashMap::new();
     for inner_pair in pair.into_inner() {
         let (name, direct, relation) = parse_relation_definition(inner_pair);
-        println!("{:?}, {:?}", direct, relation);
         relations.insert(name.clone(), relation);
         metadata.insert(name, direct);
     }
     (metadata, relations)
 }
 
+
+fn source_info_from_pair(
+    pair: Pair<Rule>
+) -> SourceInfo {
+    let span = pair.as_span();
+    SourceInfo {
+        file: "file".to_string(),
+        line: span.start_pos().line_col().0 as u32,
+        line_end: span.end_pos().line_col().0 as u32,
+        column: span.start_pos().line_col().1 as u32,
+        column_end: span.end_pos().line_col().1 as u32,
+    }
+}
 
 fn parse_type_definition(pair: Pair<Rule>) -> TypeDefinition {
     let mut metadata: HashMap<String, RelationMetadata> = HashMap::new();
@@ -369,20 +246,13 @@ fn parse_type_definition(pair: Pair<Rule>) -> TypeDefinition {
         }
     }
 
-    let span = pair.as_span();
     TypeDefinition {
         _type,
         relations: Some(relations),
         metadata: Option::from(Metadata {
             relations: metadata,
             module: None,
-            source_info: Some(SourceInfo {
-                file: "file".to_string(),
-                line: span.start_pos().line_col().0 as u32,
-                line_end: span.end_pos().line_col().0 as u32,
-                column: span.start_pos().line_col().1 as u32,
-                column_end: span.end_pos().line_col().1 as u32,
-            }),
+            source_info: Some(source_info_from_pair(pair)),
         }),
     }
 }
@@ -399,14 +269,14 @@ fn parse_schema(pair: Pair<Rule>) -> Schema {
 }
 
 fn parse_model(pair: Pair<Rule>) -> ModelConfig {
-    let mut schema: Schema;
+    let mut schema = None;
     let mut types: Vec<TypeDefinition> = vec![];
     let mut module: Option<String> = None;
 
     for inner_pair in pair.into_inner() {
         match inner_pair.as_rule() {
             // Model definition
-            Rule::schema => { schema = parse_schema(inner_pair) }
+            Rule::schema => { schema = Some(parse_schema(inner_pair)) }
             Rule::module => { module = Some(query_string_from_pair(inner_pair.into_inner().next().unwrap())); }
             Rule::type_definition => { types.push(parse_type_definition(inner_pair)); }
             Rule::condition_definition => {}
@@ -417,14 +287,14 @@ fn parse_model(pair: Pair<Rule>) -> ModelConfig {
     types.iter_mut().for_each(|t| {
         t.metadata.as_mut().unwrap().module = module.clone();
     });
-
-    ModelConfig {
-        schema: Schema { version: "1.1".to_string() },
-        types,
+    if let Some(schema) = schema {
+        ModelConfig { schema, types }
+    } else {
+        panic!("Schema is required");
     }
 }
 
-fn parse(file: &str) -> Result<ModelConfig, Box<dyn Error>> {
+pub fn parse_fga_file_contents(file: &str) -> Result<ModelConfig, Box<dyn Error>> {
     let mut pairs = FgaParser::parse(Rule::input, file)?;
     let pair = pairs.next().unwrap();
     match pair.as_rule() {
@@ -462,7 +332,7 @@ fn parse_relation_reference(pair: Pair<Rule>) -> RelationReference {
 mod tests {
     use pest::error::LineColLocation;
 
-    use crate::parser::okta_dsl::error::display_error_lines;
+    use crate::parser::fga::error::display_error_lines;
 
     use super::*;
 
@@ -732,7 +602,7 @@ mod tests {
     }
 
     #[test]
-    fn test_parse_okta_dsl() {
+    fn test_parse_fga() {
         let input = r#"
             module example_
             model
@@ -747,7 +617,7 @@ mod tests {
                 define viewer3: [user] or z
         "#;
 
-        let result = parse(input).unwrap();
+        let result = parse_fga_file_contents(input).unwrap();
         // Check for the presence of specific types
         assert!(result.types.iter().any(|t| t._type == "user"));
         assert!(result.types.iter().any(|t| t._type == "domain"));
@@ -755,23 +625,3 @@ mod tests {
         println!("{}", serde_json::to_string_pretty(&result).unwrap());
     }
 }
-
-// fn format(parsed: pest::iterators::Pair<Rule>) -> String {
-//     let mut formatted_output = String::new();
-//
-//     for pair in parsed.into_inner() {
-//         match pair.as_rule() {
-//             Rule::model => {
-//                 formatted_output.push_str("model\n");
-//                 formatted_output.push_str(&format(pair));
-//             }
-//             Rule::schema => {
-//                 formatted_output.push_str(pair.as_str());
-//                 formatted_output.push('\n');
-//             }
-//             Rule::type_definition => {
-//                 formatted_output.push_str(pair.as_str());
-//                 formatted_output.push('\n');
-//             }
-//             Rule::relations => {
-//                 formatted_output.push_str("        relati

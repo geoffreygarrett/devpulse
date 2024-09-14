@@ -1,0 +1,13 @@
+model
+  schema 1.1
+
+type user
+
+type org
+  relations
+    define member: [user]
+
+type document
+  relations
+    define writer: [user, org#member]
+    define reader: [user, org#member] or writer

@@ -1,6 +1,9 @@
 use std::collections::HashMap;
+use std::path::PathBuf;
 
 use serde::{Deserialize, Serialize};
+
+use crate::parser::fga::parse_fga_file_contents;
 
 /// Represents a direct userset in a userset rewrite rule.
 #[derive(Debug, PartialEq, Serialize, Deserialize, Clone)]
@@ -69,6 +72,36 @@ pub struct Schema {
 pub struct ModelConfig {
     pub schema: Schema,
     pub types: Vec<TypeDefinition>,
+}
+
+impl ModelConfig {
+    pub fn from_fga_file(path: &PathBuf) -> Result<ModelConfig, Box<dyn std::error::Error>> {
+        let contents = std::fs::read_to_string(path)?;
+        let model_config: ModelConfig = parse_fga_file_contents(&contents)?;
+        Ok(model_config)
+    }
+
+    pub fn from_fga_file_contents(contents: &str) -> Result<ModelConfig, Box<dyn std::error::Error>> {
+        let model_config: ModelConfig = parse_fga_file_contents(contents)?;
+        Ok(model_config)
+    }
+
+    pub fn allowable_direct_relations(&self) -> HashMap<String, Vec<String>> {
+        let mut allowable_direct_relations = HashMap::new();
+        for type_def in &self.types {
+            if let Some(relations) = &type_def.relations {
+                for (relation_name, userset_rewrite) in relations {
+                    if let Some(this) = &userset_rewrite.this {
+                        allowable_direct_relations
+                            .entry(type_def._type.clone())
+                            .or_insert_with(Vec::new)
+                            .push(relation_name.clone());
+                    }
+                }
+            }
+        }
+        allowable_direct_relations
+    }
 }
 
 /// Provides source information for elements in the model.

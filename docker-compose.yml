@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   rest:
     build:
@@ -5,65 +7,36 @@ services:
       dockerfile: api/Dockerfile
     image: devpulse/api
     container_name: devpulse-rest
-    ports:
-      - "3000:3000"
-      - "50051:50051"
     environment:
       - RUST_LOG=info
       - REST_ADDRESS=0.0.0.0
-      - REST_PORT=3000
+      - REST_PORT=3002
       - GRPC_ADDRESS=0.0.0.0
       - GRPC_PORT=50051
-    labels:
-      - "traefik.enable=true"
-      - "traefik.http.routers.api.rule=PathPrefix(`/`)"
-      - "traefik.http.services.api.loadbalancer.server.port=3000"
     networks:
-      - server-side
+      - proxy
+    ports:
+      - "3002:3002"
+      - "50051:50051"
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:3000/health" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:3002/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
-
-  #  auth:
-  #    build:
-  #      context: .
-  #      dockerfile: auth/Dockerfile
-  #    image: devpulse/auth
-  #    container_name: devpulse-auth
-  #    ports:
-  #      - "4000:4000"
-  #    environment:
-  #      - JWT_SECRET=${JWT_SECRET}
-  #      - TOKEN_EXPIRATION=3600
-  #      - JWT_ALGORITHM=HS256
-  #      - REFRESH_TOKEN_SECRET=${REFRESH_TOKEN_SECRET}
-  #      - REFRESH_TOKEN_EXPIRATION=604800 # One week in seconds
-  #    depends_on:
-  #      - devpulse-api
-  #    healthcheck:
-  #      test: [ "CMD", "curl", "-f", "http://localhost:4000/health" ]
-  #      interval: 30s
-  #      timeout: 10s
-  #      retries: 3
-  #    labels:
-  #      - "traefik.enable=true"
-  #      - "traefik.http.routers.auth.rule=PathPrefix(`/auth`)"
-  #      - "traefik.http.services.auth.loadbalancer.server.port=4000"
-  #    networks:
-  #      - server-side
+    depends_on:
+      - database
+      - openfga
 
   database:
     build:
       context: .
-      dockerfile: db/Dockerfile
+      dockerfile: services/database/Dockerfile
     image: devpulse/database
     container_name: devpulse-database
     environment:
       - DATABASE_URL=postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
     networks:
-      - server-side
+      - proxy
       - data-access
     ports:
       - "50052:50052"
@@ -81,7 +54,9 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_DB=${POSTGRES_DB}
     networks:
+      - proxy
       - data-access
+      - external
     ports:
       - "5432:5432"
     volumes:
@@ -92,27 +67,79 @@ services:
       timeout: 10s
       retries: 3
 
-  traefik:
-    image: traefik:v2.5
-    container_name: devpulse-traefik
-    command:
-      - "--api.insecure=true"
-      - "--providers.docker=true"
-      - "--entrypoints.web.address=:80"
+  migrate:
+    depends_on:
+      postgres:
+        condition: service_healthy
+    image: openfga/openfga:latest
+    container_name: migrate
+    environment:
+      - OPENFGA_DATASTORE_ENGINE=postgres
+      - OPENFGA_DATASTORE_URI=postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
+    command: migrate
+    networks:
+      - proxy
+      - data-access
+
+  openfga:
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    image: openfga/openfga:latest
+    container_name: openfga
+    command: run
+    environment:
+      - OPENFGA_DATASTORE_ENGINE=postgres
+      - OPENFGA_DATASTORE_URI=postgres://postgres:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}?sslmode=disable
+      - OPENFGA_DATASTORE_MAX_OPEN_CONNS=100
+      - OPENFGA_PLAYGROUND_ENABLED=true
+      - OPENFGA_PLAYGROUND_PORT=3001
+    networks:
+      - proxy
+      - data-access
+      - external
+    ports:
+      - "8080:8080" # http
+      - "8081:8081" # grpc
+      - "3001:3001" # playground
+      - "2112:2112" # prometheus metrics
+
+  nginx:
+    image: nginx:alpine
+    container_name: devpulse-nginx
     ports:
       - "80:80"
-      - "8080:8080" # Traefik dashboard
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
+      - "./nginx/templates:/etc/nginx/templates/"
+      - "./nginx/entrypoint.sh:/nginx/entrypoint.sh"
     networks:
-      - server-side
+      - proxy
+    environment:
+      - NGINX_ENVSUBST_TEMPLATE_SUFFIX=.conf
+      - API_DOMAIN=api.localhost
+      - REST_SERVICE_HOST=rest
+      - REST_SERVICE_PORT=3002
+      - GRPC_DOMAIN=grpc.localhost
+      - GRPC_SERVICE_HOST=rest
+      - GRPC_SERVICE_PORT=50051
+      - PLAYGROUND_DOMAIN=playground.localhost
+      - PLAYGROUND_SERVICE_HOST=openfga
+      - PLAYGROUND_SERVICE_PORT=3001
+    entrypoint: ["/nginx/entrypoint.sh"]
+    command: ["nginx", "-g", "daemon off;"]
+    depends_on:
+      - rest
+      - openfga
 
 networks:
-  server-side:
+  proxy:
     driver: bridge
-
+    internal: true
+  external:
+    driver: bridge
   data-access:
     driver: bridge
+    internal: true
 
 volumes:
   db-data: { }

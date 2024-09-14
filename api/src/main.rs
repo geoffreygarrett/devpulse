@@ -14,13 +14,15 @@ use axum_server::tls_rustls::RustlsConfig;
 use bytes::Bytes;
 use futures_util::{AsyncReadExt, Stream};
 use futures_util::StreamExt;
+use openfga_rs::open_fga_service_client::OpenFgaServiceClient;
+use openfga_rs::tonic::transport::Channel;
 use reqwest::tls;
 use tokio::sync::RwLock;
 use tokio_stream::wrappers::IntervalStream;
 use tonic::{Request, Response, Status};
 use tonic::transport::{Identity, Server as TonicServer, ServerTlsConfig};
 use tonic_reflection::server::Builder as ReflectionBuilder;
-use tower::ServiceBuilder;
+use tower::{Layer, ServiceBuilder};
 use tower_http::add_extension::AddExtensionLayer;
 use tower_http::body::Full;
 use tower_http::LatencyUnit;
@@ -31,6 +33,8 @@ use tracing_subscriber::FmtSubscriber;
 pub(crate) use utils::auto_route::route;
 
 use crate::handlers::v1::health::{HealthServer, HealthServiceImpl};
+use crate::http::middleware::authorize::{ AuthorizationLayer, AuthorizationMiddleware};
+// use crate::http::middleware::authorize::{authorize, Claims};
 // use crate::grpc::my_service::{MyRequest, MyResponse};
 // use crate::grpc::my_service_server::{MyService, MyServiceServer};
 use crate::http::routes;
@@ -135,6 +139,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let start_time = Arc::new(RwLock::new(SystemTime::now()));
     let server_state = Arc::new(RwLock::new(ServerState::new(start_time.clone())));
 
+
+    // let middleware_stack = ServiceBuilder::new()
+    //     // .layer(axum::middleware::from_fn(authorize))
+    //     .layer(axum::Extension(Arc::new(Claims::new("sub".to_string(), 0))))
+    //     .into_inner();
+
+
+    let fga_client = Arc::new(OpenFgaServiceClient::connect("http://fga.localhost:80").await?);
+    // let app_state = Arc::new(AppState { fga_client });
+
     // REST router setup
     let rest_router = routes::create_router().layer(
         ServiceBuilder::new()
@@ -148,7 +162,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                             .latency_unit(LatencyUnit::Micros),
                     ),
             )
-            .layer(AddExtensionLayer::new(server_state.clone())),
+            .layer(AddExtensionLayer::new(server_state.clone()))
+            // .layer(AddExtensionLayer::new(app_state))
+            .layer(AuthorizationLayer {  })
+        // .layer(middleware_stack)
     );
 
     // REST server setup with optional TLS

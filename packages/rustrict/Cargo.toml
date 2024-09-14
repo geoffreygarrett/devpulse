@@ -30,6 +30,7 @@ serde_yaml = "0.9.34+deprecated"
 color-eyre = "0.6.1"
 anyhow = "1.0.86"
 tracing-error = "0.2.0"
+colored = "2.1.0"
 
 [build-dependencies]
 tonic-build = "0.12.1"

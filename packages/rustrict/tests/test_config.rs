@@ -56,6 +56,7 @@ types:
         "#;
 
         let model: Configuration = deserialize_yaml(yaml_data).unwrap();
+        println!("{}", serde_json::to_string_pretty(&model).unwrap());
         assert_eq!(model.model.schema, "1.1");
         assert_eq!(model.types.len(), 3);
         assert!(model.types.contains_key("user"));

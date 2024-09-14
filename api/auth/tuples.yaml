@@ -1,0 +1,11 @@
+- user: user:peter
+  relation: admin
+  object: organization:acme
+  condition:
+    name: non_expired_grant
+    context:
+      grant_time: "2024-02-01T00:00:00Z"
+      grant_duration: 1h
+- user: user:anne
+  relation: member
+  object: organization:acme

@@ -1,0 +1,124 @@
+## Rustproof Default Configuration
+#
+## External providers
+[external]
+apple = false
+azure = false
+bitbucket = false
+discord = false
+facebook = false
+figma = false
+github = false
+gitlab = false
+google = false
+keycloak = false
+linkedin = false
+notion = false
+slack = false
+spotify = false
+twitch = false
+twitter = false
+workos = false
+email = true
+phone = false
+
+[tata]
+#
+## Main configuration
+#site_url = "http://localhost:3000"
+#uri_allow_list = ""
+#operator_token = ""
+#disable_signup = false
+#
+## Access Token Configuration
+#[token]
+#secret = "your-secret-key-here"
+#exp = 3600
+#nbf = 0
+#rexp = 2592000
+#
+## SMTP Configuration
+#[smtp]
+#host = "localhost"
+#port = 25
+#user = ""
+#pass = ""
+#name = "Rustproof Mailer"
+#from = "no-reply@example.com"
+#
+## Mailer Configuration
+#[mailer]
+#autoconfirm = true
+#otp_exp = 300
+#
+#[mailer.url_paths]
+#invite = "/invite"
+#confirmation = "/confirm"
+#recovery = "/recovery"
+#email_change = "/email-change"
+#
+#[mailer.subjects]
+#invite = "MailerSubjectSource::Fallback"
+#confirmation = "MailerSubjectSource::Fallback"
+#recovery = "MailerSubjectSource::Fallback"
+#magic_link = "MailerSubjectSource::Fallback"
+#email_change = "MailerSubjectSource::Fallback"
+#
+#[mailer.templates]
+#invite = "MailerTemplateSource::Fallback"
+#confirmation = "MailerTemplateSource::Fallback"
+#recovery = "MailerTemplateSource::Fallback"
+#magic_link = "MailerTemplateSource::Fallback"
+#email_change = "MailerTemplateSource::Fallback"
+#
+#localization = true
+#
+## Auth Configuration
+#[auth]
+#anonymous_users_enabled = false
+#password_min_length = 8
+#password_required_characters = "lowercase,uppercase,number,special"
+#
+## Database Configuration
+#[database]
+#driver = "postgres"
+#connection_string = "postgres://user:password@localhost/rustproof"
+#max_pool_size = 5
+#max_connections = 10
+#namespace = "_auth"
+#
+## Observability Configuration
+#[observability]
+## Add observability settings here if needed
+#
+## Rate Limiting Configuration
+#[rate_limiting]
+#rate_limit_header = "X-RateLimit-Limit"
+#rate_limit_email_sent = "5/hour"
+#
+## Server Configuration
+#[server]
+#api_host = "127.0.0.1"
+#port = 8000
+#request_id_header = "X-Request-ID"
+#
+## Security Configuration
+#[security]
+#captcha_enabled = false
+#captcha_provider = ""
+#captcha_secret = ""
+#captcha_timeout = "30s"
+#update_password_require_reauthentication = false
+#refresh_token_rotation_enabled = true
+#refresh_token_reuse_interval = 10
+#
+## SMS Configuration
+#[sms]
+#autoconfirm = false
+#max_frequency = 60
+#otp_exp = 300
+#otp_length = 6
+#provider = ""
+#twilio_account_sid = ""
+#twilio_auth_token = ""
+#twilio_message_service_sid = ""

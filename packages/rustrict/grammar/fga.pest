@@ -1,77 +1,118 @@
-// Okta DSL Pest Grammar
-// Version: 1.0.0
-// Date: 2024-08-04
-// Description: Grammar definitions for model, type, and expression handling.
-////////////////////////////////////////
+// Okta FGA Configuration Language
+// ===============================
+// Description: This grammar defines the structure for Okta FGA (Feature Gate Access) configuration language,
+//              including module definitions, type definitions, userset rewrites, and conditions.
+// Date: 2024-08-05
+// Author: Geoffrey Garrett (https://github.com/geoffreygarrett)
+
 
 // General Setup and Whitespace Handling
 ////////////////////////////////////////
 
-WHITESPACE        = _{ " " | "\t" | COMMENT_NEWLINE }
-COMMENT_NEWLINE   = _{ COMMENT? ~ NEWLINE }
-COMMENT           = _{ "//" ~ (!NEWLINE ~ ANY)* }
+WHITESPACE            = _{ " " | "\t" | NEWLINE | COMMENT }
+COMMENT               = _{ "//" ~ (!NEWLINE ~ ANY)* }
+
+// Basic Elements
+////////////////////////////////////////
+
+identifier            = @{ (ASCII_ALPHANUMERIC | "_")+ }
+type_name             =  { identifier }
+relation              = @{ identifier }
+type_relation         = _{ _type ~ "#" ~ relation }
+_type                 = @{ identifier }  // "type" reserved in rust
+object                = @{ identifier }
 
 // Model Definitions
 ////////////////////////////////////////
 
-model             =  _{ "model" ~ schema }
-input             =  { WHITESPACE* ~ module? ~ model ~ type_definition* }
-module            =  { "module" ~ identifier }
-schema            =  { "schema" ~ version }
-version           = @{ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT+ }
+model                 = _{ "model" ~ schema }
+input                 =  { WHITESPACE* ~ module? ~ model ~ type_definition* ~ condition_definition* }
+module                =  { "module" ~ identifier }
+schema                =  { "schema" ~ version }
+version               = @{ ASCII_DIGIT+ ~ "." ~ ASCII_DIGIT+ }
 
 // Type Definitions and Relations
 ////////////////////////////////////////
 
-type_definition    = { "type" ~ identifier ~ relations? }
-relations         = { "relations" ~ definition+ }
-definition         = { "define" ~ identifier ~ ":" ~ expression }
+type_definition        =  { "type" ~ identifier ~ relations? }
+relations              =  { "relations" ~ relation_definition+ }
+relation_definition    =  { "define" ~ relation ~ ":" ~ userset_rewrite }
+
+// Condition Definitions
+////////////////////////////////////////
+
+expression            =  { (!"}" ~ ANY)* }
+condition             = @{ identifier }
+condition_definition  =  { "condition" ~ condition ~ parameters ~ condition_body }
+parameters            =  { "(" ~ parameter_list ~ ")" }
+parameter_list        =  { (parameter ~ ("," ~ parameter)*)? }
+parameter             =  { identifier ~ ":" ~ identifier }
+condition_body        =  { "{" ~ expression ~ "}" }
 
 // Expression Definitions
 ////////////////////////////////////////
 
-self_reference    = @{ identifier }
-from_reference    =  { identifier ~ "from" ~ identifier }
-reference         = _{ from_reference | self_reference }
-direct            =  { direct_relationships }
-union             =  { "or" ~ reference }
-exclusion         =  { "but" ~ "not" ~ reference }
-intersection      =  { "and" ~ reference }
+tupleset              =  { relation }
+computed_userset      =  { relation }
+tuple_to_userset      =  { computed_userset ~ "from" ~ tupleset }
+child                 =  { tuple_to_userset | computed_userset | this }
 
-expression        = _{
-    (direct | reference) ~
-    (exclusion | intersection | union)*
+// Direct Relationships and Type Restrictions
+/////////////////////////////////////////////
+
+wildcard              =  { "*" }
+type_wildcard         = _{ _type ~ ":" ~ wildcard }  // <type:*>
+
+reference             =  { (
+    _type ~ "#" ~ relation |
+    _type ~ ":" ~ wildcard |
+    _type
+) ~ ("with" ~ condition)? }
+
+this                  =  {
+    "[" ~
+    reference ~ ("," ~ reference)* ~
+    "]"
 }
 
-// Array and Direct Type Restriction Handling
+// Define Logical Operations with Precedence
 ////////////////////////////////////////
 
-square_bracket_left  = _{ "[" }
-square_bracket_right = _{ "]" }
+// connector_and = _{ "and" ~ userset_rewrite }
+// connector_or  = _{ "or" ~ userset_rewrite }
+// connector_not = _{ "but"? ~ "not" ~ userset_rewrite }
 
-type_specifier = _{
-    direct_type_relation |
-    direct_type_wildcard |
-    direct_type
+// Parentheses Handling TODO: Add to all expressions
+// parentheses_expression = { "(" ~ expression ~ ")" }
+
+// Top Level Expression
+userset_rewrite       =  {
+    exclusion | intersection | union | child
 }
 
-direct_type          = @{ identifier }                  // <type>
-direct_type_wildcard = @{ identifier ~ ":*" }           // <type:*>
-direct_type_relation = @{ type_relation }               // <type>#<relation>
-
-direct_relationships = _{
-    square_bracket_left ~
-    (type_specifier ~ ("," ~ type_specifier)*)? ~
-    square_bracket_right
+// Handle Intersection: Intermediate Precedence
+intersection_inner    = _{
+    ((union | child) ~ "and" ~ (intersection_inner | union | child)) | child
+}
+intersection          =  {
+    (union | child) ~ "and" ~ intersection_inner
 }
 
-// Identifier Definitions
-////////////////////////////////////////
+// Handle Union: Lowest Precedence, and Flattening Unions
+union_inner           = _{
+    (child ~ "or" ~ (union_inner | child)) | child
+}
+union                 =  {
+    child ~ ("or" ~ union_inner)+
+}
 
-identifier           = @{ (ASCII_ALPHANUMERIC | "_")+ }
-type_name           = { identifier }
-relation_name       = @{ identifier }
-type_relation       = { type_name ~ "#" ~ relation_name }
+// Handle Exclusion: Outermost Level, Applied Last
+exclusion_inner       = _{
+    intersection | union | child
+}
+exclusion             =  {
+    exclusion_inner ~ ("but" ~ "not" ~ exclusion_inner)+
+}
 
 // Character Handling for Various Constructs
 ////////////////////////////////////////

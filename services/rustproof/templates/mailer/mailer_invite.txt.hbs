@@ -1,0 +1,15 @@
+{{!--
+  Arguments:
+  - site_url: The URL of the site inviting the user.
+  - confirmation_url: The URL for the user to accept the invite.
+  - inviter_name: The name of the person or entity inviting the user (optional).
+--}}
+You have been invited to create a user on {{site_url}}.
+
+{{#if inviter_name}}
+    This invitation was sent by {{inviter_name}}.
+{{/if}}
+
+Follow this link to accept the invite:
+
+{{confirmation_url}}

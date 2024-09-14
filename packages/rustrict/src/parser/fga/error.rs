@@ -4,7 +4,7 @@ use color_eyre::owo_colors::OwoColorize;
 use pest::Span;
 use serde::{de, ser};
 
-use crate::parser::okta_dsl::Rule;
+use crate::parser::fga::Rule;
 
 /// Alias for a `Result` with error type `Error`
 pub type Result<T> = std::result::Result<T, Error>;

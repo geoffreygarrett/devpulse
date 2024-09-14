@@ -8,3 +8,4 @@ pub(crate) mod repository;
 pub(crate) mod version;
 pub(crate) mod chat;
 pub(crate) mod chat_2;
+pub (crate) mod auth;

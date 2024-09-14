@@ -1,0 +1,74 @@
+
+substitutions:
+  _POSTGRES_URI: '"postgres:///postgres?host=/cloudsql/openrescue:africa-south1:openrescue-postgres-develop&user=postgres&password=3g%2A%2Bl%7E0qH22xihTK&sslmode=disable"'
+
+steps:
+  # [START delete_migration_job]
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud beta run jobs delete openrescue-migrate --region africa-south1 --quiet || true
+  # [END delete_migration_job]
+
+  # [START create_migration_job]
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud beta run jobs create openrescue-migrate \
+        --region africa-south1 \
+        --image docker.io/openfga/openfga:latest \
+        --command "/openfga" \
+        --set-env-vars=OPENFGA_DATASTORE_ENGINE=postgres,OPENFGA_DATASTORE_URI=${_POSTGRES_URI},OPENFGA_DATASTORE_MAX_OPEN_CONNS=100,OPENFGA_PLAYGROUND_ENABLED=false \
+        --set-cloudsql-instances=openrescue:africa-south1:openrescue-postgres-develop \
+        --args="migrate"
+  # [END create_migration_job]
+
+  # [START execute_migration_job]
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud beta run jobs execute openrescue-migrate --region africa-south1
+  # [END execute_migration_job]
+
+  # [START deploy_service_http]
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud run deploy openrescue-openfga-http \
+        --region africa-south1 \
+        --allow-unauthenticated \
+        --set-cloudsql-instances=openrescue:africa-south1:openrescue-postgres-develop \
+        --image docker.io/openfga/openfga:latest \
+        --command "/openfga" \
+        --port 8080 \
+        --set-env-vars=OPENFGA_DATASTORE_ENGINE=postgres,OPENFGA_DATASTORE_URI=${_POSTGRES_URI},OPENFGA_DATASTORE_MAX_OPEN_CONNS=100,OPENFGA_PLAYGROUND_ENABLED=false \
+        --args="run"
+  # [END deploy_service_http]
+
+  # [START deploy_service_grpc]
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud run deploy openrescue-openfga-grpc \
+        --region africa-south1 \
+        --allow-unauthenticated \
+        --set-cloudsql-instances=openrescue:africa-south1:openrescue-postgres-develop \
+        --image docker.io/openfga/openfga:latest \
+        --command "/openfga" \
+        --port 8081 \
+        --set-env-vars=OPENFGA_DATASTORE_ENGINE=postgres,OPENFGA_DATASTORE_URI=${_POSTGRES_URI},OPENFGA_DATASTORE_MAX_OPEN_CONNS=100,OPENFGA_PLAYGROUND_ENABLED=false \
+        --args="run"
+  # [END deploy_service_grpc]
+
+images:
+  - 'docker.io/openfga/openfga:latest'

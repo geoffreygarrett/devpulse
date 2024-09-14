@@ -1,0 +1,24 @@
+steps:
+  # Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/openrescue-openfga', '.']
+
+  # Push the Docker image to Google Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/openrescue-openfga']
+
+  # Deploy the image to Google Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: 'bash'
+    args:
+      - '-c'
+      - |
+        gcloud run deploy openrescue-openfga \
+        --image gcr.io/$PROJECT_ID/openrescue-openfga \
+        --platform managed \
+        --region us-central1 \
+        --set-env-vars=OPENFGA_DATASTORE_ENGINE=postgres,OPENFGA_DATASTORE_URI=postgres://postgres.xijufqypeyrpkypqdzbi:mYxunFHqdzIdmV00@aws-0-eu-west-2.pooler.supabase.com:5432/postgres,OPENFGA_DATASTORE_MAX_OPEN_CONNS=100,OPENFGA_PLAYGROUND_ENABLED=true,OPENFGA_PLAYGROUND_PORT=3001 \
+        --allow-unauthenticated # Optional: Remove this if you want to restrict access
+
+images:
+  - 'gcr.io/$PROJECT_ID/openrescue-openfga'

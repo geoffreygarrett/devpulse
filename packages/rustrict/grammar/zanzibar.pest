@@ -1,33 +1,61 @@
-WHITESPACE = _{ " " | "\t" | "\r" | "\n" }
-COMMENT = _{ "#" ~ (!"\n" ~ ANY)* ~ "\n" }
-WHITESPACE_OR_COMMENT = _{ WHITESPACE | COMMENT }
-name = @{ ASCII_ALPHANUMERIC+ }
-key = { ASCII_ALPHANUMERIC+ }
-value = { string | number | boolean }
-pair = { key ~ ":" ~ value }
-string = @{ "\"" ~ (!"\"" ~ ANY)* ~ "\"" }
-number = @{
-    "-"?
-    ~ ("0" | ASCII_NONZERO_DIGIT ~ ASCII_DIGIT*)
-    ~ ("." ~ ASCII_DIGIT*)?
-    ~ (^"e" ~ ("+" | "-")? ~ ASCII_DIGIT+)?
-}
-name_pair = { "name" ~ ":" ~ value }
-block = { key ~ "{" ~ (pair | block | WHITESPACE_OR_COMMENT)* ~ "}" }
-variable = { "$" ~ "TUPLE_USERSET_OBJECT" }
-boolean = { "true" | "false" }
-relation_name = { "relation" }
-relation_block = _{ relation_name ~ "{" ~ relation_body* ~ "}" }
-relation_body = { name ~ ":" ~ value | userset_rewrite }
-userset_rewrite = { "userset_rewrite" ~ "{" ~ union_block ~ "}" }
-union_block = { "union" ~ "{" ~ child_block* ~ "}" }
-child_block = { "child" ~ "{" ~ child_type ~ "}" }
-_this = { "_this" ~ "{" ~ "}" }
-child_type = { _this | computed_userset | tuple_to_userset }
-computed_userset = { "computed_userset" ~ "{" ~ "relation:" ~ string ~ "}" }
-tuple_to_userset = { "tuple_to_userset" ~ "{" ~ tupleset ~ computed_userset ~ "}" }
-tupleset = { "tupleset" ~ "{" ~ "relation:" ~ string ~ "}" }
-config = { SOI ~ name ~ ":" ~ string ~ relation_block* ~ EOI }
-userset_rewrite_block = { "userset_rewrite" ~ "{" ~ union_block* ~ "}" }
-_this_block = { "_this" ~ "{" ~ "}" }
+// ReBAC Model Grammar
+// ====================
+// Description: This grammar defines the structure for ReBAC (Relationship-Based Access Control) models,
+//              including definitions for types, relations, and userset rewrites.
+// Date: 2024-08-05
+// Author: Geoffrey Garrett (https://github.com/geoffreygarrett)
+// Original Zanzibar Paper: https://research.google/pubs/pub48190/
 
+// General Setup and Whitespace Handling
+////////////////////////////////////////
+
+WHITESPACE           = _{ " " | "\t" | NEWLINE | COMMENT }
+COMMENT              = _{ "#" ~ (!NEWLINE ~ ANY)* }
+
+// Basic Elements
+////////////////////////////////////////
+
+identifier           = @{ (ASCII_ALPHANUMERIC | "_")+ }
+type_name            =  { identifier }
+name_string          = _{ "\"" ~ type_name ~ "\"" }
+relation             = @{ identifier }
+relation_string      = _{ "\"" ~ relation ~ "\"" }
+variable             = @{ ("$" ~ identifier) }
+object               =  { variable | "\"" ~ identifier ~ "\"" }
+
+// Model Definitions
+////////////////////////////////////////
+
+input                = _{ model }
+model                = _{ "name:" ~ name_string ~ relations }
+relations            = _{ relation_definition* }
+
+relation_definition   =  { "relation" ~ "{" ~ relation_body ~ "}" }
+relation_body        = _{ "name" ~ ":" ~ relation_string ~ userset_rewrite? }
+
+userset_rewrite      = _{ "userset_rewrite" ~ "{" ~ rewrite_body ~ "}" }
+rewrite_body         = _{ union | intersection | exclusion | child }
+
+child                = _{ "child" ~ "{" ~ child_body ~ "}" }
+this                 =  { "_this" ~ "{" ~ "}" }
+child_body           = _{ this | computed_userset | tuple_to_userset }
+
+relation_pair        =  { "relation" ~ ":" ~ relation_string }
+object_pair          =  { "object" ~ ":" ~ object }
+computed_userset     =  { "computed_userset" ~ "{" ~ (relation_pair | object_pair)+ ~ "}" }
+
+tuple_to_userset     =  { "tuple_to_userset" ~ "{" ~ tupleset ~ computed_userset ~ "}" }
+tupleset             = _{ "tupleset" ~ "{" ~ "relation:" ~ relation_string ~ "}" }
+
+union                =  { "union" ~ "{" ~ rewrite_body+ ~ "}" }
+intersection         =  { "intersection" ~ "{" ~ rewrite_body+ ~ "}" }
+exclusion            =  { "exclusion" ~ "{" ~ rewrite_body+ ~ "}" }
+
+// Character Handling for Various Constructs
+////////////////////////////////////////
+
+char = _{
+    !("\"" | "\\") ~ ANY
+    | "\\" ~ ("\"" | "\\" | "/" | "b" | "f" | "n" | "r" | "t")
+    | "\\" ~ ("u" ~ ASCII_HEX_DIGIT{4})
+}

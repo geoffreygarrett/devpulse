@@ -1,0 +1,3 @@
+[submodule "packages/openfga"]
+	path = packages/openfga
+	url = https://github.com/openfga/api.git

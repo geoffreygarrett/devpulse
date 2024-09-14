@@ -1,0 +1,145 @@
+[package]
+name = "rustproof"
+edition = "2021"
+authors = ["Geoffrey Garrett"]
+build = "build.rs"
+version = "0.1.0"
+description = "Rustproof is a user registration and authentication API"
+
+[lib]
+path = "src/lib.rs"
+name = "rustproof"
+
+[[bin]]
+name = "rustproof"
+path = "src/bin/mod.rs"
+description = "Rustproof CLI"
+
+[features]
+default = [
+    "auth-server",
+    "grpc-server",
+    "grpc-client",
+    "http-server",
+    "http-client",
+    "async-trait",
+]
+server-cli = ["anstyle", "clap"]
+client-cli = ["anstyle", "clap"]
+auth-server = [
+    "jsonwebtoken/default", # JWT
+    "nject", # Dependency injection
+    "bcrypt", # Password hashing
+    "snafu", # Elegant error handling
+    "zxcvbn", # Password strength checker (Dropbox)
+    "adapter-postgres", # Postgres adapter
+    "adapter-sqlite", # Sqlite adapter
+    "axum", # Web framework
+    "server-cli", # CLI
+    "observability", # Tracing'
+    "shaku", # DI
+]
+adapter-postgres = [
+    "sqlx/postgres", # Postgres adapter
+]
+adapter-sqlite = [
+    "sqlx/sqlite", # Sqlite adapter
+]
+grpc-server = ["grpc-base"]
+grpc-client = ["grpc-base"]
+http-server = []
+http-client = []
+grpc-base = [
+    "prost-types", # Protobuf
+    "prost" # Protobuf
+]
+observability = [
+    "tracing",
+    "tracing-subscriber",
+    "tracing-opentelemetry",
+    "opentelemetry",
+    "opentelemetry-prometheus",
+    "opentelemetry-otlp",
+]
+
+[dependencies]
+handlebars = "6.0.0"
+secrecy = { version = "0.8.0", features = ["serde"] }
+anstyle = { version = "1.0.8", optional = true }
+sqlx = { version = "0.8.0", features = ["runtime-tokio", "macros", "postgres", "tls-rustls", "chrono", "time", "uuid", "json", "ipnetwork"], optional = true }
+prost = { version = "0.13.1", optional = true }
+prost-types = { version = "0.13.1", optional = true }
+jsonwebtoken = { version = "9.3.0", optional = true }
+convert_case = "0.6.0"
+serde = { version = "1.0.209", features = ["derive"] }
+once_cell = "1.8"
+nject = { version = "0.4", optional = true }
+uuid = { version = "1.10.0", features = ["v4", "serde"] }
+bcrypt = { version = "0.15.1", optional = true }
+config = "0.14.0"
+dotenv = "0.15.0"
+snafu = { version = "0.8.1", optional = true, features = ["futures"] }
+async-trait = { version = "0.1.81", optional = true }
+
+zxcvbn = { version = "3.1.0", optional = true, features = ["ser"] }
+util-proto = { path = "..", workspace = true }
+rand = "0.8.5"
+thiserror = "1.0.63"
+argon2 = { version = "0.5.1", features = ["default"] }
+rand_core = "0.6.4"
+serde_json = "1.0.127"
+sha2 = "0.10.8"
+env_logger = "0.11.5"
+derive_more = { version = "1.0.0", features = ["full"] }
+chrono = { version = "0.4.38", features = ["serde"] }
+rusty_paseto = { version = "0.7.1", features = ["core", "v4_local", "v4_public"] }
+base64 = { version = "0.22.1", features = ["std"] }
+serde_with = "3.9.0"
+reqwest = { version = "0.12.7", features = ["json"] }
+sha1 = "0.10.6"
+httpmock = "0.7.0"
+ipnetwork = { version = "0.20.0", features = ["serde"] }
+webauthn-rs = { version = "0.5.0" }
+lazy_static = "1.5.0"
+
+# CONFIG
+validator = { version = "0.18.1", features = ["derive"] }
+
+# SMTP
+lettre = { version = "0.11.7", features = ["tokio1", "rustls-tls", "tokio1-rustls-tls", "smtp-transport", "builder"], default-features = false }
+
+# CLI
+clap = { version = "4.5.16", features = ["derive", "wrap_help", "help", "suggestions", "usage"], optional = true }
+
+# WEB
+tonic = "0.12.1"
+tower = "0.5.0"
+http = "1.1.0"
+hyper = { version = "1.0", features = ["full"] }
+axum = { version = "0.7.5", features = ["default", "tracing"], optional = true }
+tokio = { version = "1.39.2", features = ["full"] }
+tower-http = { version = "0.5.2", optional = true, features = ["tracing", "full"] }
+
+# DI
+shaku = { version = "0.6.1", optional = true , features = ["derive"] }
+
+# OBSERVABILITY
+tracing = { version = "0.1.40", features = ["log"], optional = true }
+tracing-subscriber = { version = "0.3.18", features = ["env-filter", "fmt", "ansi", "json", "registry"], optional = true }
+tracing-opentelemetry = { version = "0.25.0", optional = true }
+opentelemetry = { version = "0.24.0", features = ["trace"], optional = true }
+opentelemetry-prometheus = { version = "0.17.0", optional = true }
+opentelemetry-otlp = { version = "0.17.0", features = ["grpc-tonic"], optional = true }
+opentelemetry_sdk = "0.24.1"
+tracing-appender = "0.2.3"
+
+[build-dependencies]
+sqlx = { version = "0.8.0", features = ["runtime-tokio", "macros", "postgres", "tls-rustls"], optional = true }
+tokio = { version = "1", features = ["full"] }
+tonic = "0.12.1"
+tonic-build = "0.12.1"
+util-proto = { path = "..", workspace = true, features = ["build"] }
+dotenv = "0.15.0"
+
+[test-dependencies]
+httpmock = "0.6.0"

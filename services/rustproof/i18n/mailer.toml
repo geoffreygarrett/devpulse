@@ -1,0 +1,232 @@
+_version = 2
+
+[subjects.invite]
+en = "You've been invited to join"
+es = "Has sido invitado a unirte"
+fr = "Vous avez été invité à rejoindre"
+
+[subjects.confirmation]
+en = "Please confirm your email address"
+es = "Por favor, confirma tu dirección de correo electrónico"
+fr = "Veuillez confirmer votre adresse e-mail"
+
+[subjects.recovery]
+en = "Reset your password"
+es = "Restablecer tu contraseña"
+fr = "Réinitialiser votre mot de passe"
+
+[subjects.magic_link]
+en = "Sign in to your account"
+es = "Inicia sesión en tu cuenta"
+fr = "Connectez-vous à votre compte"
+
+[subjects.email_change]
+en = "Confirm your email address change"
+es = "Confirma el cambio de tu dirección de correo electrónico"
+fr = "Confirmez le changement de votre adresse e-mail"
+
+[templates.invite.text]
+#language=handlebars
+en = """
+You have been invited to join {{site_url}}.
+
+Please follow this link to accept the invitation:
+
+{{confirmation_url}}
+"""
+#language=handlebars
+es = """
+Has sido invitado a unirte a {{site_url}}.
+
+Por favor, sigue este enlace para aceptar la invitación:
+
+{{confirmation_url}}
+"""
+#language=handlebars
+fr = """
+Vous avez été invité à rejoindre {{site_url}}.
+
+Veuillez suivre ce lien pour accepter l'invitation :
+
+{{confirmation_url}}
+"""
+
+[templates.invite.html]
+#language=handlebars
+en = """
+<h2>You have been invited to join {{site_url}}</h2>
+<p>Please follow this link to accept the invitation:</p>
+<p><a href="{{confirmation_url}}">Accept the invite</a></p>
+"""
+#language=handlebars
+es = """
+<h2>Has sido invitado a unirte a {{site_url}}</h2>
+<p>Por favor, sigue este enlace para aceptar la invitación:</p>
+<p><a href="{{confirmation_url}}">Aceptar la invitación</a></p>
+"""
+#language=handlebars
+fr = """
+<h2>Vous avez été invité à rejoindre {{site_url}}</h2>
+<p>Veuillez suivre ce lien pour accepter l'invitation :</p>
+<p><a href="{{confirmation_url}}">Accepter l'invitation</a></p>
+"""
+
+[templates.confirmation.text]
+#language=handlebars
+en = """
+Please confirm your email address by clicking the link below:
+
+{{confirmation_url}}
+"""
+#language=handlebars
+es = """
+Por favor, confirma tu dirección de correo electrónico haciendo clic en el enlace a continuación:
+
+{{confirmation_url}}
+"""
+#language=handlebars
+fr = """
+Veuillez confirmer votre adresse e-mail en cliquant sur le lien ci-dessous :
+
+{{confirmation_url}}
+"""
+
+[templates.confirmation.html]
+#language=handlebars
+en = """
+<h2>Please confirm your email address</h2>
+<p>Click the link below to confirm your email address:</p>
+<p><a href="{{confirmation_url}}">Confirm your email</a></p>
+"""
+#language=handlebars
+es = """
+<h2>Por favor, confirma tu dirección de correo electrónico</h2>
+<p>Haz clic en el enlace a continuación para confirmar tu dirección de correo electrónico:</p>
+<p><a href="{{confirmation_url}}">Confirmar correo electrónico</a></p>
+"""
+#language=handlebars
+fr = """
+<h2>Veuillez confirmer votre adresse e-mail</h2>
+<p>Cliquez sur le lien ci-dessous pour confirmer votre adresse e-mail :</p>
+<p><a href="{{confirmation_url}}">Confirmer votre e-mail</a></p>
+"""
+
+[templates.recovery.text]
+#language=handlebars
+en = """
+You requested to reset your password. Please click the link below to proceed:
+
+{{confirmation_url}}
+"""
+#language=handlebars
+es = """
+Solicitaste restablecer tu contraseña. Por favor, haz clic en el enlace a continuación para continuar:
+
+{{confirmation_url}}
+"""
+#language=handlebars
+fr = """
+Vous avez demandé à réinitialiser votre mot de passe. Veuillez cliquer sur le lien ci-dessous pour continuer :
+
+{{confirmation_url}}
+"""
+
+[templates.recovery.html]
+#language=handlebars
+en = """
+<h2>Reset your password</h2>
+<p>Please click the link below to reset your password:</p>
+<p><a href="{{confirmation_url}}">Reset password</a></p>
+"""
+#language=handlebars
+es = """
+<h2>Restablecer tu contraseña</h2>
+<p>Haz clic en el enlace a continuación para restablecer tu contraseña:</p>
+<p><a href="{{confirmation_url}}">Restablecer contraseña</a></p>
+"""
+#language=handlebars
+fr = """
+<h2>Réinitialisez votre mot de passe</h2>
+<p>Cliquez sur le lien ci-dessous pour réinitialiser votre mot de passe :</p>
+<p><a href="{{confirmation_url}}">Réinitialiser le mot de passe</a></p>
+"""
+
+[templates.magic_link.text]
+#language=handlebars
+en = """
+Use the following link to sign in to your account:
+
+{{confirmation_url}}
+"""
+#language=handlebars
+es = """
+Utiliza el siguiente enlace para iniciar sesión en tu cuenta:
+
+{{confirmation_url}}
+"""
+#language=handlebars
+fr = """
+Utilisez le lien suivant pour vous connecter à votre compte :
+
+{{confirmation_url}}
+"""
+
+[templates.magic_link.html]
+#language=handlebars
+en = """
+<h2>Sign in to your account</h2>
+<p>Click the link below to sign in:</p>
+<p><a href="{{confirmation_url}}">Sign in</a></p>
+"""
+#language=handlebars
+es = """
+<h2>Inicia sesión en tu cuenta</h2>
+<p>Haz clic en el enlace a continuación para iniciar sesión:</p>
+<p><a href="{{confirmation_url}}">Iniciar sesión</a></p>
+"""
+#language=handlebars
+fr = """
+<h2>Connectez-vous à votre compte</h2>
+<p>Cliquez sur le lien ci-dessous pour vous connecter :</p>
+<p><a href="{{confirmation_url}}">Se connecter</a></p>
+"""
+
+[templates.email_change.text]
+#language=handlebars
+en = """
+Please confirm the change of your email address from {{old_email}} to {{new_email}} by clicking the link below:
+
+{{confirmation_url}}
+"""
+#language=handlebars
+es = """
+Por favor, confirma el cambio de tu dirección de correo electrónico de {{old_email}} a {{new_email}} haciendo clic en el enlace a continuación:
+
+{{confirmation_url}}
+"""
+#language=handlebars
+fr = """
+Veuillez confirmer le changement de votre adresse e-mail de {{old_email}} à {{new_email}} en cliquant sur le lien ci-dessous :
+
+{{confirmation_url}}
+"""
+
+[templates.email_change.html]
+#language=handlebars
+en = """
+<h2>Confirm email address change</h2>
+<p>Click the link below to confirm the change of your email address from {{old_email}} to {{new_email}}:</p>
+<p><a href="{{confirmation_url}}">Confirm change</a></p>
+"""
+#language=handlebars
+es = """
+<h2>Confirma el cambio de dirección de correo electrónico</h2>
+<p>Haz clic en el enlace a continuación para confirmar el cambio de tu dirección de correo electrónico de {{old_email}} a {{new_email}}:</p>
+<p><a href="{{confirmation_url}}">Confirmar cambio</a></p>
+"""
+#language=handlebars
+fr = """
+<h2>Confirmer le changement d'adresse e-mail</h2>
+<p>Cliquez sur le lien ci-dessous pour confirmer le changement de votre adresse e-mail de {{old_email}} à {{new_email}} :</p>
+<p><a href="{{confirmation_url}}">Confirmer le changement</a></p>
+"""

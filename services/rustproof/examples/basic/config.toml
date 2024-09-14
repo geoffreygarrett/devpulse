@@ -1,0 +1,134 @@
+[auth]
+anonymous_users_enabled = false
+password_min_length = 0
+#password_required_characters = "" # Optional: Add required characters if needed
+
+[database]
+connection_string = "[REDACTED]"
+driver = "postgres"
+max_connections = 10
+#max_pool_size = 10 # Optional: Set max pool size if needed
+namespace = "_auth"
+
+#disable_signup = true # Optional: Disable signup if needed
+
+[external]
+apple = false
+azure = false
+bitbucket = false
+discord = false
+email = true
+facebook = false
+figma = false
+github = false
+gitlab = false
+google = false
+keycloak = false
+linkedin = false
+notion = false
+phone = false
+slack = false
+spotify = false
+twitch = false
+twitter = false
+workos = false
+
+[logging]
+#env_filter_directives = "" # Optional: Add directives if needed
+file = "./rustproof.log"
+level = "warn"
+
+[mailer]
+autoconfirm = false
+localization = false
+otp_exp = 0
+
+[mailer.subjects]
+confirmation = "fallback"
+email_change = "fallback"
+invite = "fallback"
+magic_link = "fallback"
+recovery = "fallback"
+
+[mailer.templates]
+confirmation = "fallback"
+email_change = "fallback"
+invite = "fallback"
+magic_link = "fallback"
+recovery = "fallback"
+
+[mailer.url_paths]
+#confirmation = "" # Optional: Add confirmation URL path
+#email_change = "" # Optional: Add email change URL path
+#invite = "" # Optional: Add invite URL path
+#recovery = "" # Optional: Add recovery URL path
+
+#metrics = "" # Optional: Add metrics config if needed
+
+[oauth2]
+admin_group_name = ""
+aud = ""
+authorization_code.enabled = false
+client_credentials.enabled = false
+default_group_name = ""
+device_code.enabled = false
+driver = "not_set"
+exp = 0
+implicit.enabled = false
+issuer = ""
+jwks_uri = ""
+jwt_bearer.enabled = false
+password.enabled = false
+refresh_token.enabled = false
+refresh_token_exp = 0
+reuse_interval = 0
+rotation_enabled = false
+
+#operator_token = "" # Optional: Add operator token if needed
+
+[rate_limiting]
+rate_limit_email_sent_hourly = 0
+rate_limit_header = ""
+
+[security]
+#captcha_enabled = false # Optional: Enable captcha if needed
+#captcha_provider = "" # Optional: Set captcha provider
+#captcha_secret = "" # Optional: Set captcha secret
+#captcha_timeout = 60 # Optional: Set captcha timeout in seconds
+refresh_token_reuse_interval = 0
+refresh_token_rotation_enabled = false
+update_password_require_reauthentication = false
+
+[server]
+#api_endpoint = "" # Optional: Set API endpoint
+#api_external_url = "" # Optional: Set external API URL
+#api_host = "" # Optional: Set API host
+enable_grpc = false
+enable_http = false
+grpc_port = 0
+http_port = 0
+#request_id_header = "" # Optional: Set request ID header
+
+site_url = "http://localhost:3000"
+
+[sms]
+autoconfirm = false
+max_frequency = 15
+otp_exp = 0
+otp_length = 6
+#provider = "" # Optional: Set SMS provider
+#twilio_account_sid = "" # Optional: Set Twilio account SID
+#twilio_auth_token = "" # Optional: Set Twilio auth token
+#twilio_message_service_sid = "" # Optional: Set Twilio message service SID
+
+[smtp]
+admin_email = "verify@geoffreygarrett.com"
+host = "smtp.resend.com"
+max_frequency = 900
+pass = "[REDACTED]"
+port = 465
+sender_name = "Rustproof"
+user = "resend"
+
+#tracing = "" # Optional: Add tracing config if needed
+#uri_allow_list = "" # Optional: Add URI allow list if needed
